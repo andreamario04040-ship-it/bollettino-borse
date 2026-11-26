@@ -1,35 +1,47 @@
-/* Bollettino Borse — interfaccia a schede, superfici nette, numeri in evidenza. */
+/* Bollettino Borse — identità presa dal marchio: carta bianca di giornale,
+   verde neon del grafico, rosso delle candele, fondo nero con bagliore verde. */
 
 :root{
-  --fondo:#F4F5F3; --superficie:#FFFFFF; --superficie2:#EFF0ED; --bordo:#E3E4DF;
-  --testo:#14181D; --testo2:#59616C; --testo3:#8B939E;
-  --accento:#1B5FB0; --accento-tenue:#E8F0FA;
-  --su:#107A52; --su-tenue:#E3F3EC; --giu:#B8362A; --giu-tenue:#FBE9E7;
+  /* Chiaro: la carta del giornale */
+  --fondo:#ECEFEC; --superficie:#FFFFFF; --superficie2:#F1F4F1; --bordo:#DCE2DC;
+  --testo:#0A0F0C; --testo2:#4E5A52; --testo3:#7C8A81;
+  --marchio:#0ED775;                      /* il verde del logo, per i pieni */
+  --accento:#05713F; --accento-tenue:#E2F6EC;
+  --su:#07803F; --su-tenue:#E2F6EC; --giu:#C0392B; --giu-tenue:#FBE9E7;
   --attenzione:#9A6410;
-  --ombra:0 1px 2px rgba(20,24,29,.05), 0 6px 18px -10px rgba(20,24,29,.18);
+  --ombra:0 1px 2px rgba(10,15,12,.05), 0 6px 18px -10px rgba(10,15,12,.2);
+  --bagliore:none; --luce:none;
   --raggio:16px; --raggio-s:10px;
-  --fd:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --fd:'Montserrat',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
   --fb:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
   --fm:'IBM Plex Mono',ui-monospace,'SF Mono',Menlo,monospace;
   --barra:68px;
   color-scheme:light;
 }
+
+/* Scuro: il fondo del marchio, nero con bagliore verde */
 @media (prefers-color-scheme:dark){ :root:not([data-tema="chiaro"]){
-  --fondo:#0E1116; --superficie:#171C23; --superficie2:#1F262F; --bordo:#283039;
-  --testo:#E9EDF2; --testo2:#9BA5B2; --testo3:#6C7784;
-  --accento:#74B2F0; --accento-tenue:#16273B;
-  --su:#3FCB8E; --su-tenue:#11291F; --giu:#FF8073; --giu-tenue:#2B1917;
-  --attenzione:#DCA64C;
-  --ombra:0 1px 2px rgba(0,0,0,.3), 0 8px 24px -12px rgba(0,0,0,.6);
+  --fondo:#05080A; --superficie:#0E1512; --superficie2:#16201B; --bordo:#1E2D25;
+  --testo:#ECF3EE; --testo2:#95A89D; --testo3:#6B7E74;
+  --marchio:#0ED775;
+  --accento:#0ED775; --accento-tenue:#07301E;
+  --su:#0ED775; --su-tenue:#06311E; --giu:#FF5B50; --giu-tenue:#2E1512;
+  --attenzione:#E0A94E;
+  --ombra:0 1px 2px rgba(0,0,0,.5), 0 10px 28px -14px rgba(0,0,0,.8);
+  --bagliore:0 0 22px -6px rgba(14,215,117,.55);
+  --luce:drop-shadow(0 0 3.5px currentColor);
   color-scheme:dark;
 }}
 :root[data-tema="scuro"]{
-  --fondo:#0E1116; --superficie:#171C23; --superficie2:#1F262F; --bordo:#283039;
-  --testo:#E9EDF2; --testo2:#9BA5B2; --testo3:#6C7784;
-  --accento:#74B2F0; --accento-tenue:#16273B;
-  --su:#3FCB8E; --su-tenue:#11291F; --giu:#FF8073; --giu-tenue:#2B1917;
-  --attenzione:#DCA64C;
-  --ombra:0 1px 2px rgba(0,0,0,.3), 0 8px 24px -12px rgba(0,0,0,.6);
+  --fondo:#05080A; --superficie:#0E1512; --superficie2:#16201B; --bordo:#1E2D25;
+  --testo:#ECF3EE; --testo2:#95A89D; --testo3:#6B7E74;
+  --marchio:#0ED775;
+  --accento:#0ED775; --accento-tenue:#07301E;
+  --su:#0ED775; --su-tenue:#06311E; --giu:#FF5B50; --giu-tenue:#2E1512;
+  --attenzione:#E0A94E;
+  --ombra:0 1px 2px rgba(0,0,0,.5), 0 10px 28px -14px rgba(0,0,0,.8);
+  --bagliore:0 0 22px -6px rgba(14,215,117,.55);
+  --luce:drop-shadow(0 0 3.5px currentColor);
   color-scheme:dark;
 }
 
@@ -55,13 +67,10 @@ svg{fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-l
   padding:.7rem max(16px,env(safe-area-inset-right)) .7rem max(16px,env(safe-area-inset-left));
   padding-top:calc(.7rem + env(safe-area-inset-top))}
 .marchio{display:flex;align-items:center;gap:.65rem;min-width:0}
-.segno{width:34px;height:34px;border-radius:11px;flex:none;background:var(--accento);position:relative}
-.segno::after{content:"";position:absolute;inset:0;border-radius:inherit;
-  background:
-    linear-gradient(transparent 62%, color-mix(in srgb,var(--superficie) 85%,transparent) 62%, color-mix(in srgb,var(--superficie) 85%,transparent) 68%, transparent 68%),
-    linear-gradient(115deg, transparent 44%, color-mix(in srgb,var(--superficie) 92%,transparent) 44%, color-mix(in srgb,var(--superficie) 92%,transparent) 50%, transparent 50%)}
+.segno{width:36px;height:36px;flex:none;border-radius:11px;display:block;
+  box-shadow:var(--bagliore);background:#000}
 .titoli{min-width:0}
-.titoli h1{font-size:1.12rem;font-weight:800}
+.titoli h1{font-size:1.1rem;font-weight:800;letter-spacing:-.02em}
 .titoli p{margin:0;font-size:.74rem;color:var(--testo2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tondo{width:38px;height:38px;flex:none;border-radius:50%;border:1px solid var(--bordo);background:var(--superficie);
   display:grid;place-items:center;color:var(--testo2);transition:color .15s,border-color .15s}
@@ -145,6 +154,7 @@ main{max-width:640px;margin:0 auto;
 .riga .nome{font-size:.95rem;font-weight:600;display:block;letter-spacing:-.01em}
 .riga .breve{font-size:.78rem;color:var(--testo3);display:block;line-height:1.35}
 .riga .grafico{width:62px;height:26px;flex:none}
+.riga .grafico svg,.grafico-grande svg{filter:var(--luce)}
 .riga .valore{text-align:right}
 .riga .prezzo{display:block;font-family:var(--fm);font-variant-numeric:tabular-nums;font-size:.86rem;font-weight:500;white-space:nowrap}
 .varia{display:inline-block;margin-top:.12rem;font-family:var(--fm);font-variant-numeric:tabular-nums;
@@ -167,8 +177,8 @@ main{max-width:640px;margin:0 auto;
   background:var(--superficie2);color:var(--testo2);white-space:nowrap}
 .pillola.ok{background:var(--su-tenue);color:var(--su)}
 .pillola.no{background:var(--giu-tenue);color:var(--giu)}
-.bottone{margin-top:.9rem;width:100%;border:0;border-radius:12px;background:var(--accento);color:#fff;
-  font-weight:600;font-size:.94rem;padding:.72rem 1rem}
+.bottone{margin-top:.9rem;width:100%;border:0;border-radius:12px;background:var(--marchio);color:#04210F;
+  font-weight:700;font-size:.94rem;padding:.72rem 1rem;box-shadow:var(--bagliore)}
 .bottone:disabled{opacity:.55}
 .bottone.chiaro{background:var(--superficie2);color:var(--testo);width:auto;margin-top:0}
 .riga-bottoni{display:flex;align-items:center;gap:.7rem;margin-top:.6rem;flex-wrap:wrap}
@@ -191,7 +201,8 @@ code{font-family:var(--fm);font-size:.82rem;background:var(--superficie2);paddin
   padding:.4rem .2rem;color:var(--testo3);border-radius:12px;transition:color .15s}
 .schede button svg{width:22px;height:22px}
 .schede button span{font-size:.68rem;font-weight:600;letter-spacing:.01em}
-.schede button[aria-selected="true"]{color:var(--accento)}
+.schede button[aria-selected="true"]{color:var(--marchio)}
+.schede button[aria-selected="true"] svg{filter:drop-shadow(0 0 7px rgba(14,215,117,.45))}
 
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 @media (min-width:560px){

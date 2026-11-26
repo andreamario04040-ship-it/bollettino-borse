@@ -34,10 +34,12 @@ function linea(valori, largo, alto, inverso, pieno) {
   const d = 'M' + p.map(([x, y]) => `${x.toFixed(1)} ${y.toFixed(1)}`).join(' L');
   const salito = valori[valori.length - 1] >= valori[0];
   const col = (inverso ? !salito : salito) ? 'var(--su)' : 'var(--giu)';
+  // La classe serve al CSS per dare alla linea un bagliore del suo stesso colore.
+  const cls = (inverso ? !salito : salito) ? 'su' : 'giu';
   const ultimo = p[p.length - 1];
   const area = pieno ? `<path d="${d} L${ultimo[0].toFixed(1)} ${alto} L${p[0][0].toFixed(1)} ${alto} Z" fill="${col}" opacity=".12" stroke="none"/>` : '';
   const punto = pieno ? `<circle cx="${ultimo[0].toFixed(1)}" cy="${ultimo[1].toFixed(1)}" r="3" fill="${col}" stroke="none"/>` : '';
-  return `<svg viewBox="0 0 ${largo} ${alto}" preserveAspectRatio="none" aria-hidden="true">
+  return `<svg class="${cls}" viewBox="0 0 ${largo} ${alto}" preserveAspectRatio="none" aria-hidden="true">
     ${area}<path d="${d}" fill="none" stroke="${col}" stroke-width="1.8" stroke-linejoin="round"
       stroke-linecap="round" vector-effect="non-scaling-stroke"/>${punto}</svg>`;
 }
