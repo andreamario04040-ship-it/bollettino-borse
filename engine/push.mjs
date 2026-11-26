@@ -11,7 +11,13 @@ function leggiIscrizioni(grezzo) {
 
 export async function inviaNotifica(notifica, env = process.env) {
   const pubblica = env.VAPID_PUBBLICA, privata = env.VAPID_PRIVATA;
+  // Lo standard vuole un recapito vero: il servizio di Apple può rifiutare
+  // un indirizzo inventato, e il messaggio di errore non lo spiega.
   const contatto = env.VAPID_CONTATTO || 'mailto:bollettino@example.com';
+  if (!env.VAPID_CONTATTO) {
+    console.warn('  ⚠ VAPID_CONTATTO non impostato: uso un indirizzo di riserva.');
+    console.warn('    Se Apple rifiuta l’invio, imposta il segreto con un tuo indirizzo vero.');
+  }
   const iscrizioni = leggiIscrizioni(env.ISCRIZIONE_PUSH);
 
   if (!pubblica || !privata) { console.log('  push: chiavi assenti, non invio niente'); return { inviate: 0, saltata: 'chiavi' }; }
