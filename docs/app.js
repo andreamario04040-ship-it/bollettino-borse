@@ -3,7 +3,7 @@
 // Si alza a ogni modifica dell'app, insieme a docs/versione.json.
 // Serve perché un'app aggiunta alla schermata Home resta viva in memoria:
 // riaprendola dal selettore non ricarica, e resterebbe vecchia per giorni.
-const VERSIONE_APP = 9;
+const VERSIONE_APP = 10;
 
 const CHIAVE_PUBBLICA = 'BEX2Ep7AZJPgrIF_cHwKOWk9VSiE8OLd1WLxSJDANLNEbox4xiHYb5pgRslEapXEXZs35jhSmHRhrLcfFhyPwVk';
 const MENO = '−', SOTTILE = ' ';
@@ -138,12 +138,64 @@ function disegnaOggi() {
   $('sezioni').innerHTML = (REPORT.sezioni || []).map((s, i) => {
     const link = (s.riferimenti || []).map((r) => `<a class="fonte-link" href="${fuga(r.link || '#')}" target="_blank" rel="noopener">
       <span class="testata">${fuga(r.fonte)}</span>${fuga(r.titolo)}</a>`).join('');
+    // La sezione che parla di un indice preciso se lo porta dietro disegnato.
+    const m = s.sym ? MERCATI.find((x) => x.sym === s.sym) : null;
+    const disegno = m?.spark?.length ? `<div class="sezione-grafico">
+      <div class="sg-testa"><span class="sg-nome">${fuga(m.nome)}</span>
+        <span class="sg-valore">${num(m.prezzo, m.decimali)}</span>
+        <span class="varia ${classe(m.giorno, m.inverso)}">${pct(m.giorno)}</span></div>
+      ${linea(m.spark, 300, 62, m.inverso, true)}
+      <div class="sg-piede">ultimi tre mesi</div></div>` : '';
     return `<article class="sezione">
       <div class="sezione-testa"><span class="gettone">${i + 1}</span><h3>${fuga(s.titolo)}</h3></div>
-      <p>${fuga(s.testo)}</p>${link ? `<div class="fonti-link">${link}</div>` : ''}</article>`;
+      <p>${fuga(s.testo)}</p>${disegno}${link ? `<div class="fonti-link">${link}</div>` : ''}</article>`;
   }).join('');
 
   $('piede-oggi').textContent = REPORT.ora ? `Bollettino delle ${REPORT.ora}` : '';
+}
+
+// I numeri che altrimenti resterebbero sepolti nel testo, resi guardabili:
+// valore, variazione e andamento dell'ultimo trimestre in un colpo d'occhio.
+const TESSERE = [
+  ['^VIX', 'Paura'], ['^TNX', 'Tasso USA 10 anni'], ['EURUSD=X', 'Euro / Dollaro'],
+  ['GC=F', 'Oro'], ['CL=F', 'Petrolio'], ['BTC-USD', 'Bitcoin'],
+];
+
+function disegnaTessere() {
+  const voci = TESSERE.map(([sym, et]) => [MERCATI.find((m) => m.sym === sym), et]).filter(([m]) => m?.prezzo != null);
+  $('tessere').innerHTML = voci.map(([m, et]) => `<div class="tessera">
+    <span class="t-nome">${fuga(et)}</span>
+    <span class="t-riga">
+      <span class="t-valore">${num(m.prezzo, m.decimali)}</span>
+      <span class="varia ${classe(m.giorno, m.inverso)}">${pct(m.giorno)}</span>
+    </span>
+    <span class="t-graf">${linea(m.spark, 120, 26, m.inverso, true)}</span>
+    <span class="t-periodo">tre mesi</span>
+  </div>`).join('');
+}
+
+function disegnaAziende() {
+  const az = REPORT?.aziende || [];
+  $('aziende-scheda').hidden = az.length === 0;
+  if (!az.length) return;
+  $('aziende-conteggio').textContent = `${az.length} oggi`;
+
+  $('aziende').innerHTML = az.map((a) => {
+    const prezzo = a.prezzo != null
+      ? `<span class="az-prezzo">${num(a.prezzo, 2)} <span class="varia ${classe(a.giorno)}">${pct(a.giorno)}</span></span>`
+      : '<span class="az-prezzo az-nonquotata">non quotata</span>';
+    const link = (a.titoli || []).map((t) => `<a class="fonte-link" href="${fuga(t.link || '#')}" target="_blank" rel="noopener">
+      <span class="testata">${fuga(t.fonte)}</span>${fuga(t.titolo)}</a>`).join('');
+    return `<article class="azienda">
+      <div class="az-testa">
+        <span><span class="az-nome">${fuga(a.nome)}</span><span class="az-settore">${fuga(a.settore)}</span></span>
+        ${prezzo}
+      </div>
+      <p class="az-fa">${fuga(a.nome)} ${fuga(a.fa)}.</p>
+      <p class="az-motivo">${fuga(a.motivo)}</p>
+      ${link ? `<div class="fonti-link">${link}</div>` : ''}
+    </article>`;
+  }).join('');
 }
 
 function disegnaMercati() {
@@ -210,7 +262,7 @@ async function carica() {
   const [r, m] = await Promise.all([prendi('data/report.json', null), prendi('data/mercati.json', [])]);
   REPORT = r; MERCATI = Array.isArray(m) ? m : [];
   // Se una parte si rompe, le altre devono restare in piedi.
-  for (const [nome, f] of [['saluto', disegnaSaluto], ['nastro', disegnaNastro], ['oggi', disegnaOggi], ['mercati', disegnaMercati], ['info', disegnaInfo]]) {
+  for (const [nome, f] of [['saluto', disegnaSaluto], ['nastro', disegnaNastro], ['oggi', disegnaOggi], ['tessere', disegnaTessere], ['aziende', disegnaAziende], ['mercati', disegnaMercati], ['info', disegnaInfo]]) {
     try { f(); } catch (e) { console.error('disegno ' + nome + ':', e); }
   }
 }

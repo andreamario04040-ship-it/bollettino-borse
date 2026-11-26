@@ -10,6 +10,10 @@
     "sera": "18:15",
     "nota": "Gli orari sono in ora italiana; nel workflow sono convertiti in UTC."
   },
+  "aziende": {
+    "quante": 6,
+    "nota": "Quante aziende mostrare nella sezione di approfondimento della home."
+  },
   "avvisi": {
     "attivi": true,
     "finestra": {

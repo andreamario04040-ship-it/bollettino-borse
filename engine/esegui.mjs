@@ -9,6 +9,7 @@ import { scaricaMercati } from './mercati.mjs';
 import { serieVuota } from './serie.mjs';
 import { scaricaNotizie } from './notizie.mjs';
 import { costruisciReport } from './report.mjs';
+import { aziendeDelGiorno } from './aziende.mjs';
 import { valutaAvviso, statoVuoto } from './avvisi.mjs';
 import { inviaNotifica } from './push.mjs';
 import { giornoRoma, oraItalia, dataItalia, minutiDaMezzanotteRoma } from './lingua.mjs';
@@ -88,6 +89,7 @@ if (modo === 'avviso') {
     ...r.sezioni.filter((s) => s.id === 'perche' || s.id === 'contesto'),
   ];
   r.utente = config.utente || null;
+  r.aziende = await aziendeDelGiorno(notizie, 3);
   await scriviJson(dentro('docs/data/report.json'), r);
   await scriviJson(dentro(`docs/data/storico/${giornoRoma(adesso)}-avviso-${esito.evento.motivo}.json`), r);
   await inviaNotifica({ ...r.notifica, tipo: 'avviso' });
@@ -115,6 +117,7 @@ if (daCalendario) {
 
 const report = costruisciReport(mercati, notizie, tipo, adesso);
 report.utente = config.utente || null;   // serve all'app per il saluto
+report.aziende = await aziendeDelGiorno(notizie, config.aziende?.quante ?? 6);
 
 await scriviJson(dentro('docs/data/report.json'), report);
 await scriviJson(archivio, report);
