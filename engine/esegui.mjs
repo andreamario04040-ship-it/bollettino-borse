@@ -15,7 +15,8 @@ import { scaricaMercati } from './mercati.mjs';
 import { serieVuota } from './serie.mjs';
 import { scaricaNotizie } from './notizie.mjs';
 import { costruisciReport } from './report.mjs';
-import { aziendeDelGiorno } from './aziende.mjs';
+import { aziendeDelGiorno, componiAziende, componiIndici } from './aziende.mjs';
+import { scegliIlGiorno } from './scelta.mjs';
 import { arricchisci } from './articoli.mjs';
 import { riassumiAziende } from './agente.mjs';
 import { riassumiConEstratto } from './estratto.mjs';
@@ -174,7 +175,23 @@ const report = costruisciReport(mercati, notizie, tipo, adesso);
 report.utente = config.utente || null;   // serve all'app per il saluto
 // Le aziende: prima si trovano, poi si legge il testo degli articoli che le
 // riguardano, poi l'agente scrive il riassunto di ciascuna.
-const aziendeTrovate = await aziendeDelGiorno(notizie, config.aziende?.quante ?? 6);
+// Chi conta oggi lo decide l'agente, leggendo i titoli del giorno e i dati di
+// mercato: così le aziende cambiano con le notizie invece di essere sempre le
+// stesse, e ognuna arriva con la riga che dice perché è lì. Se l'agente non c'è
+// o non ce la fa, si torna al conteggio delle citazioni: meno sveglio, sempre
+// disponibile.
+const scelta = await scegliIlGiorno({
+  notizie, mercati, env: process.env,
+  modello: config.agente?.modello, modelloCli: config.agente?.modello_cli,
+});
+let aziendeTrovate;
+if (scelta) {
+  aziendeTrovate = await componiAziende(scelta.aziende);
+  report.daGuardare = componiIndici(scelta.indici, mercati);
+} else {
+  console.log('  scelta: nessun agente, torno al conteggio delle citazioni nei titoli');
+  aziendeTrovate = await aziendeDelGiorno(notizie, config.aziende?.quante ?? 6);
+}
 const serviranno = new Set(aziendeTrovate.flatMap((a) => (a.titoli || []).map((t) => t.link)));
 const conTesto = await arricchisci(notizie.filter((n) => serviranno.has(n.link)), config.agente?.massimo_articoli ?? 20);
 // Tre livelli, dal migliore al sempre disponibile: l'agente scrive il riassunto;

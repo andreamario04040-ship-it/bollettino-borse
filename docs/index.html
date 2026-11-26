@@ -54,6 +54,8 @@
       <p class="saluto-invito" id="saluto-invito"></p>
     </div>
 
+    <p class="capitolo" data-tinta="1"><i></i><span>Il quadro di oggi</span></p>
+
     <div class="scheda clima-scheda" id="clima-scheda" hidden>
       <div class="clima-sx">
         <p class="etichetta">Clima di oggi</p>
@@ -67,16 +69,33 @@
       <div class="caricamento">Carico il bollettino…</div>
     </div>
 
+    <p class="capitolo" data-tinta="4" id="capitolo-guardare" hidden><i></i><span>I numeri che oggi dicono qualcosa</span></p>
+
+    <section class="scheda guardare-scheda" id="guardare-scheda" hidden>
+      <div class="riga-titolo">
+        <h2 class="scheda-titolo">Da guardare oggi</h2>
+        <span class="pillola" id="guardare-conteggio"></span>
+      </div>
+      <p class="testo">Fra tutti i numeri della giornata, questi sono quelli che oggi stanno dicendo qualcosa. Sotto ognuno c'è scritto perché.</p>
+      <div id="guardare"></div>
+    </section>
+
+    <p class="capitolo" data-tinta="5"><i></i><span>Sempre sott'occhio</span></p>
+
     <div class="tessere" id="tessere"></div>
 
+    <p class="capitolo" data-tinta="2"><i></i><span>Il bollettino, un pezzo alla volta</span></p>
+
     <div id="sezioni"></div>
+
+    <p class="capitolo" data-tinta="3" id="capitolo-aziende" hidden><i></i><span>Le aziende del giorno</span></p>
 
     <section class="scheda aziende-scheda" id="aziende-scheda" hidden>
       <div class="riga-titolo">
         <h2 class="scheda-titolo">Le aziende di cui si parla</h2>
         <span class="pillola" id="aziende-conteggio"></span>
       </div>
-      <p class="testo">Non solo l'economia in generale. Ogni mattina vengono letti gli articoli del giorno su queste aziende, e qui c'è scritto cosa è successo.</p>
+      <p class="testo">Non un elenco fisso: ogni giorno vengono scelte quelle a cui è davvero successo qualcosa, e su ognuna c'è scritto perché è qui e cosa è successo.</p>
       <div id="aziende"></div>
     </section>
 

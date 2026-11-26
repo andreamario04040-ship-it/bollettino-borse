@@ -32,6 +32,10 @@ export async function quotazioniCnbc(simboli) {
     const prezzo = numero(v.last);
     if (prezzo == null) continue;
     out.set(v.symbol, {
+      // Il nome serve a controllare un codice di borsa proposto dall'agente:
+      // se chiedo STLA e mi risponde "Stellantis N.V." il codice è quello
+      // giusto; se risponde un'altra azienda, meglio nessun prezzo.
+      nome: v.name || v.altName || null,
       prezzo,
       giorno: numero(v.change_pct),
       chiusuraPrecedente: numero(v.previous_day_closing),

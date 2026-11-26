@@ -396,10 +396,16 @@
       "peso": 2
     },
     {
-      "fonte": "Financial Times",
-      "url": "https://www.ft.com/markets?format=rss",
-      "lingua": "en",
-      "peso": 3
+      "fonte": "Il Post Economia",
+      "url": "https://www.ilpost.it/economia/feed/",
+      "lingua": "it",
+      "peso": 2
+    },
+    {
+      "fonte": "Repubblica Economia",
+      "url": "https://www.repubblica.it/rss/economia/rss2.0.xml",
+      "lingua": "it",
+      "peso": 1
     },
     {
       "fonte": "CNBC Markets",
@@ -408,16 +414,22 @@
       "peso": 2
     },
     {
-      "fonte": "MarketWatch",
-      "url": "https://feeds.content.dowjones.io/public/rss/mw_topstories",
+      "fonte": "CNBC Technology",
+      "url": "https://www.cnbc.com/id/19854910/device/rss/rss.html",
       "lingua": "en",
-      "peso": 1
+      "peso": 2
     },
     {
-      "fonte": "Investing.com",
-      "url": "https://www.investing.com/rss/news_25.rss",
+      "fonte": "CNBC Finance",
+      "url": "https://www.cnbc.com/id/10000664/device/rss/rss.html",
       "lingua": "en",
-      "peso": 1
+      "peso": 2
+    },
+    {
+      "fonte": "BBC Business",
+      "url": "https://feeds.bbci.co.uk/news/business/rss.xml",
+      "lingua": "en",
+      "peso": 2
     },
     {
       "fonte": "BCE",
@@ -433,5 +445,6 @@
       "peso": 3,
       "ufficiale": true
     }
-  ]
+  ],
+  "fonti_nota": "Ogni fonte qui dentro è stata provata: si legge l'articolo intero senza abbonamento. Tolte il 26/11/2026 perché davano zero articoli leggibili su quattro — i titoli entravano nel bollettino ma le schede dovevano dire «l'articolo non si è potuto leggere»: Financial Times, Investing.com, MarketWatch. Scartate alla prova: Corriere Economia (muro), The Guardian e AP (403), Reuters, Yahoo Finance, Teleborsa, Sky TG24 e Rai News (feed morti). Per ricontrollare: npm run fonti."
 }

@@ -1,0 +1,6 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    { "name": "borsa", "runtimeExecutable": "node", "runtimeArgs": ["engine/servi.mjs"], "port": 4173 }
+  ]
+}

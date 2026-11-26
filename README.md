@@ -28,9 +28,35 @@ l'app già installata sulla schermata Home e l'iscrizione alle notifiche.
 
 **Le fonti.** Le quotazioni arrivano da **Yahoo Finance** quando il motore gira da casa, e da
 **CNBC** quando gira su GitHub — perché Yahoo rifiuta le richieste che arrivano dai data center,
-e GitHub Actions è un data center. Il *perché* arriva da Il Sole 24 Ore, Financial Times, CNBC,
-ANSA Economia, MarketWatch, Investing.com e dai comunicati ufficiali di BCE e Federal Reserve.
-Sono state tutte verificate una per una.
+e GitHub Actions è un data center.
+
+Il *perché* arriva da dieci testate, e la regola è una sola: **l'articolo si deve poter leggere
+per intero senza abbonamento.** Un titolo che entra nel bollettino e poi non si può aprire è
+peggio di un titolo che non entra, perché la scheda deve ammettere «l'articolo non si è potuto
+leggere» e chi legge non sa se la notizia fosse povera o il giornale chiuso.
+
+| Fonte | Lingua | Peso |
+|---|---|---|
+| Il Sole 24 Ore | it | 3 |
+| ANSA Economia | it | 2 |
+| Il Post Economia | it | 2 |
+| Repubblica Economia | it | 1 |
+| CNBC Markets · Technology · Finance | en | 2 |
+| BBC Business | en | 2 |
+| BCE *(ufficiale)* | en | 3 |
+| Federal Reserve *(ufficiale)* | en | 3 |
+
+Non è una lista scelta a occhio: è misurata, e si rimisura quando si vuole.
+
+```bash
+npm run fonti
+```
+
+Scarica quattro articoli per fonte e dice quanti si sono aperti davvero. Il 26/11/2026 ne sono
+uscite tre su otto con **zero articoli leggibili su quattro** — Financial Times, Investing.com e
+MarketWatch — e portavano 29 titoli su 105. Scartate alla prova anche Corriere Economia (muro),
+The Guardian e AP (403), Reuters, Yahoo Finance, Teleborsa, Sky TG24 e Rai News (feed morti).
+Con le dieci di adesso: 40 articoli su 40.
 
 **Lo storico.** CNBC dà il prezzo di adesso ma non il passato, quindi le variazioni su settimana,
 mese e anno e i grafici vengono da `docs/data/serie.json`, un archivio di chiusure conservato nel
@@ -227,6 +253,46 @@ suonare di nuovo il telefono, solo *arrivarci* lo fa.
 Per cambiare le soglie o spegnere gli avvisi, apri `config.json` alla voce `avvisi`.
 
 ---
+
+## Chi sceglie cosa conta oggi
+
+Prima la scelta era meccanica: un dizionario di quaranta aziende, un'espressione
+regolare per ciascuna, un punteggio per quante volte il nome compariva nei titoli,
+massimo due per settore. Prevedibile in tutti i sensi — tornavano sempre gli stessi
+nomi, e bastava una citazione di passaggio («Intesa saliva del 2,78%» dentro un
+riepilogo di Piazza Affari) per guadagnarsi una scheda in cui non c'era niente da dire.
+
+Adesso ogni bollettino fa **due giri**.
+
+**Primo giro: decidere.** L'agente legge tutti i titoli del giorno, numerati, e i dati
+di mercato. Sceglie da tre a sei aziende e da due a quattro indici, in ordine di
+importanza, e per ognuno scrive **una riga che dice il fatto di oggi** — quella che
+nell'app compare come «perché oggi». Il prompt dice soprattutto cosa *non* basta per
+entrare: essere famosa, essere nominata di passaggio in un riepilogo, essere salita o
+scesa senza che nessuno spieghi perché, esserci anche ieri.
+
+**Secondo giro: raccontare.** Solo per le aziende scelte si scarica il testo degli
+articoli, e l'agente scrive la scheda.
+
+Il dizionario in `engine/aziende.mjs` resta, ma cambia mestiere: non è più il cancello
+che decide chi entra, è l'anagrafica di chi è entrato — ticker, settore, logo. Un'azienda
+che non conosce entra comunque:
+
+- **il prezzo** solo se uno dei codici di borsa che l'agente propone risponde col nome
+  giusto. Un prezzo sbagliato è molto peggio di nessun prezzo, quindi il nome che
+  restituisce la borsa viene confrontato con quello dell'azienda, e se non combacia si
+  scrive «quotazione non disponibile».
+- **il logo** scaricato al volo dal sito che l'agente indica, ma solo se quel sito porta
+  il nome dell'azienda: `sanofi.com` sì, `db.com` per Deutsche Bank no. Altrimenti resta
+  l'iniziale. Un logo sbagliato accanto al nome giusto è un errore che si vede.
+
+Anche la riga «perché oggi» passa dal verificatore, con una soglia più severa del resto:
+è una frase breve, quindi **due** cifre che non stanno né nei titoli né nei dati bloccano
+la pubblicazione. È la ragione per cui una scheda esiste: se è inventata quella, è
+inventata la scheda intera.
+
+Se l'agente non c'è — niente gettone, niente chiave — si torna al conteggio delle
+citazioni. Meno sveglio, sempre disponibile.
 
 ## Cosa c'è scritto nelle schede delle aziende
 

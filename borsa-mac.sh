@@ -127,10 +127,12 @@ con_agente() {
 
   [ -f "$CLONE/docs/data/storico/$oggi-$tipo.json" ] || { nota "l'agente non ha prodotto il bollettino."; return 1; }
 
-  if [ -z "$( git -C "$CLONE" status --porcelain docs/data )" ]; then
+  if [ -z "$( git -C "$CLONE" status --porcelain docs/data docs/loghi )" ]; then
     nota "niente di nuovo da caricare."; return 1
   fi
-  git -C "$CLONE" add docs/data || return 1
+  # docs/loghi perché l'agente sceglie aziende nuove, e i loro loghi vengono
+  # scaricati durante l'esecuzione: senza questa riga resterebbero sul Mac.
+  git -C "$CLONE" add docs/data docs/loghi || return 1
   git -C "$CLONE" commit --quiet -m "Bollettino del $(date '+%d/%m/%Y alle %H:%M'), scritto dall'agente sul Mac" || return 1
   git -C "$CLONE" push --quiet origin main || { nota "il caricamento su GitHub è fallito."; return 1; }
 

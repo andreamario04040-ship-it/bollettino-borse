@@ -7,7 +7,7 @@
 // Cosa NON può verificare: se un giornale ha scritto il vero. Per quello l'unica
 // difesa è citare la fonte e il titolo, come si fa, così si risale sempre all'origine.
 
-import { pct, giornoRoma, oraItalia, minutiDaMezzanotteRoma } from './lingua.mjs';
+import { pct, num, giornoRoma, oraItalia, minutiDaMezzanotteRoma } from './lingua.mjs';
 import { materialePerAzienda } from './agente.mjs';
 
 const AREE = {
@@ -15,6 +15,9 @@ const AREE = {
   usa: ['^GSPC', '^IXIC', '^DJI'],
   asia: ['^N225', '^HSI', '000001.SS'],
 };
+
+// I campi di uno strumento che contengono un numero che può finire in una frase.
+const CAMPI_NUMERICI = ['prezzo', 'giorno', 'settimana', 'mese', 'trimestre', 'anno', 'max52', 'min52'];
 
 // Tutti i modi in cui un valore può comparire scritto in una frase.
 function formeDi(v) {
@@ -146,6 +149,40 @@ export function verifica({ report, mercati, notizie = [], adesso = new Date() })
     if (prestate.length) segnala('avviso', 'agente', `${a.nome}: ${prestate.length} cifr${prestate.length === 1 ? 'a viene' : 'e vengono'} dal materiale di un'altra azienda (${prestate.slice(0, 4).join(', ')}): la scheda esce dal suo argomento`);
 
     if (a.materialeScarso) segnala('nota', 'agente', `${a.nome}: l'agente dice che il materiale di oggi non bastava`);
+  }
+
+  // ——— 5c. La scelta del giorno: la riga "perché oggi" e gli indici segnalati.
+  //      Il primo giro dell'agente vede soltanto i titoli e i dati di mercato,
+  //      non il testo degli articoli: quindi le sue cifre si controllano lì.
+  //      Ed è il controllo che conta più di tutti, perché quella riga è la
+  //      ragione per cui una scheda esiste: se è inventata, è inventata la
+  //      scheda intera.
+  const cifreDelMercato = new Set();
+  for (const m of mercati) {
+    for (const k of CAMPI_NUMERICI) {
+      if (m[k] == null || !isFinite(m[k])) continue;
+      numeriDi(num(m[k], m.decimali ?? 2)).forEach((x) => cifreDelMercato.add(x));
+      formeDi(m[k]).forEach((x) => cifreDelMercato.add(x));
+    }
+  }
+  const cifreDeiTitoli = new Set();
+  for (const n of notizie) for (const x of numeriDi(`${n.titolo} ${n.sommario || ''}`)) cifreDeiTitoli.add(x);
+  const ammesseNellaScelta = new Set([...cifreDeiTitoli, ...cifreDelMercato]);
+
+  const controllaScelta = (dove, chi, frase) => {
+    const fuori = [...numeriDi(frase)].filter((x) => !ammesseNellaScelta.has(x));
+    // Una frase sola, breve: due cifre inventate lì dentro non sono una sbavatura.
+    if (fuori.length >= 2) segnala('blocco', dove, `${chi}: la riga «perché oggi» cita ${fuori.length} cifre che non stanno né nei titoli né nei dati (${fuori.slice(0, 3).join(', ')})`);
+    else for (const x of fuori) segnala('avviso', dove, `${chi}: la cifra ${x} della riga «perché oggi» non sta né nei titoli né nei dati`);
+  };
+
+  for (const a of report.aziende || []) if (a.perche) controllaScelta('scelta', a.nome, a.perche);
+
+  for (const d of report.daGuardare || []) {
+    const m = mercati.find((x) => x.sym === d.sym);
+    if (!m) { segnala('blocco', 'scelta', `«${d.nome}» è segnalato fra i dati da guardare, ma non è fra gli strumenti scaricati`); continue; }
+    if (m.prezzo == null) { segnala('avviso', 'scelta', `«${d.nome}» è segnalato da guardare ma oggi non ha un valore`); continue; }
+    if (d.perche) controllaScelta('scelta', d.nome, d.perche);
   }
 
   // ——— 6. Le notizie citate devono essere fra quelle lette oggi.

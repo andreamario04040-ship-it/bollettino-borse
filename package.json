@@ -13,6 +13,7 @@
     "prova-verifica": "node engine/prova-verifica.mjs",
     "storico": "node engine/storico.mjs",
     "verifica": "node engine/controlla.mjs",
+    "fonti": "node engine/fonti.mjs",
     "loghi": "node engine/loghi.mjs"
   },
   "dependencies": {

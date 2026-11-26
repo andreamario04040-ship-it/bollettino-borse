@@ -3,7 +3,7 @@
 // Si alza a ogni modifica dell'app, insieme a docs/versione.json.
 // Serve perché un'app aggiunta alla schermata Home resta viva in memoria:
 // riaprendola dal selettore non ricarica, e resterebbe vecchia per giorni.
-const VERSIONE_APP = 14;
+const VERSIONE_APP = 15;
 
 const CHIAVE_PUBBLICA = 'BEX2Ep7AZJPgrIF_cHwKOWk9VSiE8OLd1WLxSJDANLNEbox4xiHYb5pgRslEapXEXZs35jhSmHRhrLcfFhyPwVk';
 const MENO = '−', SOTTILE = ' ';
@@ -236,7 +236,7 @@ function disegnaOggi() {
         <span class="varia ${classe(m.giorno, m.inverso)}">${pct(m.giorno)}</span></div>
       ${linea(m.spark, 300, 62, m.inverso, true)}
       <div class="sg-piede">ultimi tre mesi</div></div>` : '';
-    return `<article class="sezione">
+    return `<article class="sezione" data-sezione="${fuga(s.id || '')}">
       <div class="sezione-testa"><span class="gettone">${i + 1}</span><h3>${fuga(s.titolo)}</h3></div>
       <p>${testo(s.testo)}</p>${disegno}${link ? `<div class="fonti-link">${link}</div>` : ''}</article>`;
   }).join('');
@@ -265,9 +265,37 @@ function disegnaTessere() {
   </div>`).join('');
 }
 
+// I dati che oggi dicono qualcosa, scelti e motivati dall'agente. Le tessere
+// qui sotto mostrano sempre gli stessi sei numeri: questa invece cambia ogni
+// giorno, ed è l'unica che spiega perché valga la pena guardarli.
+function disegnaGuardare() {
+  const g = (REPORT?.daGuardare || []).filter((d) => MERCATI.some((m) => m.sym === d.sym && m.prezzo != null));
+  $('guardare-scheda').hidden = g.length === 0;
+  $('capitolo-guardare').hidden = g.length === 0;
+  if (!g.length) return;
+  $('guardare-conteggio').textContent = `${g.length} segnalat${g.length === 1 ? 'o' : 'i'}`;
+
+  $('guardare').innerHTML = g.map((d) => {
+    const m = MERCATI.find((x) => x.sym === d.sym);
+    return `<article class="guardare">
+      <div class="gu-testa">
+        <span class="gu-nome">${fuga(m.nome)}
+          ${m.guida ? `<button class="chiedi" data-guida="${fuga(m.sym)}" aria-label="Cos'è ${fuga(m.nome)}">?</button>` : ''}</span>
+        <span class="gu-numeri">
+          <span class="gu-valore">${num(m.prezzo, m.decimali)}</span>
+          <span class="varia ${classe(m.giorno, m.inverso)}">${pct(m.giorno)}</span>
+        </span>
+      </div>
+      <p class="gu-perche">${testo(d.perche)}</p>
+      ${m.spark?.length ? `<div class="gu-graf">${linea(m.spark, 320, 46, m.inverso, true)}</div>` : ''}
+    </article>`;
+  }).join('');
+}
+
 function disegnaAziende() {
   const az = REPORT?.aziende || [];
   $('aziende-scheda').hidden = az.length === 0;
+  $('capitolo-aziende').hidden = az.length === 0;
   if (!az.length) return;
   $('aziende-conteggio').textContent = `${az.length} oggi`;
 
@@ -288,7 +316,8 @@ function disegnaAziende() {
         ${prezzo}
       </div>
       <p class="az-fa">${fuga(a.nome)} ${testo(a.fa)}.</p>
-      <p class="az-motivo">${testo(a.motivo)}</p>
+      ${a.perche ? `<p class="az-perche"><span class="az-perche-et">Perché oggi</span>${testo(a.perche)}</p>` : ''}
+      ${a.motivo ? `<p class="az-motivo">${testo(a.motivo)}</p>` : ''}
       ${a.materialeScarso ? '<p class="az-nota">Oggi i giornali la citano senza spiegare bene cosa sia successo.</p>' : ''}
       <p class="az-firma">${a.scritto === 'agente'
         ? 'Riassunto dagli articoli di oggi'
@@ -385,7 +414,7 @@ async function carica() {
     .map((t) => ({ ...t, forme: [...t.forme].sort((a, b) => b.length - a.length) }))
     .sort((a, b) => Math.max(...b.forme.map((f) => f.length)) - Math.max(...a.forme.map((f) => f.length)));
   // Se una parte si rompe, le altre devono restare in piedi.
-  for (const [nome, f] of [['correzioni', disegnaCorrezioni], ['saluto', disegnaSaluto], ['nastro', disegnaNastro], ['oggi', disegnaOggi], ['tessere', disegnaTessere], ['aziende', disegnaAziende], ['mercati', disegnaMercati], ['info', disegnaInfo]]) {
+  for (const [nome, f] of [['correzioni', disegnaCorrezioni], ['saluto', disegnaSaluto], ['nastro', disegnaNastro], ['oggi', disegnaOggi], ['da guardare', disegnaGuardare], ['tessere', disegnaTessere], ['aziende', disegnaAziende], ['mercati', disegnaMercati], ['info', disegnaInfo]]) {
     try { f(); } catch (e) { console.error('disegno ' + nome + ':', e); }
   }
 }

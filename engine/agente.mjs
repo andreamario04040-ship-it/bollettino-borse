@@ -88,8 +88,11 @@ export function materialePerAzienda(a, notizie) {
   const quot = a.prezzo != null
     ? `Quotazione di oggi: ${num(a.prezzo, 2)} (${pct(a.giorno)}).`
     : 'Quotazione non disponibile.';
+  // Perché è stata scelta: la decisione del primo giro, che serve a questo
+  // secondo per sapere su cosa il racconto deve stare.
+  const scelta = a.perche ? `Scelta oggi perché: ${a.perche}\n` : '';
 
-  return `### ${a.nome}  —  ${a.settore}\n${quot}\n\n${pezzi.join('\n\n')}`;
+  return `### ${a.nome}  —  ${a.settore}\n${scelta}${quot}\n\n${pezzi.join('\n\n')}`;
 }
 
 const richiesta = (aziende, materiale) =>

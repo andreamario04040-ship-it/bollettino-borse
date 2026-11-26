@@ -3,6 +3,7 @@
 // spesso la notizia vera è un chip nuovo o un bilancio migliore del previsto.
 
 import { quotazioniCnbc } from './cnbc.mjs';
+import { scaricaLogo, esisteLogo } from './logo.mjs';
 import { pct, num, taglia } from './lingua.mjs';
 
 // cnbc: null quando il titolo non è scambiato dove possiamo leggerlo (resta
@@ -130,5 +131,127 @@ export async function aziendeDelGiorno(notizie, quante = 6) {
   });
 
   console.log(`  aziende: ${out.length} (${out.map((x) => x.nome).join(', ')})`);
+  return out;
+}
+
+// ─────────────────────  l'anagrafica di chi l'agente sceglie  ────────────────
+//
+// Quando la scelta la fa l'agente (engine/scelta.mjs), il dizionario qui sopra
+// cambia mestiere: non decide più chi entra, ma dice quello che sappiamo di chi
+// è entrato — il codice di borsa, il settore, il logo già scaricato. Un'azienda
+// che il dizionario non conosce entra comunque: avrà l'iniziale al posto del
+// logo, e il prezzo soltanto se il codice che l'agente propone si rivela giusto.
+
+const SUFFISSI = /\b(s\.?p\.?a|n\.?v|inc|incorporated|corp|corporation|ltd|plc|a\.?g|s\.?a|s\.?e|holdings?|group|gruppo|co|company|limited|platforms)\b/gi;
+// Parole che da sole non identificano nessuno: senza questa lista "Banca Intesa"
+// e "Banca Monte dei Paschi" sarebbero la stessa azienda.
+const GENERICHE = new Set(['banca', 'bank', 'banco', 'assicurazioni', 'insurance', 'energia', 'energy',
+  'motors', 'auto', 'telecom', 'industries', 'partners', 'capital', 'technology', 'technologies',
+  'international', 'semiconductor', 'semiconduttori', 'systems', 'solutions', 'italia', 'italiana']);
+
+const normalizza = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+  .replace(SUFFISSI, ' ').replace(/[^a-z0-9]+/g, ' ').replace(/\s+/g, ' ').trim();
+
+const significative = (s) => normalizza(s).split(' ').filter((t) => t.length >= 4 && !GENERICHE.has(t));
+
+export function stessoNome(x, y) {
+  const a = normalizza(x), b = normalizza(y);
+  if (!a || !b) return false;
+  if (a === b) return true;
+  const sa = significative(x), sb = significative(y);
+  if (sa.length && sb.length) return sa.some((t) => sb.includes(t));
+  // Nomi corti e senza parole proprie (PDD, AMD, Eni): o combaciano o no.
+  return a.split(' ').some((t) => b.split(' ').includes(t));
+}
+
+// Prende le aziende scelte dall'agente e le completa: anagrafica dal dizionario
+// quando c'è, quotazioni da CNBC, e un controllo sul codice di borsa proposto.
+export async function componiAziende(scelte) {
+  if (!scelte?.length) return [];
+
+  const risolte = scelte.map((s) => {
+    const d = AZIENDE.find((a) => stessoNome(a.nome, s.nome)) || AZIENDE.find((a) => a.re.test(s.nome));
+    return {
+      nome: d?.nome || s.nome,
+      settore: d?.settore || s.settore,
+      fa: d?.fa || s.fa,
+      // Dove il dizionario dice esplicitamente che un titolo non è leggibile
+      // (OpenAI, DeepSeek) la sua parola vale più di quella dell'agente.
+      candidati: d ? (d.cnbc ? [d.cnbc] : []) : (s.simboli || []),
+      daControllare: !d,
+      dominio: d?.dominio || s.dominio || null,
+      perche: s.perche,
+      titoli: s.titoli,
+      conosciuta: !!d,
+    };
+  });
+
+  let prezzi = new Map();
+  const simboli = [...new Set(risolte.flatMap((r) => r.candidati))];
+  if (simboli.length) {
+    try { prezzi = await quotazioniCnbc(simboli); }
+    catch (e) { console.error(`  ! quotazioni delle aziende non disponibili: ${e.message}`); }
+  }
+
+  const out = [];
+  for (const r of risolte) {
+    // Fra i codici proposti si tiene il primo a cui la borsa risponde col nome
+    // di questa azienda. Senza quel controllo un codice sbagliato darebbe il
+    // prezzo di un'altra società, che è molto peggio di nessun prezzo.
+    let sim = null, q = null;
+    for (const c of r.candidati) {
+      const v = prezzi.get(c);
+      if (!v) continue;
+      if (r.daControllare && !stessoNome(v.nome || '', r.nome)) {
+        console.log(`  · [aziende] ${r.nome}: il codice ${c} risponde «${v.nome}», non è lei`);
+        continue;
+      }
+      sim = c; q = v; break;
+    }
+
+    // Il logo: dal dizionario se c'è già, altrimenti dal sito che l'agente
+    // indica — ma solo se quel sito porta il nome dell'azienda, perché il logo
+    // sbagliato accanto al nome giusto è un errore che si vede.
+    let logo = null;
+    const nomeFile = slug(r.nome);
+    if (await esisteLogo(nomeFile)) logo = nomeFile;
+    else if (r.dominio) {
+      const radiceDominio = r.dominio.replace(/\.[a-z.]{2,8}$/, '');
+      if (r.conosciuta || stessoNome(radiceDominio, r.nome)) {
+        if (await scaricaLogo(nomeFile, r.dominio)) { logo = nomeFile; console.log(`  · [aziende] logo di ${r.nome} scaricato da ${r.dominio}`); }
+      } else {
+        console.log(`  · [aziende] ${r.nome}: il sito ${r.dominio} non porta il suo nome, niente logo`);
+      }
+    }
+
+    out.push({
+      nome: r.nome, settore: r.settore, simbolo: sim, fa: r.fa, logo,
+      prezzo: q?.prezzo ?? null, giorno: q?.giorno ?? null,
+      perche: r.perche,
+      motivo: '', scritto: 'nessuno',
+      titoli: r.titoli.map((n) => ({ fonte: n.fonte, titolo: taglia(n.titolo, 130), link: n.link })),
+    });
+  }
+
+  const senzaPrezzo = out.filter((a) => a.prezzo == null).length;
+  console.log(`  aziende: ${out.length} (${out.map((x) => x.nome).join(', ')})${senzaPrezzo ? ` — ${senzaPrezzo} senza quotazione` : ''}`);
+  const nuove = risolte.filter((r) => !r.conosciuta).map((r) => r.nome);
+  if (nuove.length) console.log(`  · [aziende] fuori dal dizionario: ${nuove.join(', ')}`);
+  const senzaLogo = out.filter((a) => !a.logo).map((a) => a.nome);
+  if (senzaLogo.length) console.log(`  · [aziende] mostrano l'iniziale al posto del logo: ${senzaLogo.join(', ')}`);
+  return out;
+}
+
+// Gli indici che l'agente ha segnalato, riportati agli strumenti veri.
+export function componiIndici(indici, mercati) {
+  const visti = new Set();
+  const out = [];
+  for (const x of indici || []) {
+    const m = mercati.find((y) => normalizza(y.nome) === normalizza(x.nome)) || mercati.find((y) => stessoNome(y.nome, x.nome));
+    if (!m || m.prezzo == null || visti.has(m.sym)) continue;
+    visti.add(m.sym);
+    out.push({ sym: m.sym, nome: m.nome, perche: x.perche });
+  }
+  if (out.length) console.log(`  da guardare: ${out.map((x) => x.nome).join(', ')}`);
   return out;
 }
