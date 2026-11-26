@@ -380,6 +380,24 @@ code{font-family:var(--fm);font-size:.82rem;background:var(--superficie2);paddin
 }
 
 /* ——— preferiti ——— */
+.sincronia{display:flex;align-items:center;justify-content:space-between;gap:.8rem;flex-wrap:wrap;
+  margin-top:1rem;padding-top:.85rem;border-top:1px solid var(--bordo)}
+.sinc-stato{font-size:.78rem;color:var(--testo3);line-height:1.45;flex:1;min-width:12rem}
+.sinc-stato.attiva{color:var(--su)}
+.sinc-stato.guasta{color:var(--attenzione)}
+.sinc-passi{margin:.9rem 0 0;padding-left:1.15rem;font-size:.93rem;line-height:1.6;color:var(--testo2)}
+.sinc-passi li{margin-bottom:.45rem}
+.sinc-passi a{color:var(--accento)}
+.sinc-campo{width:100%;margin-top:.9rem;padding:.6rem .8rem;border-radius:10px;
+  border:1px solid var(--bordo);background:var(--superficie2);color:var(--testo);
+  font:inherit;font-size:.93rem;-webkit-appearance:none;appearance:none}
+.sinc-campo:focus{outline:none;border-color:var(--accento)}
+.sinc-tasti{display:flex;align-items:center;gap:.6rem;margin-top:.8rem;flex-wrap:wrap}
+.pan-nota{margin:1rem 0 0;font-size:.8rem;line-height:1.55;color:var(--testo3)}
+.tasto-pillola{font-size:.7rem;font-weight:600;letter-spacing:.03em;padding:.3rem .8rem;border-radius:999px;
+  border:1px solid var(--accento);background:none;color:var(--accento);cursor:pointer;flex:none}
+.tasto-pillola:hover{background:var(--accento-tenue)}
+
 #pref-lista{display:flex;flex-direction:column;gap:.8rem}
 .vuoto p{margin:0;color:var(--testo3);font-size:.93rem;line-height:1.6}
 /* Quando oggi non c'è niente la scheda non sparisce: resta, più spenta.

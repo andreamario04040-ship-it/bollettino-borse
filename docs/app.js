@@ -3,7 +3,7 @@
 // Si alza a ogni modifica dell'app, insieme a docs/versione.json.
 // Serve perché un'app aggiunta alla schermata Home resta viva in memoria:
 // riaprendola dal selettore non ricarica, e resterebbe vecchia per giorni.
-const VERSIONE_APP = 18;
+const VERSIONE_APP = 19;
 
 const CHIAVE_PUBBLICA = 'BEX2Ep7AZJPgrIF_cHwKOWk9VSiE8OLd1WLxSJDANLNEbox4xiHYb5pgRslEapXEXZs35jhSmHRhrLcfFhyPwVk';
 const MENO = '−', SOTTILE = ' ';
@@ -305,7 +305,13 @@ let TITOLI = [];
 let filtro = '';
 
 const leggiLista = (chiave) => { try { return JSON.parse(localStorage.getItem(chiave) || '[]'); } catch { return []; } };
-const scriviLista = (chiave, v) => { try { localStorage.setItem(chiave, JSON.stringify(v)); } catch { /* finestra privata: pazienza */ } };
+// Un solo punto in cui le liste cambiano: così la sincronia se ne accorge
+// sempre, invece di dipendere dal fatto che qualcuno si ricordi di avvisarla.
+let applicandoRemoto = false;
+const scriviLista = (chiave, v) => {
+  try { localStorage.setItem(chiave, JSON.stringify(v)); } catch { /* finestra privata: pazienza */ }
+  if (!applicandoRemoto && ['preferite', 'fissate', 'aggiunte'].includes(chiave)) segnaCambiamento();
+};
 
 const preferiteSalvate = () => leggiLista('preferite');
 const fissateSalvate = () => leggiLista('fissate');
@@ -744,7 +750,10 @@ async function preparaNotifiche() {
 /* ——————————————— avvio ——————————————— */
 function cambiaVista(nome) {
   for (const v of ['oggi', 'preferiti', 'mercati', 'info']) $('vista-' + v).hidden = v !== nome;
-  if (nome === 'preferiti') caricaTitoli().then(disegnaPreferiti);
+  if (nome === 'preferiti') {
+    caricaTitoli().then(disegnaPreferiti);
+    if (gettoneGist()) sincronizza('controllo').catch(() => {});
+  }
   document.querySelectorAll('.schede button').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.vista === nome)));
   window.scrollTo({ top: 0, behavior: 'instant' });
 }
@@ -902,3 +911,194 @@ try { screen.orientation?.lock?.('portrait').catch(() => {}); } catch { /* non s
 carica();
 controllaAggiornamenti();
 preparaNotifiche().catch((e) => console.warn('notifiche:', e));
+
+/* ——————————————— sincronia fra i dispositivi ———————————————
+   I preferiti stanno sul dispositivo, e due dispositivi sono due liste. Per
+   tenerle uguali serve un posto che entrambi possano leggere e scrivere: un
+   gist segreto di GitHub, cioè un file fuori dal sito pubblico, raggiungibile
+   solo da chi ha il gettone.
+
+   Il gettone resta in questo browser e non va da nessuna parte se non ad
+   api.github.com. Ha il solo permesso "gist": non può toccare i repository né
+   altro. L'app non lo scrive mai nel diario e non lo mostra.
+
+   Chi ha ragione quando le due liste differiscono? L'ultima modifica, segnata
+   con l'ora. È un solo utente con due dispositivi: non serve altro. */
+
+const GIST_NOME = 'Borsa — le aziende che segui';
+const GIST_FILE = 'preferiti.json';
+let sincroniaInCorso = null;
+
+const gettoneGist = () => { try { return localStorage.getItem('gettoneGist') || ''; } catch { return ''; } };
+
+function statoLocale() {
+  return {
+    preferite: preferiteSalvate(),
+    fissate: fissateSalvate(),
+    aggiunte: aggiunteSalvate(),
+    quando: (() => { try { return localStorage.getItem('preferiteQuando') || ''; } catch { return ''; } })(),
+  };
+}
+
+function segnaCambiamento() {
+  try { localStorage.setItem('preferiteQuando', new Date().toISOString()); } catch { /* niente */ }
+  if (gettoneGist()) programmaInvio();
+}
+
+async function chiamaGist(percorso, opzioni = {}) {
+  const t = gettoneGist();
+  if (!t) throw new Error('nessun gettone');
+  const r = await fetch('https://api.github.com' + percorso, {
+    ...opzioni,
+    headers: {
+      Accept: 'application/vnd.github+json',
+      Authorization: `Bearer ${t}`,
+      'X-GitHub-Api-Version': '2022-11-28',
+      ...(opzioni.headers || {}),
+    },
+  });
+  if (r.status === 401) throw new Error('gettone rifiutato');
+  if (!r.ok) throw new Error(`GitHub ha risposto ${r.status}`);
+  return r.json();
+}
+
+// Il secondo dispositivo non deve sapere nessun identificativo: cerca fra i
+// gist quello con questo nome, e se non c'è lo crea.
+async function trovaGist() {
+  let id = '';
+  try { id = localStorage.getItem('idGist') || ''; } catch { /* niente */ }
+  if (id) return id;
+
+  const lista = await chiamaGist('/gists?per_page=100');
+  const trovato = (lista || []).find((g) => g.description === GIST_NOME || (g.files && g.files[GIST_FILE]));
+  if (trovato) { try { localStorage.setItem('idGist', trovato.id); } catch { /* niente */ } return trovato.id; }
+
+  const creato = await chiamaGist('/gists', {
+    method: 'POST',
+    body: JSON.stringify({
+      description: GIST_NOME, public: false,
+      files: { [GIST_FILE]: { content: JSON.stringify({ ...statoLocale(), quando: new Date().toISOString() }, null, 2) } },
+    }),
+  });
+  try { localStorage.setItem('idGist', creato.id); } catch { /* niente */ }
+  return creato.id;
+}
+
+async function inviaAlGist() {
+  const id = await trovaGist();
+  const stato = { ...statoLocale(), quando: statoLocale().quando || new Date().toISOString() };
+  await chiamaGist(`/gists/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ files: { [GIST_FILE]: { content: JSON.stringify(stato, null, 2) } } }),
+  });
+  return stato.quando;
+}
+
+let orologioInvio;
+function programmaInvio() {
+  clearTimeout(orologioInvio);
+  orologioInvio = setTimeout(() => {
+    sincronizza('invio').catch(() => {});
+  }, 1500);   // non una scrittura per tocco: si aspetta che tu abbia finito
+}
+
+async function sincronizza(modo = 'controllo') {
+  if (!gettoneGist()) return disegnaSincronia();
+  if (sincroniaInCorso) return sincroniaInCorso;
+
+  sincroniaInCorso = (async () => {
+    disegnaSincronia('in corso');
+    try {
+      if (modo === 'invio') {
+        await inviaAlGist();
+      } else {
+        const id = await trovaGist();
+        const g = await chiamaGist(`/gists/${id}`);
+        const grezzo = g?.files?.[GIST_FILE]?.content;
+        const remoto = grezzo ? JSON.parse(grezzo) : null;
+        const locale = statoLocale();
+
+        if (remoto && (!locale.quando || (remoto.quando || '') > locale.quando)) {
+          // Scrivere quello che arriva non è un cambiamento da rimandare
+          // indietro: senza questa guardia i due dispositivi si rincorrerebbero.
+          applicandoRemoto = true;
+          scriviLista('preferite', remoto.preferite || []);
+          scriviLista('fissate', remoto.fissate || []);
+          scriviLista('aggiunte', remoto.aggiunte || []);
+          applicandoRemoto = false;
+          try { localStorage.setItem('preferiteQuando', remoto.quando || new Date().toISOString()); } catch { /* niente */ }
+          disegnaPreferiti();
+        } else if (locale.quando && (!remoto || locale.quando > (remoto.quando || ''))) {
+          await inviaAlGist();
+        }
+      }
+      try { localStorage.setItem('sincQuando', new Date().toISOString()); } catch { /* niente */ }
+      disegnaSincronia();
+    } catch (e) {
+      disegnaSincronia('errore', e.message);
+    } finally {
+      sincroniaInCorso = null;
+    }
+  })();
+  return sincroniaInCorso;
+}
+
+function disegnaSincronia(fase, dettaglio) {
+  const stato = $('sinc-stato'), tasto = $('sinc-tasto');
+  if (!stato) return;
+  if (!gettoneGist()) {
+    stato.textContent = 'Sincronia non attiva: questa lista vale solo su questo dispositivo.';
+    stato.className = 'sinc-stato';
+    tasto.textContent = 'Attiva';
+    return;
+  }
+  tasto.textContent = 'Gestisci';
+  if (fase === 'in corso') { stato.textContent = 'Sincronizzo…'; stato.className = 'sinc-stato'; return; }
+  if (fase === 'errore') { stato.textContent = `Sincronia ferma: ${dettaglio}.`; stato.className = 'sinc-stato guasta'; return; }
+  let quando = '';
+  try { quando = localStorage.getItem('sincQuando') || ''; } catch { /* niente */ }
+  const ora = quando ? new Date(quando).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }) : '';
+  stato.textContent = ora ? `Sincronizzato alle ${ora}, su tutti i tuoi dispositivi.` : 'Sincronia attiva.';
+  stato.className = 'sinc-stato attiva';
+}
+
+function apriSincronia() {
+  const attiva = !!gettoneGist();
+  apriPannello({
+    tipo: 'Preferiti',
+    titolo: attiva ? 'Sincronia fra i dispositivi' : 'Attiva la sincronia',
+    corpo: `
+      <p class="pan-testo">La lista delle aziende che segui sta su questo dispositivo. Per averla uguale su iPhone e su Mac serve un posto che entrambi possano leggere e scrivere: un <b>gist segreto</b> di GitHub, cioè un file fuori dal sito pubblico.</p>
+      <ol class="sinc-passi">
+        <li>Apri <a href="https://github.com/settings/tokens/new?scopes=gist&amp;description=Borsa%20%E2%80%94%20preferiti" target="_blank" rel="noopener">questa pagina di GitHub</a>: il permesso <b>gist</b> è già segnato, non aggiungerne altri.</li>
+        <li>In fondo tocca <b>Generate token</b> e copia il codice che compare.</li>
+        <li>Incollalo qui sotto. Sull'altro dispositivo rifai lo stesso: troverà da solo la lista già salvata.</li>
+      </ol>
+      <input class="sinc-campo" id="sinc-gettone" type="password" placeholder="Incolla qui il gettone" autocomplete="off" spellcheck="false" aria-label="Gettone GitHub">
+      <div class="sinc-tasti">
+        <button class="tasto-pillola" id="sinc-salva">${attiva ? 'Sostituisci' : 'Attiva'}</button>
+        ${attiva ? '<button class="az-tasto" id="sinc-spegni">Disattiva su questo dispositivo</button>' : ''}
+      </div>
+      <p class="pan-nota">Il gettone resta in questo browser e non viene mandato a nessuno tranne che a GitHub. Ha il solo permesso <b>gist</b>: non può toccare i tuoi repository. Se lo perdi o cambi idea, cancellalo da GitHub e la sincronia si ferma.</p>`,
+  });
+
+  $('sinc-salva').addEventListener('click', async () => {
+    const campo = $('sinc-gettone');
+    const t = campo.value.trim();
+    if (!t) return;
+    try { localStorage.setItem('gettoneGist', t); localStorage.removeItem('idGist'); } catch { /* niente */ }
+    campo.value = '';
+    $('pannello').close();
+    await sincronizza('controllo');
+  });
+  const spegni = $('sinc-spegni');
+  if (spegni) spegni.addEventListener('click', () => {
+    try { localStorage.removeItem('gettoneGist'); localStorage.removeItem('idGist'); } catch { /* niente */ }
+    $('pannello').close();
+    disegnaSincronia();
+  });
+}
+
+$('sinc-tasto').addEventListener('click', apriSincronia);
+disegnaSincronia();
+if (gettoneGist()) sincronizza('controllo').catch(() => {});

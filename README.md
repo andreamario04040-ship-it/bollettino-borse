@@ -441,6 +441,26 @@ Lo stesso ripiego vale per le aziende conosciute di cui l'agente non ha trovato 
 rilevante: *«Niente di rilevante oggi, ma la nominano:»*, e sotto i titoli. Così si distingue
 «non è successo niente» da «non ne ha parlato nessuno».
 
+### Sincronia fra i dispositivi
+
+I preferiti stanno nel browser, e due dispositivi sono due liste. Per tenerle uguali serve un
+posto che entrambi possano leggere e scrivere: un **gist segreto** di GitHub, cioè un file fuori
+dal sito pubblico, raggiungibile solo da chi ha il gettone.
+
+Si attiva dalla pagina Preferiti, tasto **Attiva**. Serve un gettone GitHub col **solo** permesso
+`gist` — non può toccare i repository — da incollare una volta per dispositivo. Il secondo
+dispositivo non deve sapere nessun identificativo: cerca fra i gist quello giusto e lo trova.
+
+Il gettone resta in quel browser e non viene mandato a nessuno tranne che a `api.github.com`.
+Non finisce nei diari e non viene mai mostrato.
+
+Chi ha ragione quando le due liste differiscono? L'ultima modifica, segnata con l'ora. È un solo
+utente con due dispositivi: non serve una risoluzione più furba. Le scritture sono rimandate di
+un secondo e mezzo, così toccare cinque stelle di fila fa una scrittura sola.
+
+Se il gettone è sbagliato o scaduto la lista locale **non si tocca**: l'app lo scrive
+(*«Sincronia ferma: gettone rifiutato»*) e tutto il resto continua a funzionare.
+
 ### Le novantotto aziende
 
 Il dizionario in `engine/aziende.mjs` copre il listino di Milano, le grandi europee, le
