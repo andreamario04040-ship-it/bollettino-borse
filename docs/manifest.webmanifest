@@ -1,6 +1,6 @@
 {
-  "name": "Bollettino Borse",
-  "short_name": "Bollettino",
+  "name": "Borsa",
+  "short_name": "Borsa",
   "description": "Ogni giorno, in parole semplici, cosa succede sulle borse mondiali.",
   "start_url": "./",
   "scope": "./",

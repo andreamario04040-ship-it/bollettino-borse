@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Bollettino quotidiano sulle borse mondiali, spiegato in parole semplici.",
+  "description": "Borsa: bollettino quotidiano sulle borse mondiali, spiegato in parole semplici.",
   "scripts": {
     "bollettino": "node engine/esegui.mjs bollettino",
     "avviso": "node engine/esegui.mjs avviso",

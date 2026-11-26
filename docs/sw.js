@@ -4,7 +4,7 @@ self.addEventListener('install', (e) => self.skipWaiting());
 self.addEventListener('activate', (e) => e.waitUntil(self.clients.claim()));
 
 self.addEventListener('push', (event) => {
-  let d = { titolo: 'Bollettino Borse', corpo: 'Nuovo aggiornamento sui mercati.' };
+  let d = { titolo: 'Borsa', corpo: 'Nuovo aggiornamento sui mercati.' };
   try { if (event.data) d = { ...d, ...event.data.json() }; } catch { if (event.data) d.corpo = event.data.text(); }
 
   event.waitUntil(self.registration.showNotification(d.titolo, {

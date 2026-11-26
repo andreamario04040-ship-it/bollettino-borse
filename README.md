@@ -1,4 +1,4 @@
-# Bollettino Borse
+# Borsa
 
 Un'app per iPhone che ogni giorno ti racconta, in parole semplici, cosa è successo sulle borse
 mondiali — e che puoi aprire per vedere i numeri degli indici che contano.
@@ -11,6 +11,9 @@ mondiali — e che puoi aprire per vedere i numeri degli indici che contano.
 Non costa niente: il motore gira su GitHub Actions, l'app è una pagina pubblicata su GitHub Pages.
 
 ---
+
+Il nome del repository e l'indirizzo restano `bollettino-borse`: cambiarli spezzerebbe
+l'app già installata sulla schermata Home e l'iscrizione alle notifiche.
 
 ## Com'è fatto
 
@@ -47,7 +50,7 @@ le chiavi stanno nei segreti, che restano privati anche in un repository pubblic
 ```bash
 git init -b main
 git add .
-git commit -m "Bollettino Borse"
+git commit -m "Borsa"
 gh repo create bollettino-borse --public --source . --push
 ```
 

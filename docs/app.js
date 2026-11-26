@@ -1,4 +1,4 @@
-/* Bollettino Borse — nessuna libreria: legge due file JSON e disegna l'app. */
+/* Borsa — nessuna libreria: legge due file JSON e disegna l'app. */
 
 const CHIAVE_PUBBLICA = 'BEX2Ep7AZJPgrIF_cHwKOWk9VSiE8OLd1WLxSJDANLNEbox4xiHYb5pgRslEapXEXZs35jhSmHRhrLcfFhyPwVk';
 const MENO = '−', SOTTILE = ' ';
