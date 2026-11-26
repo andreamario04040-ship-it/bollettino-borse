@@ -70,5 +70,11 @@ jobs:
           git config user.name  "Borsa"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add docs/data
-          git commit -m "Bollettino del $(TZ=Europe/Rome date '+%d/%m/%Y alle %H:%M')"
+          # Anche quando non si pubblica un bollettino i prezzi si aggiornano:
+          # il messaggio dice quello che è successo davvero.
+          if git diff --cached --name-only | grep -q 'docs/data/storico/'; then
+            git commit -m "Bollettino del $(TZ=Europe/Rome date '+%d/%m/%Y alle %H:%M')"
+          else
+            git commit -m "Prezzi aggiornati il $(TZ=Europe/Rome date '+%d/%m/%Y alle %H:%M')"
+          fi
           git push
