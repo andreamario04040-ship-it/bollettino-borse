@@ -62,10 +62,15 @@ else
   echo "      claude setup-token"
   echo
   echo "  Si apre il browser, accedi col tuo account, e ti stampa un gettone."
-  # Senza terminale (per esempio se lo script viene eseguito da un'altra cosa)
-  # `read` fallisce: con set -e fermerebbe tutto, e invece va solo saltato.
+  # Serve un terminale vero per incollare. Dove non c'è — perché lo script è
+  # stato lanciato da qualcos'altro — `read` fallisce subito, e lo stesso
+  # fallimento con set -e fermerebbe l'installazione a metà: meglio dirlo.
   GETTONE=""
-  read -r -p "  Incollalo qui (o premi Invio per saltare): " GETTONE || true
+  if [ -t 0 ]; then
+    read -r -p "  Incollalo qui (o premi Invio per saltare): " GETTONE || true
+  else
+    echo "  (qui non c'è un terminale interattivo: la richiesta del gettone la salto)"
+  fi
   if [ -n "${GETTONE:-}" ]; then
     scrivi_chiave CLAUDE_CODE_OAUTH_TOKEN "$GETTONE"
     echo "  ✓ gettone salvato"
