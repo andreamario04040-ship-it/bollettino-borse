@@ -280,5 +280,9 @@ let temaSalvato = 'auto';
 try { temaSalvato = localStorage.getItem('tema') || 'auto'; } catch { /* niente */ }
 applicaTema(temaSalvato);
 
+// Blocco in verticale: funziona su Android, su iPhone no — Safari non lo
+// espone. Lì ci pensa la schermata "Gira il telefono" del foglio di stile.
+try { screen.orientation?.lock?.('portrait').catch(() => {}); } catch { /* non supportato */ }
+
 carica();
 preparaNotifiche().catch((e) => console.warn('notifiche:', e));

@@ -204,6 +204,23 @@ code{font-family:var(--fm);font-size:.82rem;background:var(--superficie2);paddin
 .schede button[aria-selected="true"]{color:var(--marchio)}
 .schede button[aria-selected="true"] svg{filter:drop-shadow(0 0 7px rgba(14,215,117,.45))}
 
+/* ——— solo in verticale ———
+   Su iPhone il blocco vero non esiste: Safari ignora "orientation" del manifest
+   e non espone il blocco via codice. Quindi in orizzontale, e solo su schermi
+   bassi come quelli dei telefoni, l'app si copre e chiede di girare il telefono.
+   Il limite di altezza evita di coprire un computer, che è sempre "orizzontale". */
+#ruota{display:none}
+@media (orientation:landscape) and (max-height:500px){
+  #ruota{display:flex;position:fixed;inset:0;z-index:100;flex-direction:column;
+    align-items:center;justify-content:center;gap:.7rem;text-align:center;
+    background:var(--fondo);
+    padding:1.5rem max(16px,env(safe-area-inset-left)) calc(1.5rem + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-right))}
+  #ruota img{border-radius:18px;box-shadow:var(--bagliore);background:#000}
+  .ruota-titolo{margin:.2rem 0 0;font-family:var(--fd);font-size:1.3rem;font-weight:800;color:var(--testo)}
+  .ruota-nota{margin:0;max-width:34ch;font-size:.88rem;color:var(--testo2);line-height:1.5}
+  body{overflow:hidden}
+}
+
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 @media (min-width:560px){
   .dati{grid-template-columns:repeat(6,1fr)}

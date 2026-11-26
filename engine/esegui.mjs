@@ -33,17 +33,16 @@ if (!config) throw new Error('config.json non trovato');
 
 console.log(`\n▸ ${modo} — ${dataItalia(adesso)} ore ${oraItalia(adesso)} (ora italiana)`);
 
-// GitHub ragiona in UTC, l'Italia cambia ora due volte l'anno: ogni appuntamento parte
-// a due orari diversi e qui si ferma subito quello che non corrisponde.
-const attesa = process.env.ORA_ATTESA;
-if (attesa) {
-  const [h, m] = attesa.split(':').map(Number);
-  const scarto = Math.abs(minutiDaMezzanotteRoma(adesso) - (h * 60 + m));
-  if (scarto > 35) {
-    console.log(`  in Italia sono le ${oraItalia(adesso)}, l'appuntamento è alle ${attesa}: non è questo il turno.`);
-    process.exit(0);
-  }
-}
+// Ogni appuntamento ha una finestra larga, non un orario esatto: GitHub fa partire
+// le esecuzioni programmate con ritardi di decine di minuti, e un controllo stretto
+// farebbe saltare il bollettino proprio nei giorni in cui il servizio è carico.
+// A non farne partire due è il controllo sotto, che guarda se è già stato pubblicato.
+const FINESTRE = {
+  mattina: { da: '08:00', a: '12:30' },
+  sera: { da: '17:30', a: '21:30' },
+};
+const inMinuti = (hhmm) => { const [h, m] = hhmm.split(':').map(Number); return h * 60 + m; };
+const daCalendario = !!process.env.DA_CALENDARIO;
 
 const serieSalvata = await leggiJson(dentro('docs/data/serie.json'), serieVuota());
 const oggi = giornoRoma(adesso);
@@ -97,10 +96,26 @@ if (modo === 'avviso') {
 
 // Bollettino fisso: mattina o sera, dedotto dall'ora se non specificato.
 const tipo = quale || (minutiDaMezzanotteRoma(adesso) < 13 * 60 ? 'mattina' : 'sera');
+const archivio = dentro(`docs/data/storico/${giornoRoma(adesso)}-${tipo}.json`);
+
+if (daCalendario) {
+  const f = FINESTRE[tipo];
+  const ora = minutiDaMezzanotteRoma(adesso);
+  if (f && (ora < inMinuti(f.da) || ora > inMinuti(f.a))) {
+    console.log(`  in Italia sono le ${oraItalia(adesso)}: fuori dalla finestra del bollettino ${tipo} (${f.da}–${f.a}).`);
+    process.exit(0);
+  }
+  // Due appuntamenti coprono ora solare e ora legale: il secondo non deve ripetere il primo.
+  if (await leggiJson(archivio)) {
+    console.log(`  il bollettino ${tipo} di oggi è già stato pubblicato: non lo rifaccio.`);
+    process.exit(0);
+  }
+}
+
 const report = costruisciReport(mercati, notizie, tipo, adesso);
 
 await scriviJson(dentro('docs/data/report.json'), report);
-await scriviJson(dentro(`docs/data/storico/${giornoRoma(adesso)}-${tipo}.json`), report);
+await scriviJson(archivio, report);
 
 // Un bollettino azzera il contatore degli avvisi del giorno quando cambia la data.
 const stato = await leggiJson(dentro('docs/data/stato.json'), statoVuoto());

@@ -40,10 +40,10 @@ jobs:
         id: scelta
         run: |
           case "${{ github.event.schedule }}" in
-            "0 7,8 * * 1-5")     echo "modo=bollettino mattina" >> "$GITHUB_OUTPUT"; echo "ora=09:00" >> "$GITHUB_OUTPUT" ;;
-            "15 16,17 * * 1-5")  echo "modo=bollettino sera"    >> "$GITHUB_OUTPUT"; echo "ora=18:15" >> "$GITHUB_OUTPUT" ;;
-            "20 7-20 * * 1-5")   echo "modo=avviso"             >> "$GITHUB_OUTPUT"; echo "ora=" >> "$GITHUB_OUTPUT" ;;
-            *)                   echo "modo=${{ inputs.modo || 'bollettino mattina' }}" >> "$GITHUB_OUTPUT"; echo "ora=" >> "$GITHUB_OUTPUT" ;;
+            "0 7,8 * * 1-5")     echo "modo=bollettino mattina" >> "$GITHUB_OUTPUT" ;;
+            "15 16,17 * * 1-5")  echo "modo=bollettino sera"    >> "$GITHUB_OUTPUT" ;;
+            "20 7-20 * * 1-5")   echo "modo=avviso"             >> "$GITHUB_OUTPUT" ;;
+            *)                   echo "modo=${{ inputs.modo || 'bollettino mattina' }}" >> "$GITHUB_OUTPUT" ;;
           esac
 
       - name: Genera e invia
@@ -52,7 +52,7 @@ jobs:
           VAPID_PRIVATA:   ${{ secrets.VAPID_PRIVATA }}
           VAPID_CONTATTO:  ${{ secrets.VAPID_CONTATTO }}
           ISCRIZIONE_PUSH: ${{ secrets.ISCRIZIONE_PUSH }}
-          ORA_ATTESA:      ${{ steps.scelta.outputs.ora }}
+          DA_CALENDARIO:   ${{ github.event_name == 'schedule' && '1' || '' }}
         run: node engine/esegui.mjs ${{ steps.scelta.outputs.modo }}
 
       - name: Salva i dati aggiornati
