@@ -14,7 +14,7 @@
 <link rel="icon" href="icons/icona-192.png">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Inter:wght@400;450;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="stile.css?v=15">
+<link rel="stylesheet" href="stile.css?v=17">
 </head>
 <body>
 
@@ -99,17 +99,6 @@
       <div id="aziende"></div>
     </section>
 
-    <p class="capitolo" data-tinta="1" id="capitolo-preferite"><i></i><span>Le tue aziende</span></p>
-
-    <section class="scheda preferite-scheda" id="preferite-scheda">
-      <div class="riga-titolo">
-        <h2 class="scheda-titolo">Le aziende che segui</h2>
-        <button class="tasto-pillola" id="scegli-preferite">Scegli</button>
-      </div>
-      <p class="testo" id="preferite-nota"></p>
-      <div id="preferite"></div>
-    </section>
-
     <p class="piede-nota" id="piede-oggi"></p>
   </section>
 
@@ -125,6 +114,26 @@
     </div>
     <div id="lista-indici"></div>
     <p class="piede-nota">Tocca una riga per sapere perché quell'indice conta.</p>
+  </section>
+
+  <!-- ———————————— PREFERITI ———————————— -->
+  <section class="vista" id="vista-preferiti" role="tabpanel" aria-labelledby="tab-preferiti" hidden>
+
+    <div class="scheda">
+      <div class="riga-titolo">
+        <h2 class="scheda-titolo">I tuoi preferiti</h2>
+        <span class="pillola" id="pref-conteggio"></span>
+      </div>
+      <p class="testo">Le aziende che vuoi tenere d'occhio. Ogni giorno guardo i giornali per loro, e qui trovi cosa ho trovato. Se non c'è niente, te lo dico.</p>
+      <div class="cerca">
+        <svg class="cerca-segno" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="m20 20-4.5-4.5"/></svg>
+        <input type="search" id="pref-cerca" placeholder="Cerca un'azienda, o scrivine una nuova" autocomplete="off" spellcheck="false" aria-label="Cerca un'azienda">
+      </div>
+      <div id="pref-risultati"></div>
+    </div>
+
+    <div id="pref-lista"></div>
+    <p class="piede-nota" id="pref-piede"></p>
   </section>
 
   <!-- ———————————— INFO ———————————— -->
@@ -202,6 +211,10 @@
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 16.5 9 10l4 4 8-8.5M21 5.5h-5m5 0v5"/></svg>
     <span>Mercati</span>
   </button>
+  <button role="tab" id="tab-preferiti" data-vista="preferiti" aria-selected="false" aria-controls="vista-preferiti">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 4.5 2.3 4.9 5.2.7-3.8 3.7.9 5.3-4.6-2.5-4.6 2.5.9-5.3L4.5 10l5.2-.7z"/></svg>
+    <span>Preferiti</span>
+  </button>
   <button role="tab" id="tab-info" data-vista="info" aria-selected="false" aria-controls="vista-info">
     <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.6v.2"/></svg>
     <span>Info</span>
@@ -217,6 +230,6 @@
   <div id="pan-corpo"></div>
 </dialog>
 
-<script src="app.js?v=16"></script>
+<script src="app.js?v=17"></script>
 </body>
 </html>

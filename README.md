@@ -398,23 +398,52 @@ invecchiano** — primati, classifiche, se un'azienda è quotata. Quelli si legg
 L'app aveva scritto che Anthropic non era quotata perché la frase era stata messa a mano
 e non è più stata rivista.
 
-## Le aziende che segui
+## Preferiti
 
-Oltre a quelle che l'agente sceglie ogni giorno, puoi tenerne d'occhio alcune tue. Si scelgono
-dall'app, col tasto **Scegli**: un elenco delle quarantadue aziende che l'app conosce, diviso per
-settore, con un segno accanto a quelle che oggi hanno una notizia.
+Una pagina sua, nel menu. Dentro ci sono le aziende che hai scelto di tenere d'occhio, e ogni
+giorno l'agente ti dice cosa ha trovato su ciascuna.
 
-La scelta **resta sul dispositivo**: nessuno la carica da nessuna parte, e iPhone e Mac possono
-avere liste diverse. Il motore non sa quali siano, quindi fa una cosa più semplice e più robusta:
-nello stesso giro in cui sceglie le aziende del giorno, l'agente passa in rassegna tutte e
-quarantadue e dice quali hanno **oggi** una notizia vera, una riga ciascuna. L'app mostra quelle
-che hai scelto, e per le altre scrive *«Oggi i giornali non ne hanno parlato»*.
+- **Cerca** fra le novantotto aziende che l'app conosce, per nome o per settore: scrivere «banc»
+  tira su tutte le banche. Quelle che oggi hanno una notizia portano un segno **oggi**.
+- **Aggiungi** un'azienda che non c'è: si scrive il nome e si tocca *Aggiungi*.
+- **Metti in cima** quelle che vuoi vedere per prime: restano in testa, nell'ordine in cui le hai
+  fissate.
 
-Vale la pena dirlo chiaramente: quella frase non è un buco. I titoli del giorno sono stati letti
-tutti, e di quell'azienda non c'era niente. È una risposta, ed è diversa dal silenzio.
+La scelta **resta sul dispositivo** — nessuno la carica da nessuna parte, e iPhone e Mac possono
+avere liste diverse. Il che pone un problema vero: il motore non sa quali aziende segui, quindi
+come fa a cercarne le notizie?
 
-Le righe del radar passano dallo stesso verificatore delle altre: due cifre che non stanno nei
-titoli né nei dati bloccano la pubblicazione.
+Non lo fa per le tue: le cerca **per tutte**. Nello stesso giro in cui sceglie le aziende del
+giorno, l'agente passa in rassegna tutte e novantotto e dice quali hanno oggi una notizia vera,
+una riga ciascuna. L'app mostra le tue, e per le altre scrive che oggi non c'era niente.
+
+Per un'azienda **aggiunta da te** il motore non è andato a cercare niente, e dirti il contrario
+sarebbe una bugia. L'app fa l'unica cosa onesta che può: guarda da sé nei titoli del giorno
+(`docs/data/titoli.json`, pubblicato a ogni bollettino) e ti mostra quelli che la nominano, con la
+testata e il link. È meno di un riassunto, ed è scritto per quello che è.
+
+Lo stesso ripiego vale per le aziende conosciute di cui l'agente non ha trovato niente di
+rilevante: *«Niente di rilevante oggi, ma la nominano:»*, e sotto i titoli. Così si distingue
+«non è successo niente» da «non ne ha parlato nessuno».
+
+### Le novantotto aziende
+
+Il dizionario in `engine/aziende.mjs` copre il listino di Milano, le grandi europee, le
+americane e le asiatiche più seguite. Per ognuna: il codice di borsa, il settore, il logo e una
+riga su cosa fa.
+
+Un codice sbagliato non dà errore: dà il prezzo di un'altra società. Quindi la borsa viene
+interrogata sul nome di ciò che risponde, e se non combacia l'azienda resta senza prezzo. Dove in
+borsa il nome è un altro — AMD è *Advanced Micro Devices*, BMW è *Bayerische Motoren Werke* — il
+dizionario lo dichiara nel campo `nomeBorsa`. Per controllarli tutti:
+
+```bash
+npm run simboli
+```
+
+I loghi si scaricano una volta e restano nel repository, così il browser non chiede niente a
+nessuno. Quelli che mancano — il servizio che li fornisce limita chi insiste — vengono recuperati
+tre per esecuzione dal lavoro quotidiano, e nel frattempo si vede l'iniziale.
 
 ## Spiegazioni e glossario
 

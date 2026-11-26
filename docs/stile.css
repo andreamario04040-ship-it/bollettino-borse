@@ -305,30 +305,42 @@ code{font-family:var(--fm);font-size:.82rem;background:var(--superficie2);paddin
 .azienda .fonti-link{margin-top:.6rem}
 .azienda .fonte-link{background:var(--superficie)}
 
-/* ——— le aziende che segui ——— */
-.preferite-scheda{padding-bottom:.9rem}
-#preferite{display:flex;flex-direction:column;gap:.8rem;margin-top:.9rem}
-#preferite:empty{display:none}
-.tasto-pillola{font-size:.7rem;font-weight:600;letter-spacing:.03em;padding:.3rem .75rem;border-radius:999px;
-  border:1px solid var(--accento);background:none;color:var(--accento);cursor:pointer}
-.tasto-pillola:hover{background:var(--accento-tenue)}
+/* ——— preferiti ——— */
+#pref-lista{display:flex;flex-direction:column;gap:.8rem}
+.vuoto p{margin:0;color:var(--testo3);font-size:.93rem;line-height:1.6}
 /* Quando oggi non c'è niente la scheda non sparisce: resta, più spenta.
    Vedere che l'azienda è stata guardata vale più di non vederla affatto. */
-.azienda.quieta{opacity:.72}
+.azienda.quieta{opacity:.78}
 .az-quieta{margin:.5rem 0 0;font-size:.88rem;color:var(--testo3);font-style:italic}
+.az-comandi{display:flex;gap:.45rem;margin-top:.7rem}
+.az-tasto{font-size:.7rem;font-weight:600;padding:.28rem .62rem;border-radius:999px;cursor:pointer;
+  border:1px solid var(--bordo);background:none;color:var(--testo3)}
+.az-tasto:hover{border-color:var(--accento);color:var(--accento)}
+.az-tasto.attivo{border-color:var(--accento);background:var(--accento-tenue);color:var(--accento)}
 
-/* il pannello che fa scegliere */
-.pref-elenco{margin-top:.9rem;display:flex;flex-direction:column;gap:.9rem}
-.pref-settore{margin:0 0 .35rem;font-size:.64rem;font-weight:700;letter-spacing:.09em;
-  text-transform:uppercase;color:var(--testo3)}
+/* la ricerca */
+.cerca{position:relative;margin-top:.9rem}
+.cerca-segno{position:absolute;left:.75rem;top:50%;transform:translateY(-50%);width:17px;height:17px;
+  fill:none;stroke:var(--testo3);stroke-width:2;stroke-linecap:round;pointer-events:none}
+#pref-cerca{width:100%;padding:.62rem .8rem .62rem 2.3rem;border-radius:999px;
+  border:1px solid var(--bordo);background:var(--superficie2);color:var(--testo);
+  font:inherit;font-size:.93rem;-webkit-appearance:none;appearance:none}
+#pref-cerca:focus{outline:none;border-color:var(--accento)}
+#pref-cerca::-webkit-search-cancel-button{-webkit-appearance:none;appearance:none}
+
+.pref-elenco{margin-top:.8rem;display:flex;flex-direction:column;gap:.2rem}
 .pref-voce{display:flex;align-items:center;gap:.6rem;width:100%;text-align:left;
-  padding:.45rem .55rem;border:1px solid transparent;border-radius:9px;background:none;
+  padding:.5rem .6rem;border:1px solid transparent;border-radius:10px;background:none;
   color:var(--testo);font:inherit;font-size:.92rem;cursor:pointer}
 .pref-voce:hover{background:var(--superficie2)}
 .pref-voce[aria-pressed="true"]{border-color:var(--accento);background:var(--accento-tenue)}
-.pref-stella{font-size:1rem;line-height:1;color:var(--accento);width:1.1em;flex:none}
+.pref-nuova{border-style:dashed;border-color:var(--bordo);color:var(--testo2)}
+.pref-nuova:hover{border-color:var(--accento);color:var(--accento)}
+.pref-stella{font-size:1rem;line-height:1;color:var(--accento);width:1.1em;flex:none;text-align:center}
 .pref-voce[aria-pressed="false"] .pref-stella{color:var(--testo3)}
 .pref-nome{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pref-settore-r{flex:none;font-size:.68rem;color:var(--testo3);max-width:9rem;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pref-oggi{flex:none;font-size:.6rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
   color:var(--accento);background:var(--accento-tenue);padding:.14rem .4rem;border-radius:999px}
 
@@ -464,9 +476,11 @@ code{font-family:var(--fm);font-size:.82rem;background:var(--superficie2);paddin
      stessa colonna e l'occhio doveva ricominciare da capo ogni volta. */
   #vista-oggi{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);
     gap:1rem 1.4rem;align-items:start;align-content:start}
-  #correzioni,#saluto,#capitolo-aziende,#aziende-scheda,
-  #capitolo-preferite,#preferite-scheda,#piede-oggi{grid-column:1/-1}
-  #preferite{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;align-items:start}
+  #correzioni,#saluto,#capitolo-aziende,#aziende-scheda,#piede-oggi{grid-column:1/-1}
+  /* Preferiti: due colonne, come le aziende del giorno. */
+  #vista-preferiti{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:1rem 1.4rem;align-items:start}
+  #vista-preferiti > .scheda:first-child,#pref-piede{grid-column:1/-1}
+  #pref-lista{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:.8rem;align-items:start}
   .col-principale{grid-column:1;min-width:0;display:flex;flex-direction:column;gap:.9rem}
   .col-lato{grid-column:2;min-width:0;display:flex;flex-direction:column;gap:.9rem}
   #sezioni{display:flex;flex-direction:column;gap:.9rem}
@@ -510,7 +524,7 @@ code{font-family:var(--fm);font-size:.82rem;background:var(--superficie2);paddin
   main{margin-left:214px;max-width:1340px}
   #lista-indici{grid-template-columns:repeat(3,1fr)}
   .tessere{grid-template-columns:repeat(3,1fr)}
-  #aziende,#preferite{grid-template-columns:repeat(3,1fr)}
+  #aziende,#pref-lista{grid-template-columns:repeat(3,1fr)}
   /* Oltre una certa larghezza la riga diventa troppo lunga per l'occhio:
      il riquadro cresce, il testo dentro no. */
   .sezione p,.az-motivo{max-width:76ch}
@@ -528,6 +542,5 @@ code{font-family:var(--fm);font-size:.82rem;background:var(--superficie2);paddin
   #capitolo-numeri{order:8} #tessere{order:9}
   #capitolo-bollettino{order:10} #sezioni{order:11}
   #capitolo-aziende{order:12} #aziende-scheda{order:13}
-  #capitolo-preferite{order:14} #preferite-scheda{order:15}
-  #piede-oggi{order:16}
+  #piede-oggi{order:14}
 }

@@ -122,6 +122,13 @@ if (validi < mercati.length / 2) {
 // I numeri degli indici si aggiornano a ogni esecuzione, anche quando non si manda niente.
 await scriviJson(dentro('docs/data/mercati.json'), mercati);
 
+// I titoli del giorno, nudi. Servono alla pagina dei preferiti: per un'azienda
+// che il motore non conosce — una che hai aggiunto tu — nessun agente è andato
+// a cercare, ma l'app può almeno dire quali titoli di oggi la nominano. È meno
+// di un riassunto, ed è detto per quello che è.
+await scriviJson(dentro('docs/data/titoli.json'),
+  notizie.slice(0, 220).map((n) => ({ t: n.titolo, f: n.fonte, l: n.link })));
+
 if (modo === 'avviso') {
   const stato = await leggiJson(dentro('docs/data/stato.json'), statoVuoto());
   const esito = valutaAvviso({ mercati, notizie, stato, config, adesso });

@@ -14,10 +14,10 @@ export const slug = (nome) => nome.toLowerCase().normalize('NFD').replace(/[\u03
 export const AZIENDE = [
   // —— Intelligenza artificiale e semiconduttori
   { nome: 'Nvidia', dominio: 'nvidia.com', cnbc: 'NVDA', re: /\bnvidia\b|\bhuang\b/i, settore: 'Semiconduttori', fa: 'fa i chip su cui gira quasi tutta l’intelligenza artificiale' },
-  { nome: 'AMD', dominio: 'amd.com', cnbc: 'AMD', re: /\bamd\b|advanced micro/i, settore: 'Semiconduttori', fa: 'è l’inseguitrice di Nvidia nei chip per l’intelligenza artificiale' },
+  { nome: 'AMD', dominio: 'amd.com', cnbc: 'AMD', nomeBorsa: 'Advanced Micro Devices', re: /\bamd\b|advanced micro/i, settore: 'Semiconduttori', fa: 'è l’inseguitrice di Nvidia nei chip per l’intelligenza artificiale' },
   { nome: 'Intel', dominio: 'intel.com', cnbc: 'INTC', re: /\bintel\b/i, settore: 'Semiconduttori', fa: 'è il vecchio gigante americano dei processori, in piena riorganizzazione' },
   { nome: 'Broadcom', dominio: 'broadcom.com', cnbc: 'AVGO', re: /\bbroadcom\b/i, settore: 'Semiconduttori', fa: 'fa i chip di rete che collegano fra loro i centri di calcolo' },
-  { nome: 'TSMC', dominio: 'tsmc.com', cnbc: 'TSM', re: /\btsmc\b|taiwan semiconductor/i, settore: 'Semiconduttori', fa: 'fabbrica materialmente i chip disegnati da Nvidia, Apple e quasi tutti gli altri' },
+  { nome: 'TSMC', dominio: 'tsmc.com', cnbc: 'TSM', nomeBorsa: 'Taiwan Semiconductor Manufacturing', re: /\btsmc\b|taiwan semiconductor/i, settore: 'Semiconduttori', fa: 'fabbrica materialmente i chip disegnati da Nvidia, Apple e quasi tutti gli altri' },
   { nome: 'ASML', dominio: 'asml.com', cnbc: 'ASML', re: /\basml\b/i, settore: 'Semiconduttori', fa: 'costruisce le macchine senza le quali i chip moderni non si possono produrre' },
   { nome: 'Micron', dominio: 'micron.com', cnbc: 'MU', re: /\bmicron\b/i, settore: 'Semiconduttori', fa: 'fa le memorie, il collo di bottiglia dei server per l’intelligenza artificiale' },
   { nome: 'Qualcomm', dominio: 'qualcomm.com', cnbc: 'QCOM', re: /\bqualcomm\b/i, settore: 'Semiconduttori', fa: 'fa i chip dei telefoni' },
@@ -60,7 +60,71 @@ export const AZIENDE = [
   { nome: 'UniCredit', dominio: 'unicredit.it', cnbc: 'UCG-IT', re: /unicredit/i, settore: 'Italia · Banche', fa: 'è una delle maggiori banche italiane, molto attiva nelle operazioni fra banche' },
   { nome: 'Monte dei Paschi', dominio: 'gruppomps.it', cnbc: 'BMPS-IT', re: /\bmps\b|monte dei paschi/i, settore: 'Italia · Banche', fa: 'è una banca storica toscana, spesso al centro delle cronache finanziarie' },
   { nome: 'Leonardo', dominio: 'leonardo.com', cnbc: 'LDO-IT', re: /\bleonardo\b/i, settore: 'Italia · Difesa', fa: 'è la difesa italiana, spinta dalle spese militari europee' },
-  { nome: 'Generali', dominio: 'generali.com', cnbc: 'G-IT', re: /\bgenerali\b/i, settore: 'Italia · Assicurazioni', fa: 'è la principale assicurazione italiana' },
+  { nome: 'Generali', dominio: 'generali.com', cnbc: 'G-IT', nomeBorsa: 'Assicurazioni Generali', re: /\bgenerali\b/i, settore: 'Italia · Assicurazioni', fa: 'è la principale assicurazione italiana' },
+
+  // —— Italia, il resto del listino principale
+  { nome: 'Poste Italiane', dominio: 'poste.it', cnbc: 'PST-IT', re: /poste italiane/i, settore: 'Italia · Servizi', fa: 'consegna la posta, ma guadagna soprattutto con risparmio e assicurazioni' },
+  { nome: 'Moncler', dominio: 'moncler.com', cnbc: 'MONC-IT', re: /moncler/i, settore: 'Italia · Lusso', fa: 'fa piumini e abbigliamento di lusso' },
+  { nome: 'Campari', dominio: 'camparigroup.com', cnbc: 'CPR-IT', nomeBorsa: 'Davide Campari Milano', re: /campari/i, settore: 'Italia · Bevande', fa: 'produce aperitivi e liquori venduti in tutto il mondo' },
+  { nome: 'Prysmian', dominio: 'prysmian.com', cnbc: 'PRY-IT', re: /prysmian/i, settore: 'Italia · Industria', fa: 'fa i cavi elettrici e in fibra ottica che tengono in piedi le reti' },
+  { nome: 'Terna', dominio: 'terna.it', cnbc: 'TRN-IT', nomeBorsa: 'Terna Rete Elettrica Nazionale', re: /\bterna\b/i, settore: 'Italia · Energia', fa: 'gestisce la rete elettrica italiana ad alta tensione' },
+  { nome: 'Snam', dominio: 'snam.it', cnbc: 'SRG-IT', re: /\bsnam\b/i, settore: 'Italia · Energia', fa: 'gestisce i gasdotti italiani' },
+  { nome: 'Banco BPM', dominio: 'bancobpm.it', cnbc: 'BAMI-IT', re: /banco bpm|\bbpm\b/i, settore: 'Italia · Banche', fa: 'è la terza banca italiana, spesso al centro delle operazioni fra banche' },
+  { nome: 'Mediobanca', dominio: 'mediobanca.com', cnbc: 'MB-IT', nomeBorsa: 'Mediobanca Banca di Credito Finanziario', re: /mediobanca/i, settore: 'Italia · Banche', fa: 'è la banca d’affari storica di Milano' },
+  { nome: 'Pirelli', dominio: 'pirelli.com', cnbc: 'PIRC-IT', re: /pirelli/i, settore: 'Italia · Industria', fa: 'fa pneumatici, soprattutto per automobili di fascia alta' },
+  { nome: 'Telecom Italia', dominio: 'gruppotim.it', cnbc: 'TIT-IT', re: /telecom italia|\btim\b/i, settore: 'Italia · Telecomunicazioni', fa: 'è l’ex monopolista del telefono, ancora alle prese con i suoi debiti' },
+  { nome: 'Fincantieri', dominio: 'fincantieri.com', cnbc: 'FCT-IT', re: /fincantieri/i, settore: 'Italia · Industria', fa: 'costruisce navi, militari e da crociera' },
+  { nome: 'Azimut', dominio: 'azimut-group.com', cnbc: 'AZM-IT', nomeBorsa: 'Azimut Holding', re: /\bazimut\b/i, settore: 'Italia · Risparmio', fa: 'gestisce i risparmi altrui' },
+  { nome: 'Amplifon', dominio: 'amplifon.com', cnbc: 'AMP-IT', re: /amplifon/i, settore: 'Italia · Salute', fa: 'vende apparecchi acustici in mezzo mondo' },
+  { nome: 'Nexi', dominio: 'nexi.it', cnbc: 'NEXI-IT', re: /\bnexi\b/i, settore: 'Italia · Pagamenti', fa: 'fa funzionare i pagamenti con carta in Italia' },
+  { nome: 'Saipem', dominio: 'saipem.com', cnbc: 'SPM-IT', re: /saipem/i, settore: 'Italia · Energia', fa: 'costruisce impianti e piattaforme per le compagnie petrolifere' },
+  { nome: 'Recordati', dominio: 'recordati.com', cnbc: null, re: /recordati/i, settore: 'Italia · Farmaceutica', fa: 'produce farmaci per malattie rare e di uso comune' },
+
+  // —— Europa
+  { nome: 'Airbus', dominio: 'airbus.com', cnbc: 'AIR-FR', re: /airbus/i, settore: 'Europa · Aerospazio', fa: 'costruisce aerei di linea, in duello perenne con Boeing' },
+  { nome: 'Siemens', dominio: 'siemens.com', cnbc: 'SIE-DE', re: /siemens/i, settore: 'Europa · Industria', fa: 'fa automazione industriale, treni e tecnologia per le fabbriche' },
+  { nome: 'Volkswagen', dominio: 'volkswagen.com', cnbc: 'VOW3-DE', re: /volkswagen/i, settore: 'Europa · Auto', fa: 'è il primo gruppo automobilistico europeo' },
+  { nome: 'Mercedes-Benz', dominio: 'mercedes-benz.com', cnbc: 'MBG-DE', nomeBorsa: 'Mercedes-Benz Group', re: /mercedes/i, settore: 'Europa · Auto', fa: 'fa automobili di lusso tedesche' },
+  { nome: 'BMW', dominio: 'bmw.com', cnbc: 'BMW-DE', nomeBorsa: 'Bayerische Motoren Werke', re: /\bbmw\b/i, settore: 'Europa · Auto', fa: 'fa automobili e moto di fascia alta' },
+  { nome: 'Adidas', dominio: 'adidas.com', cnbc: 'ADS-DE', re: /adidas/i, settore: 'Europa · Consumi', fa: 'fa scarpe e abbigliamento sportivo' },
+  { nome: 'Deutsche Bank', dominio: 'db.com', cnbc: 'DBK-DE', nomeBorsa: 'Deutsche Bank', re: /deutsche bank/i, settore: 'Europa · Banche', fa: 'è la maggiore banca tedesca' },
+  { nome: 'BNP Paribas', dominio: 'bnpparibas.com', cnbc: 'BNP-FR', re: /bnp paribas/i, settore: 'Europa · Banche', fa: 'è la maggiore banca francese' },
+  { nome: 'Banco Santander', dominio: 'santander.com', cnbc: 'SAN', re: /santander/i, settore: 'Europa · Banche', fa: 'è la maggiore banca spagnola' },
+  { nome: 'Novo Nordisk', dominio: 'novonordisk.com', cnbc: 'NVO', re: /novo nordisk/i, settore: 'Europa · Farmaceutica', fa: 'fa i farmaci per il diabete e per l’obesità' },
+  { nome: 'Sanofi', dominio: 'sanofi.com', cnbc: 'SNY', re: /sanofi/i, settore: 'Europa · Farmaceutica', fa: 'produce farmaci e vaccini' },
+  { nome: 'AstraZeneca', dominio: 'astrazeneca.com', cnbc: 'AZN', re: /astrazeneca/i, settore: 'Europa · Farmaceutica', fa: 'produce farmaci, soprattutto contro i tumori' },
+  { nome: 'Shell', dominio: 'shell.com', cnbc: 'SHEL', re: /\bshell\b/i, settore: 'Europa · Energia', fa: 'è una delle grandi compagnie petrolifere mondiali' },
+  { nome: 'TotalEnergies', dominio: 'totalenergies.com', cnbc: 'TTE', re: /totalenergies/i, settore: 'Europa · Energia', fa: 'è la compagnia petrolifera francese' },
+  { nome: 'Nestlé', dominio: 'nestle.com', cnbc: 'NSRGY', nomeBorsa: 'Nestle', re: /nestl[eé]/i, settore: 'Europa · Alimentari', fa: 'è il primo gruppo alimentare al mondo' },
+  { nome: 'Unilever', dominio: 'unilever.com', cnbc: 'UL', re: /unilever/i, settore: 'Europa · Consumi', fa: 'fa detersivi, gelati e prodotti per la casa' },
+
+  // —— Stati Uniti, fuori dalla tecnologia
+  { nome: 'JPMorgan', dominio: 'jpmorganchase.com', cnbc: 'JPM', nomeBorsa: 'JPMorgan Chase', re: /jp ?morgan/i, settore: 'Stati Uniti · Banche', fa: 'è la maggiore banca americana' },
+  { nome: 'Goldman Sachs', dominio: 'goldmansachs.com', cnbc: 'GS', re: /goldman sachs/i, settore: 'Stati Uniti · Banche', fa: 'è la banca d’affari più seguita di Wall Street' },
+  { nome: 'Visa', dominio: 'visa.com', cnbc: 'V', re: /\bvisa inc\b|\bvisa\b(?= (inc|card|pagament))/i, settore: 'Stati Uniti · Pagamenti', fa: 'incassa una piccola quota su quasi ogni pagamento con carta' },
+  { nome: 'Coca-Cola', dominio: 'coca-cola.com', cnbc: 'KO', nomeBorsa: 'Coca-Cola', re: /coca.?cola/i, settore: 'Stati Uniti · Bevande', fa: 'vende bibite in praticamente ogni paese del mondo' },
+  { nome: 'McDonald’s', dominio: 'mcdonalds.com', cnbc: 'MCD', nomeBorsa: 'McDonald', re: /mcdonald/i, settore: 'Stati Uniti · Ristorazione', fa: 'è la catena di ristoranti più grande del mondo' },
+  { nome: 'Starbucks', dominio: 'starbucks.com', cnbc: 'SBUX', re: /starbucks/i, settore: 'Stati Uniti · Ristorazione', fa: 'vende caffè, e misura la voglia di spendere degli americani' },
+  { nome: 'Nike', dominio: 'nike.com', cnbc: 'NKE', re: /\bnike\b/i, settore: 'Stati Uniti · Consumi', fa: 'fa scarpe e abbigliamento sportivo' },
+  { nome: 'Walmart', dominio: 'walmart.com', cnbc: 'WMT', re: /walmart/i, settore: 'Stati Uniti · Distribuzione', fa: 'è la più grande catena di negozi al mondo' },
+  { nome: 'Disney', dominio: 'disney.com', cnbc: 'DIS', nomeBorsa: 'Walt Disney', re: /\bdisney\b/i, settore: 'Stati Uniti · Media', fa: 'fa film, parchi a tema e televisione' },
+  { nome: 'Boeing', dominio: 'boeing.com', cnbc: 'BA', re: /boeing/i, settore: 'Stati Uniti · Aerospazio', fa: 'costruisce aerei di linea, in duello perenne con Airbus' },
+  { nome: 'Pfizer', dominio: 'pfizer.com', cnbc: 'PFE', re: /pfizer/i, settore: 'Stati Uniti · Farmaceutica', fa: 'produce farmaci e vaccini' },
+  { nome: 'Eli Lilly', dominio: 'lilly.com', cnbc: 'LLY', nomeBorsa: 'Eli Lilly', re: /eli lilly/i, settore: 'Stati Uniti · Farmaceutica', fa: 'fa i farmaci contro l’obesità che hanno cambiato il settore' },
+
+  // —— Stati Uniti e Asia, tecnologia
+  { nome: 'Dell', dominio: 'dell.com', cnbc: 'DELL', nomeBorsa: 'Dell Technologies', re: /dell technologies|\bdell\b(?!['’])/i, settore: 'Stati Uniti · Computer', fa: 'vende computer e server, oggi soprattutto per l’intelligenza artificiale' },
+  { nome: 'IBM', dominio: 'ibm.com', cnbc: 'IBM', nomeBorsa: 'International Business Machines', re: /\bibm\b/i, settore: 'Stati Uniti · Informatica', fa: 'vende informatica alle grandi aziende, ed è il nome più antico del settore' },
+  { nome: 'Cisco', dominio: 'cisco.com', cnbc: 'CSCO', nomeBorsa: 'Cisco Systems', re: /\bcisco\b/i, settore: 'Stati Uniti · Reti', fa: 'fa gli apparati che collegano fra loro le reti aziendali' },
+  { nome: 'Salesforce', dominio: 'salesforce.com', cnbc: 'CRM', re: /salesforce/i, settore: 'Stati Uniti · Software', fa: 'vende il software con cui le aziende seguono i clienti' },
+  { nome: 'Adobe', dominio: 'adobe.com', cnbc: 'ADBE', re: /\badobe\b/i, settore: 'Stati Uniti · Software', fa: 'fa i programmi con cui si disegna e si monta quasi tutto' },
+  { nome: 'Uber', dominio: 'uber.com', cnbc: 'UBER', nomeBorsa: 'Uber Technologies', re: /\buber\b/i, settore: 'Stati Uniti · Trasporti', fa: 'porta in giro persone e cibo con l’app' },
+  { nome: 'Airbnb', dominio: 'airbnb.com', cnbc: 'ABNB', re: /airbnb/i, settore: 'Stati Uniti · Viaggi', fa: 'affitta case per brevi periodi in tutto il mondo' },
+  { nome: 'Spotify', dominio: 'spotify.com', cnbc: 'SPOT', nomeBorsa: 'Spotify Technology', re: /spotify/i, settore: 'Europa · Media', fa: 'è il servizio di musica in abbonamento più grande' },
+  { nome: 'Coinbase', dominio: 'coinbase.com', cnbc: 'COIN', nomeBorsa: 'Coinbase Global', re: /coinbase/i, settore: 'Stati Uniti · Criptovalute', fa: 'è la borsa delle criptovalute quotata a Wall Street' },
+  { nome: 'Sony', dominio: 'sony.com', cnbc: 'SONY', nomeBorsa: 'Sony Group', re: /\bsony\b/i, settore: 'Giappone · Tecnologia', fa: 'fa PlayStation, fotocamere, musica e film' },
+  { nome: 'Toyota', dominio: 'toyota.com', cnbc: 'TM', nomeBorsa: 'Toyota Motor', re: /toyota/i, settore: 'Giappone · Auto', fa: 'è il primo costruttore di automobili al mondo' },
+  { nome: 'Samsung', dominio: 'samsung.com', cnbc: 'SSNLF', nomeBorsa: 'Samsung Electronics', re: /samsung/i, settore: 'Corea · Tecnologia', fa: 'fa telefoni, televisori e le memorie dei computer' },
 ];
 
 // Di cosa si parla: la prima che corrisponde vince.
@@ -285,15 +349,47 @@ export async function componiRadar(note = []) {
     } catch (e) { console.error(`  ! quotazioni del radar non disponibili: ${e.message}`); }
   }
 
+  const sbagliati = [];
   const out = AZIENDE.map((a) => {
-    const q = a.cnbc ? prezzi.get(a.cnbc) : null;
+    let q = a.cnbc ? prezzi.get(a.cnbc) : null;
+    // Lo stesso controllo delle aziende del giorno, applicato anche qui: un
+    // codice scritto male nel dizionario darebbe il prezzo di un'altra società
+    // senza che nessuno se ne accorgesse, perché nessuno guarda quarantadue
+    // quotazioni una per una.
+    // Alcune aziende in borsa si chiamano altrimenti: AMD è «Advanced Micro
+    // Devices», BMW è «Bayerische Motoren Werke». Il dizionario lo dice.
+    const combacia = stessoNome(q?.nome || '', a.nome) || (a.nomeBorsa && stessoNome(q?.nome || '', a.nomeBorsa));
+    if (q && !combacia) { sbagliati.push(`${a.nome} → ${a.cnbc} è «${q.nome}»`); q = null; }
     return {
       nome: a.nome, settore: a.settore, fa: a.fa,
-      logo: a.dominio ? slug(a.nome) : null,
+      logo: null,   // riempito sotto, solo dove il file c'è davvero
       prezzo: q?.prezzo ?? null, giorno: q?.giorno ?? null,
       notizia: perNome.get(a.nome) || null,
     };
   });
+  for (const v of out) {
+    const nomeFile = slug(v.nome);
+    if (await esisteLogo(nomeFile)) v.logo = nomeFile;
+  }
+  for (const x of sbagliati) console.log(`  · [radar] codice sbagliato nel dizionario: ${x} — resta senza prezzo`);
+
+  // Qualche logo manca sempre: il servizio che li fornisce limita chi insiste,
+  // e con quasi cento aziende non arrivano tutti in una volta. Se ne recuperano
+  // tre per esecuzione, così nel giro di qualche giorno ci sono tutti senza che
+  // nessuno debba ricordarsene.
+  let recuperati = 0;
+  for (const a of AZIENDE) {
+    if (recuperati >= 3) break;
+    if (!a.dominio) continue;
+    const nomeFile = slug(a.nome);
+    if (await esisteLogo(nomeFile)) continue;
+    if (await scaricaLogo(nomeFile, a.dominio)) {
+      recuperati++;
+      const voce = out.find((x) => x.nome === a.nome);
+      if (voce) voce.logo = nomeFile;
+      console.log(`  · [radar] logo di ${a.nome} recuperato`);
+    }
+  }
   console.log(`  radar: ${out.length} aziende seguibili, ${out.filter((x) => x.notizia).length} con una notizia oggi, ${out.filter((x) => x.prezzo != null).length} con la quotazione`);
   return out;
 }
