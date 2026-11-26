@@ -1,0 +1,351 @@
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>Bollettino Borse</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bitter:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: colonna di lettura su carta salmone da giornale finanziario; nastro prezzi in testa, schede opzioni in fondo */
+:root{
+  --paper:#FBF0E6; --paper2:#F4E3D5; --card:#FFF8F2;
+  --ink:#241B14; --ink2:#6E5B4C; --ink3:#9A8673; --rule:#E2CDBB;
+  --accent:#1C4C5B; --accent2:#8A5A1E;
+  --up:#0E6B45; --down:#AF3327; --warn:#8E5B10;
+  --fd:'Bitter',Georgia,'Times New Roman',serif;
+  --fb:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --fm:'IBM Plex Mono',ui-monospace,'SF Mono',Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#16110D; --paper2:#201810; --card:#1E1711;
+  --ink:#F2E6DA; --ink2:#AF9A86; --ink3:#86705C; --rule:#38291D;
+  --accent:#86C8D8; --accent2:#E0A75C;
+  --up:#46C089; --down:#EE7E71; --warn:#D9A549; color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --paper:#16110D; --paper2:#201810; --card:#1E1711;
+  --ink:#F2E6DA; --ink2:#AF9A86; --ink3:#86705C; --rule:#38291D;
+  --accent:#86C8D8; --accent2:#E0A75C;
+  --up:#46C089; --down:#EE7E71; --warn:#D9A549; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--fb);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+.wrap{max-width:720px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 4rem}
+h1,h2,h3{font-family:var(--fd);text-wrap:balance;line-height:1.18;margin:0}
+h1{font-size:clamp(1.95rem,6.6vw,2.9rem);font-weight:700;letter-spacing:-.02em}
+h2{font-size:clamp(1.3rem,4vw,1.65rem);font-weight:600;margin-top:3.2rem}
+h3{font-size:1.06rem;font-weight:600}
+p{margin:.85rem 0}
+a{color:var(--accent);text-underline-offset:3px}
+.eyebrow{font-family:var(--fm);font-size:.69rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);margin:0}
+.lede{font-size:1.1rem;color:var(--ink2);margin-top:.9rem}
+.num,.mono{font-family:var(--fm);font-variant-numeric:tabular-nums}
+.up{color:var(--up)}.down{color:var(--down)}
+
+/* nastro prezzi */
+.tape{background:var(--paper2);border-bottom:1px solid var(--rule);overflow-x:auto;scrollbar-width:none;
+ margin-top:calc(-1 * env(safe-area-inset-top,0px));padding-top:env(safe-area-inset-top,0px)}
+.tape::-webkit-scrollbar{display:none}
+.tape .inner{display:flex;gap:1.35rem;white-space:nowrap;padding:.6rem max(16px,env(safe-area-inset-left,0px));width:max-content;min-width:100%}
+.tk{font-family:var(--fm);font-size:.76rem;color:var(--ink2)}
+.tk b{font-weight:500;color:var(--ink)}.tk i{font-style:normal;font-weight:600}
+
+header.hd{padding-block:2.2rem 0;border-bottom:3px double var(--rule)}
+.dateline{display:flex;flex-wrap:wrap;gap:.55rem 1.1rem;align-items:center;font-family:var(--fm);font-size:.73rem;color:var(--ink3);margin:1.5rem 0 1.4rem}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--up);display:inline-block;margin-right:.4rem;vertical-align:1px}
+
+/* blocchi */
+.flow{display:grid;gap:.6rem;margin:1.5rem 0;grid-template-columns:1fr}
+@media(min-width:620px){.flow{grid-template-columns:repeat(3,1fr)}}
+.step{background:var(--card);border:1px solid var(--rule);border-radius:3px;padding:1rem 1.05rem;min-width:0}
+.step .k{font-family:var(--fm);font-size:.68rem;color:var(--accent2);letter-spacing:.1em;text-transform:uppercase}
+.step h3{margin:.3rem 0 .35rem}
+.step p{margin:0;font-size:.89rem;color:var(--ink2);line-height:1.5}
+
+/* fonti */
+.src{border-top:1px solid var(--rule);padding:.85rem 0;display:grid;grid-template-columns:1fr;gap:.2rem}
+@media(min-width:620px){.src{grid-template-columns:190px 1fr auto;gap:.2rem 1rem;align-items:baseline}}
+.src .nmm{font-weight:600}
+.src .d{font-size:.9rem;color:var(--ink2);min-width:0}
+.badge{font-family:var(--fm);font-size:.65rem;letter-spacing:.08em;text-transform:uppercase;padding:.16rem .45rem;border-radius:2px;white-space:nowrap;align-self:start}
+.b-ok{background:color-mix(in srgb,var(--up) 15%,transparent);color:var(--up)}
+.b-w{background:color-mix(in srgb,var(--warn) 18%,transparent);color:var(--warn)}
+
+/* tabella indici */
+.tbl-wrap{overflow-x:auto;margin:1.4rem -4px;border-top:2px solid var(--ink)}
+table{border-collapse:collapse;width:100%;min-width:560px}
+th,td{text-align:left;padding:.62rem .5rem;border-bottom:1px solid var(--rule);vertical-align:top}
+thead th{font-family:var(--fm);font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);font-weight:500;border-bottom:1px solid var(--rule)}
+td.num,th.num{text-align:right;font-family:var(--fm);font-variant-numeric:tabular-nums;font-size:.88rem;white-space:nowrap}
+tr.grp th{font-family:var(--fm);font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);background:var(--paper2);padding:.42rem .5rem;font-weight:600}
+.nm{min-width:210px}
+.n1{display:block;font-weight:600;font-size:.95rem}
+.n2{display:block;font-size:.8rem;color:var(--accent);font-weight:500}
+.n3{display:block;font-size:.8rem;color:var(--ink2);line-height:1.42;margin-top:.15rem;max-width:34ch}
+td.sp{width:116px}.spark{display:block}
+
+/* notifica iPhone */
+.lock{background:linear-gradient(170deg,#2B2320,#120D0A);border-radius:22px;padding:1.5rem 1rem 1.7rem;margin:1.4rem 0;box-shadow:0 10px 30px -14px rgba(0,0,0,.6)}
+.lock .clock{text-align:center;color:#F6EDE4;font-family:var(--fb);font-weight:500}
+.lock .clock .t{font-size:2.9rem;line-height:1;letter-spacing:-.02em}
+.lock .clock .d{font-size:.8rem;opacity:.65;margin-top:.3rem}
+.notif{background:rgba(255,255,255,.14);backdrop-filter:blur(8px);border-radius:15px;padding:.7rem .8rem;margin-top:1.3rem;color:#FDF6EF}
+.notif .top{display:flex;align-items:center;gap:.45rem;font-size:.74rem;opacity:.8}
+.notif .ico{width:17px;height:17px;border-radius:4px;background:var(--accent2);display:grid;place-items:center;font-size:.6rem;color:#1a1208;font-weight:700;font-family:var(--fm)}
+.notif .ttl{font-weight:600;font-size:.92rem;margin-top:.3rem}
+.notif .bd{font-size:.86rem;line-height:1.45;opacity:.92;margin-top:.12rem}
+
+/* report esempio */
+.report{background:var(--card);border:1px solid var(--rule);border-left:3px solid var(--accent);border-radius:3px;padding:1.2rem 1.15rem;margin:1.3rem 0}
+.report h3{font-family:var(--fd);font-size:1.12rem}
+.report ul{margin:.7rem 0 0;padding-left:1.1rem}
+.report li{margin:.5rem 0;font-size:.93rem;line-height:1.55}
+.report li b{font-weight:600}
+.meter{display:flex;align-items:center;gap:.6rem;margin:.9rem 0 .2rem;font-family:var(--fm);font-size:.74rem;color:var(--ink2)}
+.meter .bar{flex:1;min-width:0;height:7px;border-radius:4px;background:linear-gradient(90deg,var(--up),var(--warn),var(--down));position:relative}
+.meter .pin{position:absolute;top:-4px;width:3px;height:15px;border-radius:2px;background:var(--ink);box-shadow:0 0 0 2px var(--card)}
+
+/* opzioni */
+.opt{background:var(--card);border:1px solid var(--rule);border-radius:4px;padding:1.15rem;margin:1rem 0}
+.opt.pick{border-color:var(--accent);box-shadow:inset 3px 0 0 var(--accent)}
+.opt .hdr{display:flex;flex-wrap:wrap;gap:.5rem;align-items:baseline;justify-content:space-between}
+.opt h3{font-size:1.14rem}
+.opt .tag{font-family:var(--fm);font-size:.64rem;letter-spacing:.09em;text-transform:uppercase;padding:.2rem .5rem;border-radius:2px;background:var(--accent);color:var(--paper);font-weight:600}
+.opt .sub{font-size:.88rem;color:var(--ink2);margin:.35rem 0 .75rem}
+.facts{display:flex;flex-wrap:wrap;gap:.3rem .9rem;font-family:var(--fm);font-size:.74rem;color:var(--ink2);padding:.55rem 0;border-top:1px dashed var(--rule);border-bottom:1px dashed var(--rule)}
+.facts b{color:var(--ink);font-weight:600}
+.pc{display:grid;gap:.1rem .9rem;grid-template-columns:1fr;margin-top:.8rem}
+@media(min-width:580px){.pc{grid-template-columns:1fr 1fr}}
+.pc ul{margin:.25rem 0;padding-left:1.15rem}
+.pc li{font-size:.86rem;line-height:1.48;margin:.22rem 0;color:var(--ink2)}
+.pc .h{font-family:var(--fm);font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);margin-top:.5rem}
+.pc .pro li::marker{color:var(--up)}.pc .con li::marker{color:var(--down)}
+
+.callout{background:var(--paper2);border:1px solid var(--rule);border-radius:3px;padding:1rem 1.1rem;margin:1.5rem 0}
+.callout p{margin:.4rem 0}
+ol.ask{padding-left:1.3rem}
+ol.ask li{margin:.6rem 0}
+ol.ask b{font-weight:600}
+footer{margin-top:3rem;padding-top:1.2rem;border-top:1px solid var(--rule);font-size:.8rem;color:var(--ink3)}
+footer a{color:var(--ink2)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="tape"><div class="inner"><span class="tk"><b>FTSE MIB</b> <i class="down">-1.81%</i></span><span class="tk"><b>Euro Stoxx 50</b> <i class="down">-1.82%</i></span><span class="tk"><b>S&P 500</b> <i class="down">-0.25%</i></span><span class="tk"><b>Nasdaq Comp.</b> <i class="down">-0.62%</i></span><span class="tk"><b>Nikkei 225</b> <i class="up">+0.00%</i></span><span class="tk"><b>VIX (paura)</b> <i class="up">+7.32%</i></span><span class="tk"><b>Oro</b> <i class="up">+1.21%</i></span><span class="tk"><b>Bitcoin</b> <i class="up">+1.32%</i></span></div></div>
+
+<div class="wrap">
+<header class="hd">
+  <p class="eyebrow">Progetto app &middot; Report di fattibilit&agrave;</p>
+  <h1>Bollettino Borse</h1>
+  <p class="lede">Ogni mattina una notifica sull&rsquo;iPhone che ti spiega in parole semplici cos&rsquo;&egrave; successo sui mercati, e un&rsquo;app da aprire per vedere i numeri che contano. Qui dentro: le fonti che ho verificato oggi, un esempio vero di report, e le quattro strade possibili con la mia raccomandazione.</p>
+  <div class="dateline">
+    <span><span class="dot"></span>Fonti testate il 26 novembre 2026</span>
+    <span>Dati reali, non simulati</span>
+    <span>18 strumenti monitorati</span>
+  </div>
+</header>
+
+<h2>Come funziona, in tre pezzi</h2>
+<p>Qualunque strada scegli, l&rsquo;impianto &egrave; sempre questo. Cambia solo il terzo pezzo, cio&egrave; come la notizia arriva sul tuo telefono.</p>
+<div class="flow">
+  <div class="step"><div class="k">1 &middot; Motore</div><h3>Raccolta dati</h3><p>Ogni mattina alle 7:30 un programma scarica le quotazioni degli indici e i titoli dei giornali finanziari. Gira da solo su un server gratuito, non sul tuo Mac.</p></div>
+  <div class="step"><div class="k">2 &middot; Testo</div><h3>Spiegazione semplice</h3><p>I numeri vengono trasformati in 5 frasi in italiano: cosa &egrave; salito, cosa &egrave; sceso, e <em>perch&eacute;</em>. Zero gergo: niente &ldquo;rally&rdquo;, niente &ldquo;sell-off&rdquo;.</p></div>
+  <div class="step"><div class="k">3 &middot; Consegna</div><h3>Notifica + app</h3><p>La notifica compare sulla schermata di blocco. La tocchi e si apre la schermata con tutti gli indici, i grafici e il dettaglio.</p></div>
+</div>
+
+<h2>Le fonti: cosa ho verificato oggi</h2>
+<p>Non mi sono fidato delle pagine commerciali: ho interrogato ogni fonte dal terminale e ho segnato chi ha risposto davvero. Questi sono i risultati di stamattina.</p>
+
+<p class="eyebrow" style="margin-top:1.8rem">Quotazioni e indici</p>
+<div class="src"><div class="nmm">Yahoo Finance</div><div class="d">Endpoint pubblico senza chiave. Ha restituito tutto: Milano, Euro Stoxx, Nikkei, Shanghai, VIX, tasso USA a 10 anni, euro/dollaro, oro, petrolio, Bitcoin. Copertura migliore di tutte le alternative a pagamento in versione gratuita.</div><span class="badge b-ok">Testato &check;</span></div>
+<div class="src"><div class="nmm">Twelve Data</div><div class="d">Piano gratuito con 800 chiamate al giorno e chiave d&rsquo;accesso. Da tenere come rete di sicurezza se Yahoo cambia le regole: le condizioni gratuite parlano di uso per test e sviluppo.</div><span class="badge b-w">Riserva</span></div>
+<div class="src"><div class="nmm">Alpha Vantage / Finnhub</div><div class="d">Gratis ma stretti: 25 chiamate al giorno il primo, licenza non commerciale. Bastano appena per un report al giorno, non per sfogliare l&rsquo;app.</div><span class="badge b-w">Limitati</span></div>
+
+<p class="eyebrow" style="margin-top:1.8rem">Il perch&eacute;: notizie e banche centrali</p>
+<div class="src"><div class="nmm">Il Sole 24 Ore</div><div class="d">Flusso &ldquo;Finanza&rdquo;. La fonte italiana migliore per il commento di chiusura di Piazza Affari. Ha risposto con 9 notizie.</div><span class="badge b-ok">Testato &check;</span></div>
+<div class="src"><div class="nmm">Financial Times</div><div class="d">Sezione Markets, 25 notizie. I titoli sono leggibili e precisi anche senza abbonamento: servono a capire il tema del giorno, non a leggere l&rsquo;articolo.</div><span class="badge b-ok">Testato &check;</span></div>
+<div class="src"><div class="nmm">CNBC Markets</div><div class="d">30 notizie, aggiornatissimo su Wall Street e sulle mosse della Federal Reserve.</div><span class="badge b-ok">Testato &check;</span></div>
+<div class="src"><div class="nmm">ANSA Economia</div><div class="d">72 notizie al giorno, agenzia di stampa: asciutta e affidabile, zero titoli acchiappaclic.</div><span class="badge b-ok">Testato &check;</span></div>
+<div class="src"><div class="nmm">BCE e Federal Reserve</div><div class="d">I comunicati ufficiali delle due banche centrali, direttamente dalla fonte. 15 documenti ciascuna. Qui non c&rsquo;&egrave; interpretazione di nessuno: &egrave; la notizia prima che diventi titolo.</div><span class="badge b-ok">Testato &check;</span></div>
+<div class="src"><div class="nmm">Reuters, Bloomberg, Milano Finanza</div><div class="d">Hanno chiuso i flussi pubblici: rispondono con un errore. Si possono raggiungere solo a pagamento, e non servono: il quadro &egrave; gi&agrave; coperto.</div><span class="badge b-w">Non disponibili</span></div>
+
+<h2>Gli indici che dovresti conoscere</h2>
+<p>Questa &egrave; la schermata principale dell&rsquo;app, con i valori reali di stamattina. L&rsquo;ordine non &egrave; casuale: i primi due si guardano <em>prima</em> degli altri, perch&eacute; spiegano il movimento di tutto il resto.</p>
+<div class="tbl-wrap">
+<table>
+<thead><tr><th>Indice</th><th class="num">Valore</th><th class="num">Oggi</th><th class="num">1 mese</th><th class="num">Andamento</th></tr></thead>
+<tbody><tr class="grp"><th colspan="5" scope="colgroup">Da guardare per primo</th></tr><tr>
+<td class="nm"><span class="n1">VIX (paura)</span><span class="n2">L'indice della paura</span><span class="n3">Sotto 15 = calma. Sopra 25 = nervosismo. Sopra 35 = panico. Il piu' utile di tutti per capire la giornata.</span></td>
+<td class="num">28.29</td>
+<td class="num up">+7.32%</td>
+<td class="num up">+53.8%</td>
+<td class="sp"><svg class="spark" viewBox="0 0 108 30" width="108" height="30" aria-hidden="true"><path d="M3.0 25.9 L7.9 26.6 L12.7 26.3 L17.6 23.5 L22.4 21.3 L27.3 21.7 L32.1 27.0 L37.0 12.6 L41.9 15.8 L46.7 22.9 L51.6 23.5 L56.4 25.9 L61.3 24.4 L66.1 23.7 L71.0 19.2 L75.9 16.0 L80.7 17.1 L85.6 12.3 L90.4 3.0 L95.3 14.5 L100.1 14.9 L105.0 12.5 L105.0 30 L3.0 30 Z" fill="var(--up)" opacity=".10"/><path d="M3.0 25.9 L7.9 26.6 L12.7 26.3 L17.6 23.5 L22.4 21.3 L27.3 21.7 L32.1 27.0 L37.0 12.6 L41.9 15.8 L46.7 22.9 L51.6 23.5 L56.4 25.9 L61.3 24.4 L66.1 23.7 L71.0 19.2 L75.9 16.0 L80.7 17.1 L85.6 12.3 L90.4 3.0 L95.3 14.5 L100.1 14.9 L105.0 12.5" fill="none" stroke="var(--up)" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/><circle cx="105.0" cy="12.5" r="2.1" fill="var(--up)"/></svg></td></tr><tr>
+<td class="nm"><span class="n1">Treasury 10Y %</span><span class="n2">Il tasso a 10 anni USA</span><span class="n3">Il prezzo del denaro nel mondo. Se sale, le azioni (soprattutto tech) soffrono.</span></td>
+<td class="num">4.85</td>
+<td class="num down">-1.14%</td>
+<td class="num down">-2.8%</td>
+<td class="sp"><svg class="spark" viewBox="0 0 108 30" width="108" height="30" aria-hidden="true"><path d="M3.0 15.4 L7.9 10.7 L12.7 15.4 L17.6 20.0 L22.4 23.1 L27.3 18.5 L32.1 23.1 L37.0 27.0 L41.9 25.5 L46.7 25.5 L51.6 16.2 L56.4 14.6 L61.3 6.9 L66.1 3.0 L71.0 5.3 L75.9 6.9 L80.7 9.2 L85.6 10.7 L90.4 21.6 L95.3 20.8 L100.1 22.4 L105.0 26.2 L105.0 30 L3.0 30 Z" fill="var(--down)" opacity=".10"/><path d="M3.0 15.4 L7.9 10.7 L12.7 15.4 L17.6 20.0 L22.4 23.1 L27.3 18.5 L32.1 23.1 L37.0 27.0 L41.9 25.5 L46.7 25.5 L51.6 16.2 L56.4 14.6 L61.3 6.9 L66.1 3.0 L71.0 5.3 L75.9 6.9 L80.7 9.2 L85.6 10.7 L90.4 21.6 L95.3 20.8 L100.1 22.4 L105.0 26.2" fill="none" stroke="var(--down)" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/><circle cx="105.0" cy="26.2" r="2.1" fill="var(--down)"/></svg></td></tr><tr class="grp"><th colspan="5" scope="colgroup">Stati Uniti</th></tr><tr>
+<td class="nm"><span class="n1">S&P 500</span><span class="n2">Il termometro principale del mondo</span><span class="n3">500 grandi aziende americane. Se sale questo, sale quasi tutto il resto.</span></td>
+<td class="num">7 183</td>
+<td class="num down">-0.25%</td>
+<td class="num down">-6.4%</td>
+<td class="sp"><svg class="spark" viewBox="0 0 108 30" width="108" height="30" aria-hidden="true"><path d="M3.0 3.6 L7.9 3.0 L12.7 3.7 L17.6 7.7 L22.4 8.8 L27.3 8.0 L32.1 4.6 L37.0 14.2 L41.9 13.6 L46.7 8.6 L51.6 9.4 L56.4 6.6 L61.3 7.4 L66.1 8.2 L71.0 12.4 L75.9 14.6 L80.7 15.1 L85.6 19.4 L90.4 27.0 L95.3 17.6 L100.1 18.6 L105.0 19.2 L105.0 30 L3.0 30 Z" fill="var(--down)" opacity=".10"/><path d="M3.0 3.6 L7.9 3.0 L12.7 3.7 L17.6 7.7 L22.4 8.8 L27.3 8.0 L32.1 4.6 L37.0 14.2 L41.9 13.6 L46.7 8.6 L51.6 9.4 L56.4 6.6 L61.3 7.4 L66.1 8.2 L71.0 12.4 L75.9 14.6 L80.7 15.1 L85.6 19.4 L90.4 27.0 L95.3 17.6 L100.1 18.6 L105.0 19.2" fill="none" stroke="var(--down)" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/><circle cx="105.0" cy="19.2" r="2.1" fill="var(--down)"/></svg></td></tr><tr>
+<td class="nm"><span class="n1">Nasdaq Comp.</span><span class="n2">Tecnologia e intelligenza artificiale</span><span class="n3">Pieno di Nvidia, Apple, Microsoft. Si muove piu' degli altri, in su e in giu'.</span></td>
+<td class="num">23 586</td>
+<td class="num down">-0.62%</td>
+<td class="num down">-9.9%</td>
+<td class="sp"><svg class="spark" viewBox="0 0 108 30" width="108" height="30" aria-hidden="true"><path d="M3.0 3.4 L7.9 3.0 L12.7 5.2 L17.6 9.8 L22.4 11.5 L27.3 10.2 L32.1 8.0 L37.0 16.6 L41.9 15.0 L46.7 10.9 L51.6 12.1 L56.4 9.6 L61.3 10.2 L66.1 11.6 L71.0 15.5 L75.9 16.6 L80.7 15.9 L85.6 19.3 L90.4 27.0 L95.3 18.0 L100.1 20.2 L105.0 21.1 L105.0 30 L3.0 30 Z" fill="var(--down)" opacity=".10"/><path d="M3.0 3.4 L7.9 3.0 L12.7 5.2 L17.6 9.8 L22.4 11.5 L27.3 10.2 L32.1 8.0 L37.0 16.6 L41.9 15.0 L46.7 10.9 L51.6 12.1 L56.4 9.6 L61.3 10.2 L66.1 11.6 L71.0 15.5 L75.9 16.6 L80.7 15.9 L85.6 19.3 L90.4 27.0 L95.3 18.0 L100.1 20.2 L105.0 21.1" fill="none" stroke="var(--down)" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/><circle cx="105.0" cy="21.1" r="2.1" fill="var(--down)"/></svg></td></tr><tr>
+<td class="nm"><span class="n1">Dow Jones</span><span class="n2">L'America 'vecchia' economia</span><span class="n3">30 colossi industriali e finanziari. Si muove meno del Nasdaq: utile per capire se il calo e' solo tech.</span></td>
+<td class="num">50 183</td>
+<td class="num up">+0.33%</td>
+<td class="num down">-4.2%</td>
+<td class="sp"><svg class="spark" viewBox="0 0 108 30" width="108" height="30" aria-hidden="true"><path d="M3.0 7.5 L7.9 7.1 L12.7 7.7 L17.6 10.3 L22.4 9.3 L27.3 10.2 L32.1 3.0 L37.0 11.4 L41.9 12.5 L46.7 7.5 L51.6 8.2 L56.4 7.0 L61.3 7.9 L66.1 7.6 L71.0 11.1 L75.9 15.0 L80.7 17.6 L85.6 22.6 L90.4 27.0 L95.3 20.3 L100.1 18.4 L105.0 17.6 L105.0 30 L3.0 30 Z" fill="var(--down)" opacity=".10"/><path d="M3.0 7.5 L7.9 7.1 L12.7 7.7 L17.6 10.3 L22.4 9.3 L27.3 10.2 L32.1 3.0 L37.0 11.4 L41.9 12.5 L46.7 7.5 L51.6 8.2 L56.4 7.0 L61.3 7.9 L66.1 7.6 L71.0 11.1 L75.9 15.0 L80.7 17.6 L85.6 22.6 L90.4 27.0 L95.3 20.3 L100.1 18.4 L105.0 17.6" fill="none" stroke="var(--down)" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/><circle cx="105.0" cy="17.6" r="2.1" fill="var(--down)"/></svg></td></tr><tr>
+<td class="nm"><span class="n1">Russell 2000</span><span class="n2">Le piccole aziende USA</span><span class="n3">Soffre quando i tassi sono alti. Dice come sta l'economia reale americana.</span></td>
+<td class="num">2 704</td>
+<td class="num up">+0.71%</td>
+<td class="num down">-3.0%</td>
+<td class="sp"><svg class="spark" viewBox="0 0 108 30" width="108" height="30" aria-hidden="true"><path d="M3.0 6.5 L7.9 5.5 L12.7 3.0 L17.6 7.1 L22.4 7.6 L27.3 7.0 L32.1 3.2 L37.0 14.2 L41.9 12.1 L46.7 4.6 L51.6 6.3 L56.4 4.1 L61.3 8.2 L66.1 8.9 L71.0 13.1 L75.9 16.6 L80.7 15.5 L85.6 20.7 L90.4 27.0 L95.3 19.4 L100.1 18.1 L105.0 16.4 L105.0 30 L3.0 30 Z" fill="var(--down)" opacity=".10"/><path d="M3.0 6.5 L7.9 5.5 L12.7 3.0 L17.6 7.1 L22.4 7.6 L27.3 7.0 L32.1 3.2 L37.0 14.2 L41.9 12.1 L46.7 4.6 L51.6 6.3 L56.4 4.1 L61.3 8.2 L66.1 8.9 L71.0 13.1 L75.9 16.6 L80.7 15.5 L85.6 20.7 L90.4 27.0 L95.3 19.4 L100.1 18.1 L105.0 16.4" fill="none" stroke="var(--down)" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/><circle cx="105.0" cy="16.4" r="2.1" fill="var(--down)"/></svg></td></tr><tr class="grp"><th colspan="5" scope="colgroup">Europa</th></tr><tr>
+<td class="nm"><span class="n1">Euro Stoxx 50</span><span class="n2">Il listino dell'Europa</span><span class="n3">Le 50 big dell'eurozona. E' il tuo riferimento europeo numero uno.</span></td>
+<td class="num">5 894</td>
+<td class="num down">-1.82%</td>
+<td class="num down">-3.6%</td>
+<td class="sp"><svg class="spark" viewBox="0 0 108 30" width="108" height="30" aria-hidden="true"><path d="M3.0 17.8 L7.9 15.3 L12.7 15.1 L17.6 13.1 L22.4 17.1 L27.3 14.7 L32.1 16.4 L37.0 10.0 L41.9 11.8 L46.7 15.0 L51.6 8.7 L56.4 6.7 L61.3 3.3 L66.1 3.0 L71.0 3.6 L75.9 5.7 L80.7 12.8 L85.6 15.8 L90.4 18.0 L95.3 27.0 L100.1 20.0 L105.0 23.8 L105.0 30 L3.0 30 Z" fill="var(--down)" opacity=".10"/><path d="M3.0 17.8 L7.9 15.3 L12.7 15.1 L17.6 13.1 L22.4 17.1 L27.3 14.7 L32.1 16.4 L37.0 10.0 L41.9 11.8 L46.7 15.0 L51.6 8.7 L56.4 6.7 L61.3 3.3 L66.1 3.0 L71.0 3.6 L75.9 5.7 L80.7 12.8 L85.6 15.8 L90.4 18.0 L95.3 27.0 L100.1 20.0 L105.0 23.8" fill="none" stroke="var(--down)" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/><circle cx="105.0" cy="23.8" r="2.1" fill="var(--down)"/></svg></td></tr><tr>
+<td class="nm"><span class="n1">FTSE MIB</span><span class="n2">La Borsa di Milano</span><span class="n3">40 titoli italiani, pesantissimi di banche. Questo e' 'casa'.</span></td>
+<td class="num">47 249</td>
+<td class="num down">-1.81%</td>
+<td class="num down">-3.9%</td>
+<td class="sp"><svg class="spark" viewBox="0 0 108 30" width="108" height="30" aria-hidden="true"><path d="M3.0 20.3 L7.9 17.5 L12.7 16.3 L17.6 15.2 L22.4 18.3 L27.3 15.5 L32.1 15.6 L37.0 8.7 L41.9 12.0 L46.7 14.9 L51.6 6.4 L56.4 4.2 L61.3 3.0 L66.1 3.9 L71.0 3.6 L75.9 5.7 L80.7 9.9 L85.6 14.1 L90.4 15.6 L95.3 23.3 L100.1 21.3 L105.0 27.0 L105.0 30 L3.0 30 Z" fill="var(--down)" opacity=".10"/><path d="M3.0 20.3 L7.9 17.5 L12.7 16.3 L17.6 15.2 L22.4 18.3 L27.3 15.5 L32.1 15.6 L37.0 8.7 L41.9 12.0 L46.7 14.9 L51.6 6.4 L56.4 4.2 L61.3 3.0 L66.1 3.9 L71.0 3.6 L75.9 5.7 L80.7 9.9 L85.6 14.1 L90.4 15.6 L95.3 23.3 L100.1 21.3 L105.0 27.0" fill="none" stroke="var(--down)" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/><circle cx="105.0" cy="27.0" r="2.1" fill="var(--down)"/></svg></td></tr><tr>
+<td class="nm"><span class="n1">DAX</span><span class="n2">La locomotiva tedesca</span><span class="n3">Industria e auto. Se frena la Germania, frena l'Europa.</span></td>
+<td class="num">24 702</td>
+<td class="num down">-1.26%</td>
+<td class="num down">-2.8%</td>
+<td class="sp"><svg class="spark" viewBox="0 0 108 30" width="108" height="30" aria-hidden="true"><path d="M3.0 19.6 L7.9 17.4 L12.7 16.0 L17.6 11.9 L22.4 14.6 L27.3 12.6 L32.1 14.1 L37.0 7.1 L41.9 8.4 L46.7 14.6 L51.6 9.2 L56.4 8.2 L61.3 4.3 L66.1 3.0 L71.0 3.3 L75.9 5.1 L80.7 11.9 L85.6 15.6 L90.4 18.9 L95.3 27.0 L100.1 20.5 L105.0 24.4 L105.0 30 L3.0 30 Z" fill="var(--down)" opacity=".10"/><path d="M3.0 19.6 L7.9 17.4 L12.7 16.0 L17.6 11.9 L22.4 14.6 L27.3 12.6 L32.1 14.1 L37.0 7.1 L41.9 8.4 L46.7 14.6 L51.6 9.2 L56.4 8.2 L61.3 4.3 L66.1 3.0 L71.0 3.3 L75.9 5.1 L80.7 11.9 L85.6 15.6 L90.4 18.9 L95.3 27.0 L100.1 20.5 L105.0 24.4" fill="none" stroke="var(--down)" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/><circle cx="105.0" cy="24.4" r="2.1" fill="var(--down)"/></svg></td></tr><tr>
+<td class="nm"><span class="n1">CAC 40</span><span class="n2">Parigi, lusso e industria</span><span class="n3">LVMH, Hermes, TotalEnergies. Sensibile ai consumi in Cina.</span></td>
+<td class="num">7 981</td>
+<td class="num down">-0.74%</td>
+<td class="num up">+1.7%</td>
+<td class="sp"><svg class="spark" viewBox="0 0 108 30" width="108" height="30" aria-hidden="true"><path d="M3.0 27.0 L7.9 25.2 L12.7 25.2 L17.6 21.4 L22.4 21.4 L27.3 17.8 L32.1 19.0 L37.0 11.8 L41.9 10.5 L46.7 13.6 L51.6 9.2 L56.4 7.2 L61.3 4.7 L66.1 3.3 L71.0 3.0 L75.9 3.8 L80.7 10.0 L85.6 13.2 L90.4 16.3 L95.3 23.3 L100.1 17.9 L105.0 18.1 L105.0 30 L3.0 30 Z" fill="var(--up)" opacity=".10"/><path d="M3.0 27.0 L7.9 25.2 L12.7 25.2 L17.6 21.4 L22.4 21.4 L27.3 17.8 L32.1 19.0 L37.0 11.8 L41.9 10.5 L46.7 13.6 L51.6 9.2 L56.4 7.2 L61.3 4.7 L66.1 3.3 L71.0 3.0 L75.9 3.8 L80.7 10.0 L85.6 13.2 L90.4 16.3 L95.3 23.3 L100.1 17.9 L105.0 18.1" fill="none" stroke="var(--up)" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/><circle cx="105.0" cy="18.1" r="2.1" fill="var(--up)"/></svg></td></tr><tr>
+<td class="nm"><span class="n1">FTSE 100</span><span class="n2">Londra, petrolio e miniere</span><span class="n3">Molto diverso dal resto: energia e materie prime. Spesso va in controtendenza.</span></td>
+<td class="num">10 427</td>
+<td class="num down">-0.38%</td>
+<td class="num down">-3.2%</td>
+<td class="sp"><svg class="spark" viewBox="0 0 108 30" width="108" height="30" aria-hidden="true"><path d="M3.0 8.8 L7.9 12.3 L12.7 12.0 L17.6 10.8 L22.4 10.5 L27.3 9.1 L32.1 14.4 L37.0 6.2 L41.9 8.2 L46.7 12.9 L51.6 8.2 L56.4 9.5 L61.3 5.9 L66.1 4.7 L71.0 3.0 L75.9 3.9 L80.7 12.2 L85.6 18.2 L90.4 22.4 L95.3 27.0 L100.1 21.2 L105.0 21.8 L105.0 30 L3.0 30 Z" fill="var(--down)" opacity=".10"/><path d="M3.0 8.8 L7.9 12.3 L12.7 12.0 L17.6 10.8 L22.4 10.5 L27.3 9.1 L32.1 14.4 L37.0 6.2 L41.9 8.2 L46.7 12.9 L51.6 8.2 L56.4 9.5 L61.3 5.9 L66.1 4.7 L71.0 3.0 L75.9 3.9 L80.7 12.2 L85.6 18.2 L90.4 22.4 L95.3 27.0 L100.1 21.2 L105.0 21.8" fill="none" stroke="var(--down)" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/><circle cx="105.0" cy="21.8" r="2.1" fill="var(--down)"/></svg></td></tr><tr class="grp"><th colspan="5" scope="colgroup">Asia</th></tr><tr>
+<td class="nm"><span class="n1">Nikkei 225</span><span class="n2">Il Giappone</span><span class="n3">Primo mercato ad aprire la giornata. Ti anticipa l'umore delle borse.</span></td>
+<td class="num">57 012</td>
+<td class="num up">+0.00%</td>
+<td class="num down">-8.3%</td>
+<td class="sp"><svg class="spark" viewBox="0 0 108 30" width="108" height="30" aria-hidden="true"><path d="M3.0 10.2 L8.4 7.1 L13.7 5.1 L19.1 3.0 L24.5 7.0 L29.8 7.6 L35.2 10.2 L40.6 13.5 L45.9 24.1 L51.3 20.2 L56.7 15.3 L62.1 13.0 L67.4 14.2 L72.8 13.3 L78.2 17.6 L83.5 19.9 L88.9 19.4 L94.3 18.2 L99.6 27.0 L105.0 20.6 L105.0 30 L3.0 30 Z" fill="var(--down)" opacity=".10"/><path d="M3.0 10.2 L8.4 7.1 L13.7 5.1 L19.1 3.0 L24.5 7.0 L29.8 7.6 L35.2 10.2 L40.6 13.5 L45.9 24.1 L51.3 20.2 L56.7 15.3 L62.1 13.0 L67.4 14.2 L72.8 13.3 L78.2 17.6 L83.5 19.9 L88.9 19.4 L94.3 18.2 L99.6 27.0 L105.0 20.6" fill="none" stroke="var(--down)" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/><circle cx="105.0" cy="20.6" r="2.1" fill="var(--down)"/></svg></td></tr><tr>
+<td class="nm"><span class="n1">Hang Seng</span><span class="n2">Hong Kong, la porta sulla Cina</span><span class="n3">Dove si vedono subito le tensioni geopolitiche e i dazi.</span></td>
+<td class="num">21 966</td>
+<td class="num down">-1.14%</td>
+<td class="num down">-5.4%</td>
+<td class="sp"><svg class="spark" viewBox="0 0 108 30" width="108" height="30" aria-hidden="true"><path d="M3.0 17.8 L7.9 19.3 L12.7 18.9 L17.6 20.1 L22.4 17.0 L27.3 16.1 L32.1 14.8 L37.0 11.2 L41.9 3.0 L46.7 5.9 L51.6 6.2 L56.4 5.2 L61.3 7.5 L66.1 10.3 L71.0 13.8 L75.9 12.7 L80.7 15.0 L85.6 17.0 L90.4 21.2 L95.3 25.2 L100.1 25.5 L105.0 27.0 L105.0 30 L3.0 30 Z" fill="var(--down)" opacity=".10"/><path d="M3.0 17.8 L7.9 19.3 L12.7 18.9 L17.6 20.1 L22.4 17.0 L27.3 16.1 L32.1 14.8 L37.0 11.2 L41.9 3.0 L46.7 5.9 L51.6 6.2 L56.4 5.2 L61.3 7.5 L66.1 10.3 L71.0 13.8 L75.9 12.7 L80.7 15.0 L85.6 17.0 L90.4 21.2 L95.3 25.2 L100.1 25.5 L105.0 27.0" fill="none" stroke="var(--down)" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/><circle cx="105.0" cy="27.0" r="2.1" fill="var(--down)"/></svg></td></tr><tr>
+<td class="nm"><span class="n1">Shanghai Comp.</span><span class="n2">La Cina interna</span><span class="n3">Mercato molto guidato dalle decisioni di Pechino.</span></td>
+<td class="num">3 476</td>
+<td class="num down">-2.03%</td>
+<td class="num down">-6.0%</td>
+<td class="sp"><svg class="spark" viewBox="0 0 108 30" width="108" height="30" aria-hidden="true"><path d="M3.0 3.0 L7.9 10.2 L12.7 5.4 L17.6 9.8 L22.4 17.4 L27.3 11.7 L32.1 16.1 L37.0 4.7 L41.9 4.1 L46.7 10.1 L51.6 8.4 L56.4 8.0 L61.3 5.5 L66.1 9.1 L71.0 12.3 L75.9 16.9 L80.7 19.6 L85.6 19.1 L90.4 20.6 L95.3 27.0 L100.1 26.2 L105.0 24.9 L105.0 30 L3.0 30 Z" fill="var(--down)" opacity=".10"/><path d="M3.0 3.0 L7.9 10.2 L12.7 5.4 L17.6 9.8 L22.4 17.4 L27.3 11.7 L32.1 16.1 L37.0 4.7 L41.9 4.1 L46.7 10.1 L51.6 8.4 L56.4 8.0 L61.3 5.5 L66.1 9.1 L71.0 12.3 L75.9 16.9 L80.7 19.6 L85.6 19.1 L90.4 20.6 L95.3 27.0 L100.1 26.2 L105.0 24.9" fill="none" stroke="var(--down)" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/><circle cx="105.0" cy="24.9" r="2.1" fill="var(--down)"/></svg></td></tr><tr class="grp"><th colspan="5" scope="colgroup">Valute, materie prime, crypto</th></tr><tr>
+<td class="nm"><span class="n1">EUR/USD</span><span class="n2">Euro contro dollaro</span><span class="n3">Quanto vale il tuo euro. Decide se un investimento in USA ti rende o ti costa.</span></td>
+<td class="num">1.10</td>
+<td class="num down">-0.07%</td>
+<td class="num down">-2.2%</td>
+<td class="sp"><svg class="spark" viewBox="0 0 108 30" width="108" height="30" aria-hidden="true"><path d="M3.0 11.0 L7.9 3.0 L12.7 3.0 L17.6 3.0 L22.4 3.0 L27.3 3.0 L32.1 3.0 L37.0 3.0 L41.9 11.0 L46.7 3.0 L51.6 3.0 L56.4 11.0 L61.3 11.0 L66.1 19.0 L71.0 19.0 L75.9 19.0 L80.7 19.0 L85.6 19.0 L90.4 19.0 L95.3 27.0 L100.1 19.0 L105.0 19.0 L105.0 30 L3.0 30 Z" fill="var(--down)" opacity=".10"/><path d="M3.0 11.0 L7.9 3.0 L12.7 3.0 L17.6 3.0 L22.4 3.0 L27.3 3.0 L32.1 3.0 L37.0 3.0 L41.9 11.0 L46.7 3.0 L51.6 3.0 L56.4 11.0 L61.3 11.0 L66.1 19.0 L71.0 19.0 L75.9 19.0 L80.7 19.0 L85.6 19.0 L90.4 19.0 L95.3 27.0 L100.1 19.0 L105.0 19.0" fill="none" stroke="var(--down)" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/><circle cx="105.0" cy="19.0" r="2.1" fill="var(--down)"/></svg></td></tr><tr>
+<td class="nm"><span class="n1">Oro</span><span class="n2">Oro</span><span class="n3">Il bene rifugio. Sale quando la gente ha paura o si aspetta inflazione.</span></td>
+<td class="num">3 608</td>
+<td class="num up">+1.21%</td>
+<td class="num down">-10.7%</td>
+<td class="sp"><svg class="spark" viewBox="0 0 108 30" width="108" height="30" aria-hidden="true"><path d="M3.0 4.6 L7.9 5.5 L12.7 6.3 L17.6 11.6 L22.4 8.8 L27.3 10.0 L32.1 4.7 L37.0 3.0 L41.9 4.6 L46.7 3.0 L51.6 6.4 L56.4 7.6 L61.3 12.2 L66.1 12.1 L71.0 13.5 L75.9 13.0 L80.7 17.9 L85.6 20.2 L90.4 27.0 L95.3 21.6 L100.1 25.1 L105.0 23.3 L105.0 30 L3.0 30 Z" fill="var(--down)" opacity=".10"/><path d="M3.0 4.6 L7.9 5.5 L12.7 6.3 L17.6 11.6 L22.4 8.8 L27.3 10.0 L32.1 4.7 L37.0 3.0 L41.9 4.6 L46.7 3.0 L51.6 6.4 L56.4 7.6 L61.3 12.2 L66.1 12.1 L71.0 13.5 L75.9 13.0 L80.7 17.9 L85.6 20.2 L90.4 27.0 L95.3 21.6 L100.1 25.1 L105.0 23.3" fill="none" stroke="var(--down)" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/><circle cx="105.0" cy="23.3" r="2.1" fill="var(--down)"/></svg></td></tr><tr>
+<td class="nm"><span class="n1">Petrolio WTI</span><span class="n2">Petrolio</span><span class="n3">Finisce nella benzina e nelle bollette: e' inflazione con 3 mesi di ritardo.</span></td>
+<td class="num">84.05</td>
+<td class="num up">+0.44%</td>
+<td class="num down">-17.4%</td>
+<td class="sp"><svg class="spark" viewBox="0 0 108 30" width="108" height="30" aria-hidden="true"><path d="M3.0 7.2 L7.9 4.3 L12.7 5.1 L17.6 3.0 L22.4 10.7 L27.3 11.0 L32.1 19.0 L37.0 16.6 L41.9 16.3 L46.7 20.3 L51.6 21.1 L56.4 20.6 L61.3 18.4 L66.1 18.6 L71.0 21.4 L75.9 21.1 L80.7 23.9 L85.6 24.0 L90.4 23.2 L95.3 27.0 L100.1 25.1 L105.0 23.1 L105.0 30 L3.0 30 Z" fill="var(--down)" opacity=".10"/><path d="M3.0 7.2 L7.9 4.3 L12.7 5.1 L17.6 3.0 L22.4 10.7 L27.3 11.0 L32.1 19.0 L37.0 16.6 L41.9 16.3 L46.7 20.3 L51.6 21.1 L56.4 20.6 L61.3 18.4 L66.1 18.6 L71.0 21.4 L75.9 21.1 L80.7 23.9 L85.6 24.0 L90.4 23.2 L95.3 27.0 L100.1 25.1 L105.0 23.1" fill="none" stroke="var(--down)" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/><circle cx="105.0" cy="23.1" r="2.1" fill="var(--down)"/></svg></td></tr><tr>
+<td class="nm"><span class="n1">Bitcoin</span><span class="n2">Bitcoin</span><span class="n3">Il termometro piu' estremo della voglia di rischiare. Crolla prima degli altri.</span></td>
+<td class="num">60 358</td>
+<td class="num up">+1.32%</td>
+<td class="num down">-24.6%</td>
+<td class="sp"><svg class="spark" viewBox="0 0 108 30" width="108" height="30" aria-hidden="true"><path d="M3.0 3.0 L7.9 8.0 L12.7 8.2 L17.6 8.2 L22.4 9.5 L27.3 8.8 L32.1 10.4 L37.0 10.2 L41.9 13.1 L46.7 16.5 L51.6 21.1 L56.4 19.8 L61.3 20.3 L66.1 20.2 L71.0 22.3 L75.9 23.6 L80.7 27.0 L85.6 25.6 L90.4 24.4 L95.3 24.3 L100.1 25.9 L105.0 25.3 L105.0 30 L3.0 30 Z" fill="var(--down)" opacity=".10"/><path d="M3.0 3.0 L7.9 8.0 L12.7 8.2 L17.6 8.2 L22.4 9.5 L27.3 8.8 L32.1 10.4 L37.0 10.2 L41.9 13.1 L46.7 16.5 L51.6 21.1 L56.4 19.8 L61.3 20.3 L66.1 20.2 L71.0 22.3 L75.9 23.6 L80.7 27.0 L85.6 25.6 L90.4 24.4 L95.3 24.3 L100.1 25.9 L105.0 25.3" fill="none" stroke="var(--down)" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/><circle cx="105.0" cy="25.3" r="2.1" fill="var(--down)"/></svg></td></tr></tbody>
+</table>
+</div>
+<p style="font-size:.86rem;color:var(--ink2)">La colonna &ldquo;1 mese&rdquo; &egrave; quella che conta davvero: un &minus;1% in un giorno &egrave; rumore, un &minus;10% in un mese &egrave; una storia. L&rsquo;ultima colonna mostra le ultime 22 sedute.</p>
+
+<h2>La notifica di domani, se l&rsquo;app esistesse oggi</h2>
+<p>Non &egrave; un esempio inventato: &egrave; il testo che il motore produrrebbe con i dati e le notizie di questa mattina.</p>
+
+<div class="lock">
+  <div class="clock"><div class="t">7:30</div><div class="d">gioved&igrave; 26 novembre</div></div>
+  <div class="notif">
+    <div class="top"><span class="ico">B</span><span>BOLLETTINO BORSE</span><span style="margin-left:auto">ora</span></div>
+    <div class="ttl">Giornata nervosa: l&rsquo;Europa perde l&rsquo;1,8%</div>
+    <div class="bd">Milano chiude a &minus;1,81%, Wall Street mista. La paura sale: l&rsquo;indice VIX &egrave; a 28, il pi&ugrave; alto da un mese. Pesano i timori sull&rsquo;intelligenza artificiale e l&rsquo;inflazione USA risalita al 3,8%.</div>
+  </div>
+</div>
+
+<div class="report">
+  <h3>Il report completo che trovi aprendo l&rsquo;app</h3>
+  <div class="meter"><span>Clima</span><div class="bar"><span class="pin" style="left:62%"></span></div><span>nervoso</span></div>
+  <ul>
+    <li><b>Cos&rsquo;&egrave; successo.</b> Le borse europee hanno perso quasi il 2% in un giorno: Milano &minus;1,81%, l&rsquo;indice dell&rsquo;eurozona &minus;1,82%, Francoforte &minus;1,26%. L&rsquo;America ha retto meglio ed &egrave; finita mista, con il Dow Jones in rialzo dello 0,33% e il Nasdaq tecnologico in calo dello 0,62%.</li>
+    <li><b>Perch&eacute;.</b> Due motivi, raccontati da tutti i giornali finanziari. Primo: gli investitori hanno dubbi sul fatto che le aziende dell&rsquo;intelligenza artificiale valgano i prezzi che hanno raggiunto &mdash; e il Nasdaq ha perso quasi il 10% in un mese. Secondo: negli Stati Uniti l&rsquo;inflazione misurata dalla Federal Reserve &egrave; risalita al 3,8% in ottobre, e questo rende pi&ugrave; difficile un taglio dei tassi.</li>
+    <li><b>Il dato da non perdere.</b> L&rsquo;indice della paura (VIX) &egrave; a 28: un mese fa era sotto 19. &Egrave; cresciuto del 54% in quattro settimane. Sotto 15 significa mercato tranquillo, sopra 25 significa che gli operatori si stanno coprendo dai cali.</li>
+    <li><b>Cosa guardare oggi.</b> Il Giappone ha chiuso piatto e Shanghai ha perso il 2%: l&rsquo;Asia non d&agrave; una spinta positiva all&rsquo;apertura europea. Il tasso americano a 10 anni resta alto, al 4,85%.</li>
+    <li><b>Il contesto che manca nei titoli.</b> Non sta scendendo solo la borsa: in un mese l&rsquo;oro ha perso il 10,7%, il petrolio il 17,4% e il Bitcoin il 24,6%. Quando scende tutto insieme, azioni comprese, di solito vuol dire che gli investitori stanno riducendo il rischio in generale, non che c&rsquo;&egrave; un problema in un singolo settore.</li>
+  </ul>
+</div>
+
+<h2>Le quattro strade possibili</h2>
+<p>La differenza vera non &egrave; l&rsquo;app: &egrave; <em>come arriva la notifica</em>. Su iPhone questo &egrave; il punto che decide costi e tempi, perch&eacute; Apple tratta in modo diverso le app vere e le pagine web.</p>
+
+<div class="opt pick">
+  <div class="hdr"><h3>1. App web aggiunta alla schermata Home</h3><span class="tag">la mia scelta</span></div>
+  <p class="sub">Un&rsquo;app che vive sul web ma che su iPhone si comporta come un&rsquo;app normale: icona sulla Home, schermo intero, niente barra di Safari. Le notifiche arrivano con la tecnologia Web Push, che Apple supporta dal 2023.</p>
+  <div class="facts"><span>Costo <b>0 &euro;</b></span><span>Tempi <b>2&ndash;3 giorni</b></span><span>Serve Xcode <b>no</b></span><span>Account Apple da 99 &euro; <b>no</b></span></div>
+  <div class="pc">
+    <div class="pro"><div class="h">A favore</div><ul><li>Gratis per sempre: il motore gira su GitHub Actions, l&rsquo;app &egrave; una pagina statica.</li><li>Nessuna recensione di Apple, nessuna attesa: la aggiorno e tu hai subito la versione nuova.</li><li>Funziona anche dal Mac e da un tablet, con gli stessi dati.</li><li>Grafici e dettaglio degli indici senza compromessi.</li></ul></div>
+    <div class="con"><div class="h">Contro</div><ul><li>Va aggiunta alla Home una volta sola, a mano: senza quel passaggio Apple non consegna le notifiche.</li><li>Niente widget sulla schermata Home e niente notifiche con immagini.</li><li>Se cancelli l&rsquo;icona perdi l&rsquo;iscrizione alle notifiche e va rifatta.</li></ul></div>
+  </div>
+</div>
+
+<div class="opt">
+  <div class="hdr"><h3>2. Automazione dell&rsquo;app Comandi</h3><span class="tag" style="background:var(--accent2)">prototipo oggi</span></div>
+  <p class="sub">Zero codice sul telefono: nell&rsquo;app Comandi crei un&rsquo;automazione &ldquo;Ora del giorno&rdquo; alle 7:30 che legge il report dal web e mostra una notifica. La parte &ldquo;app&rdquo; resta una pagina web che apri dalla notifica.</p>
+  <div class="facts"><span>Costo <b>0 &euro;</b></span><span>Tempi <b>mezza giornata</b></span><span>Serve Xcode <b>no</b></span><span>Account Apple da 99 &euro; <b>no</b></span></div>
+  <div class="pc">
+    <div class="pro"><div class="h">A favore</div><ul><li>&Egrave; il modo pi&ugrave; rapido per provare il contenuto e capire se il report ti piace davvero.</li><li>Lo configuri in dieci minuti seguendo cinque passaggi.</li><li>Il motore &egrave; lo stesso dell&rsquo;opzione 1: se poi passi a quella, non si butta niente.</li></ul></div>
+    <div class="con"><div class="h">Contro</div><ul><li>L&rsquo;affidabilit&agrave; non &egrave; garantita: con il telefono bloccato da ore, a volte l&rsquo;automazione chiede conferma invece di partire.</li><li>La notifica &egrave; grezza e non si pu&ograve; impaginare.</li><li>Non &egrave; un&rsquo;app: &egrave; un promemoria intelligente.</li></ul></div>
+  </div>
+</div>
+
+<div class="opt">
+  <div class="hdr"><h3>3. App nativa in SwiftUI</h3><span class="tag" style="background:var(--ink2)">la pi&ugrave; bella</span></div>
+  <p class="sub">L&rsquo;app vera, scritta nel linguaggio di Apple. Widget sulla schermata Home con gli indici sempre visibili, notifiche ricche, grafici fluidi, Face ID, funziona senza rete sui dati gi&agrave; scaricati.</p>
+  <div class="facts"><span>Costo <b>99 &euro;/anno</b></span><span>Tempi <b>1&ndash;2 settimane</b></span><span>Serve Xcode <b>s&igrave;, ~10 GB</b></span><span>Sul tuo Mac <b>non installato</b></span></div>
+  <div class="pc">
+    <div class="pro"><div class="h">A favore</div><ul><li>Widget e notifiche al livello delle app professionali.</li><li>Notifiche affidabili al 100% tramite i server Apple.</li><li>Un domani la puoi pubblicare sull&rsquo;App Store.</li></ul></div>
+    <div class="con"><div class="h">Contro</div><ul><li>Servono 99 &euro; all&rsquo;anno: senza l&rsquo;iscrizione le notifiche push non funzionano e l&rsquo;app si disattiva da sola ogni 7 giorni.</li><li>Devi installare Xcode: sul tuo Mac ora ci sono solo gli strumenti da riga di comando.</li><li>Ogni modifica richiede di ricollegare l&rsquo;iPhone al Mac, finch&eacute; non pubblichi.</li></ul></div>
+  </div>
+</div>
+
+<div class="opt">
+  <div class="hdr"><h3>4. Bot Telegram pi&ugrave; pagina web</h3><span class="tag" style="background:var(--ink3)">la pi&ugrave; solida</span></div>
+  <p class="sub">Il report arriva come messaggio in una chat Telegram tutta tua, alle 7:30. La notifica &egrave; quella di Telegram, quindi non la perdi mai. I dati di dettaglio restano su una pagina web.</p>
+  <div class="facts"><span>Costo <b>0 &euro;</b></span><span>Tempi <b>1 giorno</b></span><span>Serve Xcode <b>no</b></span><span>Affidabilit&agrave; <b>massima</b></span></div>
+  <div class="pc">
+    <div class="pro"><div class="h">A favore</div><ul><li>Le notifiche non si perdono: le consegna Telegram, non Apple.</li><li>Puoi scrivere al bot per chiedere un indice specifico.</li><li>Lo storico dei report resta nella chat, sfogliabile.</li></ul></div>
+    <div class="con"><div class="h">Contro</div><ul><li>Non &egrave; un&rsquo;app con la sua icona: &egrave; una chat, e si confonde con le altre.</li><li>Devi avere e tenere Telegram installato.</li><li>I grafici si guardano comunque fuori dalla chat.</li></ul></div>
+  </div>
+</div>
+
+<div class="callout">
+  <h3>Cosa farei io</h3>
+  <p><b>L&rsquo;opzione 1</b>, costruendo per prima cosa il motore (pezzi 1 e 2), che &egrave; identico in tutte le strade e vale l&rsquo;80% del lavoro. Nel frattempo, in mezza giornata, ti preparo l&rsquo;opzione 2: cos&igrave; gi&agrave; da domani mattina ricevi il bollettino e mi dici se il tono e il contenuto funzionano, prima che io costruisca l&rsquo;app vera e propria.</p>
+  <p>L&rsquo;opzione 3 la terrei come traguardo successivo: ha senso spendere 99 &euro; l&rsquo;anno e installare Xcode quando sei sicuro di usare l&rsquo;app ogni giorno, e quando vuoi il widget con gli indici sulla schermata Home. L&rsquo;opzione 4 la sceglierei solo se perdere una notifica fosse per te un problema grave.</p>
+</div>
+
+<h2>Tre cose che devo sapere da te</h2>
+<ol class="ask">
+  <li><b>Quale strada.</b> Se mi dici solo &ldquo;vai&rdquo;, parto con l&rsquo;opzione 1 pi&ugrave; il prototipo in Comandi.</li>
+  <li><b>A che ora vuoi la notifica.</b> Alle 7:30 racconto la giornata appena chiusa in Asia e in America: &egrave; l&rsquo;orario migliore per capire come apriranno le borse europee. Se preferisci il bilancio della giornata italiana, l&rsquo;orario giusto &egrave; le 18:15, dopo la chiusura di Milano. Si possono anche avere entrambe.</li>
+  <li><b>Quanto in profondit&agrave;.</b> La tabella qui sopra ha 18 strumenti. Posso aggiungere i singoli titoli di Piazza Affari che segui, oppure lo spread BTP-Bund, se ti interessa l&rsquo;Italia da vicino.</li>
+</ol>
+
+<footer>
+  <p>Questo documento serve a informarti sui mercati e a decidere come costruire l&rsquo;app: non &egrave; una consulenza finanziaria e non contiene indicazioni su cosa comprare o vendere. Valori rilevati il 26 novembre 2026 dagli endpoint pubblici di Yahoo Finance; i movimenti giornalieri si riferiscono all&rsquo;ultima seduta chiusa.</p>
+</footer>
+</div>

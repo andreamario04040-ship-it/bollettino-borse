@@ -1,0 +1,68 @@
+name: Bollettino Borse
+
+on:
+  schedule:
+    # GitHub usa sempre l'ora UTC. L'Italia è UTC+1 d'inverno e UTC+2 d'estate,
+    # quindi ogni appuntamento ha due orari e il programma esce subito da quello sbagliato.
+    - cron: '0 7,8 * * 1-5'        # bollettino del mattino, ore 9:00 italiane
+    - cron: '15 16,17 * * 1-5'     # bollettino della sera, ore 18:15 italiane
+    - cron: '20 9-20 * * 1-5'      # controllo del giorno: manda solo se c'è un movimento grosso
+  workflow_dispatch:
+    inputs:
+      modo:
+        description: 'Cosa eseguire'
+        type: choice
+        default: 'bollettino mattina'
+        options: ['bollettino mattina', 'bollettino sera', 'avviso']
+
+concurrency:
+  group: bollettino
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  pubblica:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - run: npm ci --omit=dev
+
+      - name: Decidi cosa eseguire
+        id: scelta
+        run: |
+          case "${{ github.event.schedule }}" in
+            "0 7,8 * * 1-5")     echo "modo=bollettino mattina" >> "$GITHUB_OUTPUT"; echo "ora=09:00" >> "$GITHUB_OUTPUT" ;;
+            "15 16,17 * * 1-5")  echo "modo=bollettino sera"    >> "$GITHUB_OUTPUT"; echo "ora=18:15" >> "$GITHUB_OUTPUT" ;;
+            "20 9-20 * * 1-5")   echo "modo=avviso"             >> "$GITHUB_OUTPUT"; echo "ora=" >> "$GITHUB_OUTPUT" ;;
+            *)                   echo "modo=${{ inputs.modo || 'bollettino mattina' }}" >> "$GITHUB_OUTPUT"; echo "ora=" >> "$GITHUB_OUTPUT" ;;
+          esac
+
+      - name: Genera e invia
+        env:
+          VAPID_PUBBLICA:  ${{ secrets.VAPID_PUBBLICA }}
+          VAPID_PRIVATA:   ${{ secrets.VAPID_PRIVATA }}
+          VAPID_CONTATTO:  ${{ secrets.VAPID_CONTATTO }}
+          ISCRIZIONE_PUSH: ${{ secrets.ISCRIZIONE_PUSH }}
+          ORA_ATTESA:      ${{ steps.scelta.outputs.ora }}
+        run: node engine/esegui.mjs ${{ steps.scelta.outputs.modo }}
+
+      - name: Salva i dati aggiornati
+        run: |
+          if [ -z "$(git status --porcelain docs/data)" ]; then
+            echo "Niente di nuovo da salvare."
+            exit 0
+          fi
+          git config user.name  "Bollettino Borse"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/data
+          git commit -m "Bollettino del $(TZ=Europe/Rome date '+%d/%m/%Y alle %H:%M')"
+          git push

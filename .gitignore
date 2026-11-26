@@ -1,0 +1,4 @@
+node_modules/
+CHIAVI-SEGRETE.txt
+.env
+.DS_Store

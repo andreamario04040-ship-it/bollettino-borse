@@ -1,0 +1,17 @@
+{
+  "name": "Bollettino Borse",
+  "short_name": "Bollettino",
+  "description": "Ogni giorno, in parole semplici, cosa succede sulle borse mondiali.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "lang": "it",
+  "background_color": "#FBF0E6",
+  "theme_color": "#FBF0E6",
+  "icons": [
+    { "src": "icons/icona-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icona-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icona-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

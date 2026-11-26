@@ -1,0 +1,237 @@
+{
+  "nome": "Bollettino Borse",
+  "fuso": "Europe/Rome",
+  "orari": {
+    "mattina": "07:00",
+    "mattina_locale": "09:00",
+    "sera": "18:15",
+    "nota": "Gli orari sono in ora italiana; nel workflow sono convertiti in UTC."
+  },
+  "strumenti": [
+    {
+      "sym": "^VIX",
+      "nome": "VIX",
+      "breve": "Indice della paura",
+      "gruppo": "Da guardare per primo",
+      "unita": "punti",
+      "perche": "Misura quanta paura c'è sul mercato americano. Sotto 15 è calma, sopra 25 è nervosismo, sopra 35 è panico.",
+      "inverso": true,
+      "decimali": 2
+    },
+    {
+      "sym": "^TNX",
+      "nome": "Tasso USA 10 anni",
+      "breve": "Il prezzo del denaro",
+      "gruppo": "Da guardare per primo",
+      "unita": "%",
+      "perche": "Quanto rende prestare soldi allo Stato americano per 10 anni. Se sale, le azioni (soprattutto tecnologiche) soffrono.",
+      "inverso": true,
+      "decimali": 2
+    },
+    {
+      "sym": "^GSPC",
+      "nome": "S&P 500",
+      "breve": "Il termometro del mondo",
+      "gruppo": "Stati Uniti",
+      "unita": "punti",
+      "perche": "Le 500 maggiori aziende americane. Se sale questo, di solito sale quasi tutto il resto."
+    },
+    {
+      "sym": "^IXIC",
+      "nome": "Nasdaq",
+      "breve": "Tecnologia e intelligenza artificiale",
+      "gruppo": "Stati Uniti",
+      "unita": "punti",
+      "perche": "Pieno di Nvidia, Apple, Microsoft. Si muove più degli altri, sia in salita sia in discesa."
+    },
+    {
+      "sym": "^DJI",
+      "nome": "Dow Jones",
+      "breve": "L'America della vecchia economia",
+      "gruppo": "Stati Uniti",
+      "unita": "punti",
+      "perche": "30 colossi industriali e finanziari. Confrontandolo col Nasdaq capisci se il calo riguarda solo la tecnologia."
+    },
+    {
+      "sym": "^RUT",
+      "nome": "Russell 2000",
+      "breve": "Le piccole aziende americane",
+      "gruppo": "Stati Uniti",
+      "unita": "punti",
+      "perche": "Le aziende piccole soffrono quando i tassi sono alti. Raccontano l'economia reale, non quella delle grandi multinazionali."
+    },
+    {
+      "sym": "^STOXX50E",
+      "nome": "Euro Stoxx 50",
+      "breve": "Il listino dell'Europa",
+      "gruppo": "Europa",
+      "unita": "punti",
+      "perche": "Le 50 aziende maggiori dell'eurozona. È il riferimento europeo numero uno."
+    },
+    {
+      "sym": "FTSEMIB.MI",
+      "nome": "FTSE MIB",
+      "breve": "La Borsa di Milano",
+      "gruppo": "Europa",
+      "unita": "punti",
+      "perche": "I 40 titoli italiani principali, con moltissime banche. Questo è il mercato di casa."
+    },
+    {
+      "sym": "^GDAXI",
+      "nome": "DAX",
+      "breve": "La locomotiva tedesca",
+      "gruppo": "Europa",
+      "unita": "punti",
+      "perche": "Industria e automobili. Se frena la Germania, frena tutta l'Europa."
+    },
+    {
+      "sym": "^FCHI",
+      "nome": "CAC 40",
+      "breve": "Parigi, lusso e industria",
+      "gruppo": "Europa",
+      "unita": "punti",
+      "perche": "LVMH, Hermès, TotalEnergies. Molto sensibile ai consumi in Cina."
+    },
+    {
+      "sym": "^FTSE",
+      "nome": "FTSE 100",
+      "breve": "Londra, petrolio e miniere",
+      "gruppo": "Europa",
+      "unita": "punti",
+      "perche": "Composto soprattutto da energia e materie prime: spesso va in direzione opposta al resto d'Europa."
+    },
+    {
+      "sym": "^N225",
+      "nome": "Nikkei 225",
+      "breve": "Il Giappone",
+      "gruppo": "Asia",
+      "unita": "punti",
+      "perche": "È il primo grande mercato ad aprire: ti anticipa l'umore della giornata."
+    },
+    {
+      "sym": "^HSI",
+      "nome": "Hang Seng",
+      "breve": "Hong Kong, la porta sulla Cina",
+      "gruppo": "Asia",
+      "unita": "punti",
+      "perche": "Qui si vedono subito le tensioni geopolitiche e gli effetti dei dazi."
+    },
+    {
+      "sym": "000001.SS",
+      "nome": "Shanghai",
+      "breve": "La Cina interna",
+      "gruppo": "Asia",
+      "unita": "punti",
+      "perche": "Un mercato guidato molto dalle decisioni del governo di Pechino."
+    },
+    {
+      "sym": "EURUSD=X",
+      "nome": "Euro / Dollaro",
+      "breve": "Quanto vale il tuo euro",
+      "gruppo": "Valute e materie prime",
+      "unita": "$",
+      "perche": "Decide se un investimento negli Stati Uniti ti rende di più o di meno una volta riportato in euro.",
+      "decimali": 4
+    },
+    {
+      "sym": "GC=F",
+      "nome": "Oro",
+      "breve": "Il bene rifugio",
+      "gruppo": "Valute e materie prime",
+      "unita": "$",
+      "perche": "Sale quando la gente ha paura o si aspetta che i prezzi corrano.",
+      "decimali": 2
+    },
+    {
+      "sym": "CL=F",
+      "nome": "Petrolio WTI",
+      "breve": "Benzina e bollette",
+      "gruppo": "Valute e materie prime",
+      "unita": "$",
+      "perche": "Finisce nel pieno dell'auto e nelle bollette: è inflazione con due o tre mesi di ritardo.",
+      "decimali": 2
+    },
+    {
+      "sym": "BTC-USD",
+      "nome": "Bitcoin",
+      "breve": "Il termometro più estremo",
+      "gruppo": "Valute e materie prime",
+      "unita": "$",
+      "perche": "Misura la voglia di rischiare. Quando gli investitori si spaventano, di solito scende per primo.",
+      "decimali": 0
+    }
+  ],
+  "feed": [
+    {
+      "fonte": "Il Sole 24 Ore",
+      "url": "https://www.ilsole24ore.com/rss/finanza.xml",
+      "lingua": "it",
+      "peso": 3
+    },
+    {
+      "fonte": "ANSA Economia",
+      "url": "https://www.ansa.it/sito/notizie/economia/economia_rss.xml",
+      "lingua": "it",
+      "peso": 2
+    },
+    {
+      "fonte": "Financial Times",
+      "url": "https://www.ft.com/markets?format=rss",
+      "lingua": "en",
+      "peso": 3
+    },
+    {
+      "fonte": "CNBC Markets",
+      "url": "https://www.cnbc.com/id/20910258/device/rss/rss.html",
+      "lingua": "en",
+      "peso": 2
+    },
+    {
+      "fonte": "MarketWatch",
+      "url": "https://feeds.content.dowjones.io/public/rss/mw_topstories",
+      "lingua": "en",
+      "peso": 1
+    },
+    {
+      "fonte": "Investing.com",
+      "url": "https://www.investing.com/rss/news_25.rss",
+      "lingua": "en",
+      "peso": 1
+    },
+    {
+      "fonte": "BCE",
+      "url": "https://www.ecb.europa.eu/rss/press.html",
+      "lingua": "en",
+      "peso": 3,
+      "ufficiale": true
+    },
+    {
+      "fonte": "Federal Reserve",
+      "url": "https://www.federalreserve.gov/feeds/press_monetary.xml",
+      "lingua": "en",
+      "peso": 3,
+      "ufficiale": true
+    }
+  ],
+  "avvisi": {
+    "attivi": true,
+    "finestra": {
+      "da": "08:00",
+      "a": "22:30"
+    },
+    "massimo_al_giorno": 2,
+    "minuti_tra_un_avviso_e_l_altro": 180,
+    "minuti_di_silenzio_attorno_ai_bollettini": 45,
+    "soglie": {
+      "indice_azionario_percento": 2.0,
+      "vix_livello": 30,
+      "vix_variazione_percento": 12,
+      "vix_scatto_percento": 20,
+      "petrolio_percento": 4.5,
+      "oro_percento": 3.0,
+      "bitcoin_percento": 7.0,
+      "tasso_10anni_percento": 4.0
+    },
+    "nota": "Un avviso parte solo se il movimento è nuovo rispetto all'ultimo controllo: superare la soglia e restarci non fa suonare di nuovo il telefono."
+  }
+}

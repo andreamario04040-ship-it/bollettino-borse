@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bollettino Borse</title>
+<meta name="description" content="Ogni giorno, in parole semplici, cosa succede sulle borse mondiali.">
+<meta name="theme-color" content="#FBF0E6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#16110D" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Bollettino">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/icona-180.png">
+<link rel="icon" href="icons/icona-192.png">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bitter:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="stile.css">
+</head>
+<body>
+
+<div class="nastro" id="nastro" aria-label="Variazioni principali"><div class="nastro-int" id="nastro-int"></div></div>
+
+<main class="pagina">
+
+  <header class="testata">
+    <p class="occhiello"><span id="tipo-report">Bollettino</span> · <span id="data-report">—</span></p>
+    <h1>Bollettino Borse</h1>
+    <div class="clima" id="clima" hidden>
+      <span class="clima-et">Clima</span>
+      <div class="clima-barra"><span class="clima-spillo" id="clima-spillo"></span></div>
+      <span class="clima-parola" id="clima-parola">—</span>
+    </div>
+  </header>
+
+  <section class="avviso-ios" id="avviso-ios" hidden>
+    <h2>Per ricevere le notifiche</h2>
+    <p>Su iPhone le notifiche arrivano solo se questa pagina è stata aggiunta alla schermata Home. Tocca <b>Condividi</b> in basso, poi <b>Aggiungi alla schermata Home</b>, e riapri l’app dall’icona.</p>
+  </section>
+
+  <section class="blocco-notifiche" id="blocco-notifiche" hidden>
+    <div class="bn-testa">
+      <h2>Notifiche</h2>
+      <span class="stato-pill" id="stato-notifiche">da attivare</span>
+    </div>
+    <p class="bn-nota" id="bn-nota">Un bollettino alle 9:00 e uno alle 18:15, più gli avvisi solo per i movimenti davvero grossi (al massimo due al giorno).</p>
+    <button class="bottone" id="attiva">Attiva le notifiche</button>
+    <div class="iscrizione" id="iscrizione" hidden>
+      <p>Ultimo passaggio, una volta sola: copia questo codice e incollalo nel segreto <code>ISCRIZIONE_PUSH</code> del repository su GitHub.</p>
+      <textarea id="iscrizione-testo" readonly rows="4" spellcheck="false"></textarea>
+      <button class="bottone piccolo" id="copia">Copia il codice</button>
+      <span class="esito" id="esito-copia" role="status"></span>
+    </div>
+  </section>
+
+  <section class="report" id="report" aria-live="polite">
+    <div class="caricamento" id="caricamento">Carico il bollettino…</div>
+  </section>
+
+  <section class="indici">
+    <div class="sez-testa">
+      <h2>Gli indici di oggi</h2>
+      <div class="periodo" role="group" aria-label="Periodo">
+        <button data-periodo="giorno" class="attivo">Oggi</button>
+        <button data-periodo="settimana">7 giorni</button>
+        <button data-periodo="mese">1 mese</button>
+        <button data-periodo="anno">1 anno</button>
+      </div>
+    </div>
+    <div id="lista-indici"></div>
+    <p class="aiuto">Tocca un indice per sapere perché conta.</p>
+  </section>
+
+  <footer>
+    <p id="fonti">—</p>
+    <p class="disclaimer">Questa app serve a capire cosa succede sui mercati. Non è una consulenza finanziaria e non contiene indicazioni su cosa comprare o vendere.</p>
+    <p class="agg">Dati: Yahoo Finance · Aggiornato <span id="aggiornato">—</span> · <button class="link" id="ricarica">ricarica</button></p>
+  </footer>
+
+</main>
+<script src="app.js"></script>
+</body>
+</html>
