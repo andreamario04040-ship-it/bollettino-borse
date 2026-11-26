@@ -114,8 +114,41 @@ Entro un minuto la notifica arriva sull'iPhone.
 | 18:15, da lunedì a venerdì | Bollettino della sera |
 | Ogni ora, dalle 8:20 alle 21:20 | Controlla, e manda solo se serve |
 
+Ogni appuntamento ha una **finestra larga** (mattina 08:00–12:30, sera 17:30–21:30), non un orario
+esatto: GitHub fa partire le esecuzioni programmate con ritardi anche di mezz'ora, e un controllo
+stretto farebbe saltare il bollettino proprio nei giorni di maggior carico. A evitare il doppione
+fra i due appuntamenti pensa il controllo sull'archivio.
+
 GitHub ragiona in UTC e l'Italia cambia ora due volte l'anno: ogni appuntamento parte a due orari
 diversi e il programma chiude subito quello sbagliato. Non devi toccare niente quando cambia l'ora.
+
+### Se GitHub non fa partire niente
+
+Le partenze programmate di GitHub sono "al meglio delle possibilità": vengono ritardate quando il
+servizio è carico e a volte saltate del tutto. Su questo progetto, finora, non ne è partita
+**nessuna**. Per questo c'è una rete di sicurezza sul Mac:
+
+```bash
+./installa-riserva.sh
+```
+
+Installa un promemoria di sistema che alle 9:00 e alle 18:15 lancia il bollettino al posto di
+GitHub. Se il Mac dorme, parte appena si sveglia; se è spento, quel turno salta.
+
+**Non può produrre doppioni**, e per due motivi indipendenti: prima di lanciare chiede a GitHub se
+il bollettino di oggi esiste già, e comunque passa l'ingresso `riserva`, che attiva nel motore le
+stesse regole delle partenze programmate — finestra oraria e controllo sull'archivio.
+
+Il diario è in `~/Library/Logs/borsa-riserva.log`. Per toglierlo:
+
+```bash
+launchctl bootout gui/$(id -u)/com.andrea.borsa.riserva && rm ~/Library/LaunchAgents/com.andrea.borsa.riserva.plist
+```
+
+Lo script installato vive in `~/Library/Application Support/Borsa/`, non nella cartella del
+progetto: macOS impedisce agli agenti di sistema di leggere dalla Scrivania, e da lì fallirebbe
+con "Operation not permitted". Dopo averlo modificato nel progetto, rilancia `./installa-riserva.sh`
+per aggiornare la copia.
 
 ### Quando scatta un avviso
 
