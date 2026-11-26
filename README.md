@@ -152,9 +152,22 @@ Il secondo lo generi tu, una volta:
 claude setup-token
 ```
 
-Si apre il browser, accedi col tuo account Claude, e ti stampa un gettone da incollare nello
-script di installazione. Senza quel gettone l'agente non parte e le schede restano all'estratto:
-l'app funziona comunque.
+Si apre il browser, accedi col tuo account Claude, e ti stampa un gettone. **Selezionalo con il
+mouse e premi Cmd+C**, anche se va a capo in mezzo: l'installatore se lo prende dagli appunti e
+rimette assieme le due metà. Copiarlo a mano dentro una richiesta non funzionerebbe, perché il
+ritorno a capo chiuderebbe la riga a metà gettone.
+
+Per aggiungerlo dopo, senza rifare tutto il resto:
+
+```bash
+./installa-mac.sh --solo-chiavi
+```
+
+Appena salvato viene provato con una domanda da niente: se Claude lo rifiuta — una copia
+incompleta, per esempio — lo script lo **toglie** invece di tenerlo, perché un gettone sbagliato
+che resta nel file è peggio di nessun gettone: l'agente fallirebbe ogni mattina in silenzio.
+
+Senza gettone l'agente non parte e le schede restano all'estratto: l'app funziona comunque.
 
 **Perché la notifica la manda GitHub.** Il Mac scrive il bollettino e lo carica, ma le iscrizioni
 dei dispositivi stanno nei segreti del repository, e i segreti non si possono rileggere da casa.

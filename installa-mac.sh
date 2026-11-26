@@ -43,6 +43,11 @@ scrivi_chiave() {   # scrivi_chiave NOME VALORE
   printf '%s=%s\n' "$nome" "$valore" >> "$tmp"
   mv "$tmp" "$SEGRETI"; chmod 600 "$SEGRETI"
 }
+togli_chiave() {    # togli_chiave NOME
+  local tmp; tmp=$(mktemp)
+  grep -v "^$1=" "$SEGRETI" > "$tmp" 2>/dev/null || true
+  mv "$tmp" "$SEGRETI"; chmod 600 "$SEGRETI"
+}
 
 if gh auth token >/dev/null 2>&1; then
   scrivi_chiave GH_TOKEN "$(gh auth token)"
@@ -55,29 +60,79 @@ fi
 if grep -q '^CLAUDE_CODE_OAUTH_TOKEN=.\+' "$SEGRETI" 2>/dev/null; then
   echo "  ✓ CLAUDE_CODE_OAUTH_TOKEN già presente"
 else
-  echo
-  echo "  L'agente ha bisogno di un gettone del tuo abbonamento Claude."
-  echo "  In un'altra finestra del Terminale esegui:"
-  echo
-  echo "      claude setup-token"
-  echo
-  echo "  Si apre il browser, accedi col tuo account, e ti stampa un gettone."
-  # Serve un terminale vero per incollare. Dove non c'è — perché lo script è
-  # stato lanciato da qualcos'altro — `read` fallisce subito, e lo stesso
-  # fallimento con set -e fermerebbe l'installazione a metà: meglio dirlo.
+  # Il gettone è lungo, e `claude setup-token` lo stampa andando a capo quando
+  # il Terminale è stretto. Copiandolo a mano ci finisce dentro un ritorno a
+  # capo: `read` si fermerebbe alla prima metà e butterebbe la seconda sulla
+  # riga di comando. Quindi lo si prende dagli appunti e si tiene solo ciò di
+  # cui un gettone è fatto, buttando spazi e ritorni a capo: le due metà
+  # tornano una.
+  ripulisci()    { tr -cd 'A-Za-z0-9_-'; }
+  pare_gettone() { case "${1:-}" in sk-ant-*) [ "${#1}" -ge 40 ] ;; *) false ;; esac; }
+
+  APPUNTI=""
+  if command -v pbpaste >/dev/null; then APPUNTI="$(pbpaste 2>/dev/null | ripulisci)"; fi
+
   GETTONE=""
-  if [ -t 0 ]; then
-    read -r -p "  Incollalo qui (o premi Invio per saltare): " GETTONE || true
+  if pare_gettone "$APPUNTI"; then
+    echo "  Negli appunti c'è un gettone: sk-ant-… , ${#APPUNTI} caratteri."
+    if [ -t 0 ]; then
+      RISPOSTA=""
+      read -r -p "  Premi Invio per usarlo, o incollane un altro: " RISPOSTA || true
+      RISPOSTA="$(printf '%s' "$RISPOSTA" | ripulisci)"
+      GETTONE="${RISPOSTA:-$APPUNTI}"
+    else
+      GETTONE="$APPUNTI"
+      echo "  (nessun terminale interattivo: uso quello degli appunti)"
+    fi
   else
-    echo "  (qui non c'è un terminale interattivo: la richiesta del gettone la salto)"
+    echo "  Serve un gettone del tuo abbonamento Claude. Per averne uno:"
+    echo
+    echo "      claude setup-token"
+    echo
+    echo "  Si apre il browser, accedi, e lo stampa. Poi selezionalo con il mouse"
+    echo "  (anche se va a capo: non importa), premi Cmd+C e rilancia questo script."
+    if [ -t 0 ]; then
+      RISPOSTA=""
+      read -r -p "  Oppure incollalo qui adesso (Invio per saltare): " RISPOSTA || true
+      GETTONE="$(printf '%s' "$RISPOSTA" | ripulisci)"
+    else
+      echo "  (qui non c'è un terminale interattivo: la richiesta la salto)"
+    fi
   fi
-  if [ -n "${GETTONE:-}" ]; then
-    scrivi_chiave CLAUDE_CODE_OAUTH_TOKEN "$GETTONE"
-    echo "  ✓ gettone salvato"
-  else
+
+  if [ -z "$GETTONE" ]; then
     echo "  ⚠ saltato: per ora le schede delle aziende resteranno all'estratto."
-    echo "    Quando vuoi, rilancia questo script e incollalo."
+    echo "    Quando vuoi, copia il gettone e rilancia:  ./installa-mac.sh --solo-chiavi"
+  elif ! pare_gettone "$GETTONE"; then
+    echo "  ✗ quello non sembra un gettone: dovrebbe iniziare con sk-ant- ed essere lungo."
+    echo "    Non lo salvo, così non ti ritrovi un agente che fallisce in silenzio."
+  else
+    scrivi_chiave CLAUDE_CODE_OAUTH_TOKEN "$GETTONE"
+    echo "  ✓ gettone salvato (${#GETTONE} caratteri)"
+    # Salvarlo non basta: se è sbagliato è meglio saperlo adesso che domattina.
+    printf '  lo provo con una domanda da niente… '
+    if CLAUDE_CODE_OAUTH_TOKEN="$GETTONE" ANTHROPIC_API_KEY="" \
+       claude -p 'Rispondi soltanto: ok' --model sonnet --output-format json --strict-mcp-config 2>/dev/null \
+       | grep -q '"is_error":false'; then
+      echo "funziona."
+    else
+      # Tenerlo sarebbe una trappola: al rilancio lo script direbbe "già
+      # presente" e non chiederebbe più niente, mentre l'agente fallisce ogni
+      # mattina in silenzio. Meglio tornare a non averlo.
+      togli_chiave CLAUDE_CODE_OAUTH_TOKEN
+      echo "RIFIUTATO."
+      echo "    Claude non l'ha accettato: forse la copia è incompleta. L'ho tolto,"
+      echo "    così al prossimo giro te lo richiede. Fanne un altro con"
+      echo "    'claude setup-token', copialo e rilancia:"
+      echo "        ./installa-mac.sh --solo-chiavi"
+    fi
   fi
+fi
+
+if [ "${1:-}" = "--solo-chiavi" ]; then
+  echo
+  echo "▸ Solo le chiavi, come chiesto. L'appuntamento era già installato."
+  exit 0
 fi
 
 # ── il clone su cui lavora l'agente ───────────────────────────────────────────
