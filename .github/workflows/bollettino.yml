@@ -14,6 +14,10 @@ on:
         type: choice
         default: 'bollettino mattina'
         options: ['bollettino mattina', 'bollettino sera', 'avviso']
+      riserva:
+        description: 'Lancio di riserva dal Mac: rispetta finestra e anti-doppione'
+        type: boolean
+        default: false
 
 concurrency:
   group: bollettino
@@ -52,7 +56,9 @@ jobs:
           VAPID_PRIVATA:   ${{ secrets.VAPID_PRIVATA }}
           VAPID_CONTATTO:  ${{ secrets.VAPID_CONTATTO }}
           ISCRIZIONE_PUSH: ${{ secrets.ISCRIZIONE_PUSH }}
-          DA_CALENDARIO:   ${{ github.event_name == 'schedule' && '1' || '' }}
+          # Il lancio di riserva dal Mac si comporta come una partenza programmata:
+          # rispetta la finestra oraria e non ripubblica un bollettino già fatto.
+          DA_CALENDARIO:   ${{ (github.event_name == 'schedule' || inputs.riserva) && '1' || '' }}
         run: node engine/esegui.mjs ${{ steps.scelta.outputs.modo }}
 
       - name: Salva i dati aggiornati
