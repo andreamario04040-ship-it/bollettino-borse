@@ -8,6 +8,7 @@
 // difesa è citare la fonte e il titolo, come si fa, così si risale sempre all'origine.
 
 import { pct, giornoRoma, oraItalia, minutiDaMezzanotteRoma } from './lingua.mjs';
+import { materialePerAzienda } from './agente.mjs';
 
 const AREE = {
   europa: ['^STOXX50E', 'FTSEMIB.MI', '^GDAXI', '^FCHI', '^FTSE'],
@@ -101,20 +102,44 @@ export function verifica({ report, mercati, notizie = [], adesso = new Date() })
   //      È la difesa contro l'invenzione: un modello che scrive un numero
   //      che non ha letto da nessuna parte se l'è inventato.
   const materiale = report.materialeAgente || [];
-  for (const a of report.aziende || []) {
-    if (!['agente', 'estratto'].includes(a.scritto) || !a.motivo) continue;
 
-    const ammessi = new Set();
+  // Due domande diverse, che all'inizio avevo confuso in una.
+  //
+  // «Se l'è inventata?» si risponde guardando TUTTO il materiale del giorno:
+  // le aziende arrivano all'agente in un'unica richiesta, quindi una cifra
+  // dell'articolo di un'altra l'ha letta davvero, e inventata non è.
+  //
+  // «L'ha presa in prestito?» si risponde guardando il materiale di quella
+  // azienda: una cifra che viene da un'altra scheda è vera ma fuori posto —
+  // come lo spread dei BTP raccontato sotto il nome di Stellantis.
+  //
+  // La prima blocca la pubblicazione, la seconda la segnala. Tenerle insieme
+  // significava bloccare per cifre giuste e non vedere le schede sporche.
+  const cifreDelGiorno = new Set();
+  const suoCifre = new Map();
+  for (const a of report.aziende || []) {
+    const sue = numeriDi(materialePerAzienda(a, materiale));
+    // I sommari, quando l'articolo non si è potuto leggere, non entrano nel
+    // materiale ma sono comunque roba di oggi: valgono.
     for (const t of a.titoli || []) {
       const fonte = materiale.find((m) => m.titolo === t.titolo || m.link === t.link);
-      for (const n of numeriDi(`${t.titolo} ${fonte?.testo || ''} ${fonte?.sommario || ''}`)) ammessi.add(n);
+      if (fonte?.sommario) for (const n of numeriDi(fonte.sommario)) sue.add(n);
     }
-    if (a.prezzo != null) { numeriDi(String(a.prezzo)).forEach((x) => ammessi.add(x)); }
-    if (a.giorno != null) { numeriDi(Math.abs(a.giorno).toFixed(2)).forEach((x) => ammessi.add(x)); numeriDi(Math.abs(a.giorno).toFixed(1)).forEach((x) => ammessi.add(x)); }
+    suoCifre.set(a.nome, sue);
+    for (const n of sue) cifreDelGiorno.add(n);
+  }
 
-    const inventati = [...numeriDi(a.motivo)].filter((x) => !ammessi.has(x));
-    if (inventati.length >= 3) segnala('blocco', 'agente', `${a.nome}: il riassunto contiene ${inventati.length} cifre che non sono nel materiale letto (${inventati.slice(0, 4).join(', ')})`);
-    else for (const x of inventati) segnala('avviso', 'agente', `${a.nome}: la cifra ${x} non compare nel materiale letto`);
+  for (const a of report.aziende || []) {
+    if (!['agente', 'estratto'].includes(a.scritto) || !a.motivo) continue;
+    const sue = suoCifre.get(a.nome) || new Set();
+    const scritte = [...numeriDi(a.motivo)];
+
+    const inventate = scritte.filter((x) => !cifreDelGiorno.has(x));
+    if (inventate.length >= 3) segnala('blocco', 'agente', `${a.nome}: il riassunto contiene ${inventate.length} cifre che non stanno in nessun articolo di oggi (${inventate.slice(0, 4).join(', ')})`);
+    else for (const x of inventate) segnala('avviso', 'agente', `${a.nome}: la cifra ${x} non sta in nessun articolo di oggi`);
+
+    const prestate = scritte.filter((x) => !sue.has(x) && cifreDelGiorno.has(x));
+    if (prestate.length) segnala('avviso', 'agente', `${a.nome}: ${prestate.length} cifr${prestate.length === 1 ? 'a viene' : 'e vengono'} dal materiale di un'altra azienda (${prestate.slice(0, 4).join(', ')}): la scheda esce dal suo argomento`);
 
     if (a.materialeScarso) segnala('nota', 'agente', `${a.nome}: l'agente dice che il materiale di oggi non bastava`);
   }

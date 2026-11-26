@@ -57,18 +57,37 @@ else
   exit 1
 fi
 
-if grep -q '^CLAUDE_CODE_OAUTH_TOKEN=.\+' "$SEGRETI" 2>/dev/null; then
-  echo "  ✓ CLAUDE_CODE_OAUTH_TOKEN già presente"
-else
-  # Il gettone è lungo, e `claude setup-token` lo stampa andando a capo quando
-  # il Terminale è stretto. Copiandolo a mano ci finisce dentro un ritorno a
-  # capo: `read` si fermerebbe alla prima metà e butterebbe la seconda sulla
-  # riga di comando. Quindi lo si prende dagli appunti e si tiene solo ciò di
-  # cui un gettone è fatto, buttando spazi e ritorni a capo: le due metà
-  # tornano una.
-  ripulisci()    { tr -cd 'A-Za-z0-9_-'; }
-  pare_gettone() { case "${1:-}" in sk-ant-*) [ "${#1}" -ge 40 ] ;; *) false ;; esac; }
+# Il gettone è lungo, e `claude setup-token` lo stampa andando a capo quando il
+# Terminale è stretto. Copiandolo dentro una richiesta, `read` si ferma al primo
+# ritorno a capo: resta metà gettone, che somiglia a un gettone intero e non lo
+# è. Quindi si prende dagli appunti tenendo solo ciò di cui un gettone è fatto —
+# le due metà tornano una — e soprattutto si prova, sempre, anche quando c'era
+# già. Un gettone sbagliato che resta nel file è peggio di nessun gettone:
+# l'agente fallisce ogni mattina in silenzio, e nessuno lo controlla più.
+ripulisci()    { tr -cd 'A-Za-z0-9_-'; }
+pare_gettone() { case "${1:-}" in sk-ant-*) [ "${#1}" -ge 40 ] ;; *) false ;; esac; }
+prova_gettone() {
+  CLAUDE_CODE_OAUTH_TOKEN="$1" ANTHROPIC_API_KEY="" \
+    claude -p 'Rispondi soltanto: ok' --model sonnet --output-format json --strict-mcp-config 2>/dev/null \
+    | grep -q '"is_error":false'
+}
 
+SALVATO="$(grep '^CLAUDE_CODE_OAUTH_TOKEN=' "$SEGRETI" 2>/dev/null | head -1 | cut -d= -f2-)"
+if [ -n "$SALVATO" ]; then
+  printf '  gettone già presente (%s caratteri), lo provo… ' "${#SALVATO}"
+  if prova_gettone "$SALVATO"; then
+    echo "funziona."
+    SALVATO=ok
+  else
+    echo "NON funziona."
+    echo "    L'ho tolto: era sbagliato o scaduto, e tenerlo avrebbe fatto fallire"
+    echo "    l'agente ogni mattina senza che nessuno se ne accorgesse."
+    togli_chiave CLAUDE_CODE_OAUTH_TOKEN
+    SALVATO=""
+  fi
+fi
+
+if [ "$SALVATO" != ok ]; then
   APPUNTI=""
   if command -v pbpaste >/dev/null; then APPUNTI="$(pbpaste 2>/dev/null | ripulisci)"; fi
 
@@ -101,29 +120,21 @@ else
   fi
 
   if [ -z "$GETTONE" ]; then
-    echo "  ⚠ saltato: per ora le schede delle aziende resteranno all'estratto."
+    echo "  ⚠ niente gettone: per ora le schede delle aziende resteranno all'estratto."
     echo "    Quando vuoi, copia il gettone e rilancia:  ./installa-mac.sh --solo-chiavi"
   elif ! pare_gettone "$GETTONE"; then
     echo "  ✗ quello non sembra un gettone: dovrebbe iniziare con sk-ant- ed essere lungo."
     echo "    Non lo salvo, così non ti ritrovi un agente che fallisce in silenzio."
   else
-    scrivi_chiave CLAUDE_CODE_OAUTH_TOKEN "$GETTONE"
-    echo "  ✓ gettone salvato (${#GETTONE} caratteri)"
-    # Salvarlo non basta: se è sbagliato è meglio saperlo adesso che domattina.
     printf '  lo provo con una domanda da niente… '
-    if CLAUDE_CODE_OAUTH_TOKEN="$GETTONE" ANTHROPIC_API_KEY="" \
-       claude -p 'Rispondi soltanto: ok' --model sonnet --output-format json --strict-mcp-config 2>/dev/null \
-       | grep -q '"is_error":false'; then
-      echo "funziona."
+    if prova_gettone "$GETTONE"; then
+      scrivi_chiave CLAUDE_CODE_OAUTH_TOKEN "$GETTONE"
+      echo "funziona, e l'ho salvato (${#GETTONE} caratteri)."
     else
-      # Tenerlo sarebbe una trappola: al rilancio lo script direbbe "già
-      # presente" e non chiederebbe più niente, mentre l'agente fallisce ogni
-      # mattina in silenzio. Meglio tornare a non averlo.
-      togli_chiave CLAUDE_CODE_OAUTH_TOKEN
       echo "RIFIUTATO."
-      echo "    Claude non l'ha accettato: forse la copia è incompleta. L'ho tolto,"
-      echo "    così al prossimo giro te lo richiede. Fanne un altro con"
-      echo "    'claude setup-token', copialo e rilancia:"
+      echo "    Claude non l'ha accettato, quindi non lo salvo: probabilmente la copia"
+      echo "    è incompleta. Il gettone va a capo sullo schermo e vanno presi tutti i"
+      echo "    pezzi. Fanne un altro con 'claude setup-token', riselezionalo e rilancia:"
       echo "        ./installa-mac.sh --solo-chiavi"
     fi
   fi

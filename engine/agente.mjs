@@ -70,10 +70,14 @@ REGOLE, in ordine di importanza.
 2. Copia i numeri esattamente come li trovi. Non arrotondare, non convertire, non stimare.
 3. Se il materiale non basta a dire cosa è successo, scrivilo apertamente — "i giornali citano l'azienda senza spiegare perché" — e segna materiale_scarso a true. È molto meglio di una frase vaga che finge di informare.
 4. Italiano semplice e diretto. Se usi un termine tecnico, spiegalo in mezza riga dentro la frase. Niente gergo da operatori: niente "rally", "sell-off", "guidance" senza spiegazione.
-5. Non dare mai indicazioni su comprare o vendere, e non prevedere il futuro. Racconta cosa è successo.
-6. Niente frasi di riempimento. Se una frase non aggiunge un fatto, toglila.`;
+5. Ogni azienda si racconta col materiale che sta sotto il suo nome. Il quadro generale del mercato entra solo se serve a spiegare quell'azienda, e detto in una riga. Non mettere nella scheda di un'azienda i fatti di un'altra, né quelli delle banche centrali o della politica: hanno la loro sezione, e chi legge si aspetta di trovare lì quella roba.
+6. Non dare mai indicazioni su comprare o vendere, e non prevedere il futuro. Racconta cosa è successo.
+7. Niente frasi di riempimento. Se una frase non aggiunge un fatto, toglila.`;
 
-function materialePerAzienda(a, notizie) {
+// Esportata perché la verifica deve poter guardare esattamente lo stesso testo
+// che ha letto l'agente. Ricostruirlo a parte significava scriverne due versioni
+// e vederle divergere: il prezzo qui è "149,30", e là diventava "149.3".
+export function materialePerAzienda(a, notizie) {
   const pezzi = (a.titoli || []).map((t) => {
     const completa = notizie.find((n) => n.titolo === t.titolo || n.link === t.link);
     const corpo = completa?.testo ? `\nTESTO: ${completa.testo}` : '\n(solo il titolo: l’articolo non si è potuto leggere)';
