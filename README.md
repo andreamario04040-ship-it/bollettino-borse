@@ -173,6 +173,47 @@ Per cambiare le soglie o spegnere gli avvisi, apri `config.json` alla voce `avvi
 
 ---
 
+## L'agente che legge gli articoli
+
+Le schede delle aziende non contengono più frasi scelte da espressioni regolari. A ogni
+bollettino un agente scarica il **testo vero** degli articoli del giorno su quelle aziende
+e scrive cosa è successo, con i fatti concreti: cifre, decisioni, prodotti, conti, mosse
+delle autorità.
+
+Serve una chiave dell'API di Claude, nel segreto `ANTHROPIC_API_KEY`:
+
+```bash
+gh secret set ANTHROPIC_API_KEY
+```
+
+**Senza chiave l'app funziona lo stesso**: le schede tornano alle frasi di base, e sotto
+ognuna c'è scritto *«Sintesi automatica: gli articoli non sono stati letti»*, così non si
+scambia un riempitivo per un riassunto.
+
+Il modello si sceglie in `config.json`, voce `agente`. Il predefinito è `claude-opus-5-5`.
+
+| Modello | Costo indicativo al mese (due bollettini al giorno) |
+|---|---|
+| `claude-opus-5-5` | circa 8 $ |
+| `claude-haiku-5-5` | circa 0,20 $ |
+
+Le stime valgono per una decina di articoli a giro; nelle giornate fitte salgono un po'.
+
+### Come ci si difende dalle invenzioni
+
+Un modello che riassume può inventare una cifra, ed è l'errore peggiore in un bollettino
+finanziario. Tre difese, in ordine:
+
+1. **Nel prompt**: scrivi solo fatti presenti nel materiale, copia i numeri esatti, e se il
+   materiale non basta dillo apertamente invece di riempire.
+2. **Nella verifica**: ogni cifra del riassunto viene cercata nel testo degli articoli che
+   l'agente ha letto. Una cifra che non c'è diventa un avviso; tre cifre **bloccano la
+   pubblicazione**.
+3. **Nell'app**: sotto ogni scheda restano i titoli con il link, per risalire sempre
+   all'origine.
+
+Quando l'agente stesso dichiara che il materiale era scarso, la scheda lo scrive.
+
 ## Quando l'app sbaglia
 
 Nessun controllo automatico può sapere se un giornale ha scritto il vero. Può però

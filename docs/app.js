@@ -3,7 +3,7 @@
 // Si alza a ogni modifica dell'app, insieme a docs/versione.json.
 // Serve perché un'app aggiunta alla schermata Home resta viva in memoria:
 // riaprendola dal selettore non ricarica, e resterebbe vecchia per giorni.
-const VERSIONE_APP = 12;
+const VERSIONE_APP = 13;
 
 const CHIAVE_PUBBLICA = 'BEX2Ep7AZJPgrIF_cHwKOWk9VSiE8OLd1WLxSJDANLNEbox4xiHYb5pgRslEapXEXZs35jhSmHRhrLcfFhyPwVk';
 const MENO = '−', SOTTILE = ' ';
@@ -289,6 +289,10 @@ function disegnaAziende() {
       </div>
       <p class="az-fa">${fuga(a.nome)} ${testo(a.fa)}.</p>
       <p class="az-motivo">${testo(a.motivo)}</p>
+      ${a.materialeScarso ? '<p class="az-nota">Oggi i giornali la citano senza spiegare bene cosa sia successo.</p>' : ''}
+      <p class="az-firma">${a.scritto === 'agente'
+        ? 'Riassunto dagli articoli di oggi'
+        : 'Sintesi automatica: gli articoli non sono stati letti'}</p>
       ${link ? `<div class="fonti-link">${link}</div>` : ''}
     </article>`;
   }).join('');

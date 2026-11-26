@@ -123,7 +123,8 @@ export async function aziendeDelGiorno(notizie, quante = 6) {
     return {
       nome: a.nome, settore: a.settore, simbolo: a.cnbc, fa: a.fa, logo: a.dominio ? slug(a.nome) : null,
       prezzo: q?.prezzo ?? null, giorno: q?.giorno ?? null,
-      motivo: tipo ? tipo.dillo(a) : `È fra i nomi più citati di oggi, senza un fatto singolo che spieghi tutto.`,
+      motivo: tipo ? tipo.dillo(a) : `I giornali la citano oggi, ma senza che emerga un fatto singolo.`,
+      scritto: 'regole',
       titoli: titoli.slice(0, 2).map((n) => ({ fonte: n.fonte, titolo: taglia(n.titolo, 130), link: n.link })),
     };
   });

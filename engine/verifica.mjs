@@ -22,6 +22,14 @@ function formeDi(v) {
   return f;
 }
 
+// I numeri che un riassunto scritto dall'agente può legittimamente contenere:
+// quelli che stanno nel materiale che ha letto, più la sua quotazione.
+function numeriDi(testo) {
+  return new Set((String(testo).match(/\d[\d.,]*/g) || [])
+    .map((x) => x.replace(/[.,](?=\d{3}\b)/g, '').replace(',', '.').replace(/\.0+$/, ''))
+    .filter((x) => x.replace('.', '').length >= 2));
+}
+
 export function verifica({ report, mercati, notizie = [], adesso = new Date() }) {
   const problemi = [];
   const segnala = (gravita, dove, cosa) => problemi.push({ gravita, dove, cosa });
@@ -87,6 +95,28 @@ export function verifica({ report, mercati, notizie = [], adesso = new Date() })
     if (!a.simbolo) segnala('nota', 'aziende', `${a.nome}: nessun simbolo in archivio, l'app dirà "quotazione non disponibile"`);
     if (!a.titoli?.length) segnala('avviso', 'aziende', `${a.nome} compare senza nessuna notizia che lo giustifichi`);
     for (const t of a.titoli || []) if (!t.link) segnala('avviso', 'aziende', `${a.nome}: notizia senza link, non verificabile`);
+  }
+
+  // ——— 5b. I riassunti dell'agente: ogni cifra deve stare nel materiale letto.
+  //      È la difesa contro l'invenzione: un modello che scrive un numero
+  //      che non ha letto da nessuna parte se l'è inventato.
+  const materiale = report.materialeAgente || [];
+  for (const a of report.aziende || []) {
+    if (a.scritto !== 'agente' || !a.motivo) continue;
+
+    const ammessi = new Set();
+    for (const t of a.titoli || []) {
+      const fonte = materiale.find((m) => m.titolo === t.titolo || m.link === t.link);
+      for (const n of numeriDi(`${t.titolo} ${fonte?.testo || ''} ${fonte?.sommario || ''}`)) ammessi.add(n);
+    }
+    if (a.prezzo != null) { numeriDi(String(a.prezzo)).forEach((x) => ammessi.add(x)); }
+    if (a.giorno != null) { numeriDi(Math.abs(a.giorno).toFixed(2)).forEach((x) => ammessi.add(x)); numeriDi(Math.abs(a.giorno).toFixed(1)).forEach((x) => ammessi.add(x)); }
+
+    const inventati = [...numeriDi(a.motivo)].filter((x) => !ammessi.has(x));
+    if (inventati.length >= 3) segnala('blocco', 'agente', `${a.nome}: il riassunto contiene ${inventati.length} cifre che non sono nel materiale letto (${inventati.slice(0, 4).join(', ')})`);
+    else for (const x of inventati) segnala('avviso', 'agente', `${a.nome}: la cifra ${x} non compare nel materiale letto`);
+
+    if (a.materialeScarso) segnala('nota', 'agente', `${a.nome}: l'agente dice che il materiale di oggi non bastava`);
   }
 
   // ——— 6. Le notizie citate devono essere fra quelle lette oggi.

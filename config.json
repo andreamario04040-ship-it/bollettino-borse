@@ -10,6 +10,11 @@
     "sera": "18:15",
     "nota": "Gli orari sono in ora italiana; nel workflow sono convertiti in UTC."
   },
+  "agente": {
+    "modello": "claude-opus-5-5",
+    "massimo_articoli": 20,
+    "nota": "Il modello che legge gli articoli e scrive i riassunti. claude-opus-5-5 è il più capace; claude-haiku-5-5 costa molto meno. Senza la chiave ANTHROPIC_API_KEY l'agente non parte e le schede usano le frasi di base."
+  },
   "aziende": {
     "quante": 6,
     "nota": "Quante aziende mostrare nella sezione di approfondimento della home."

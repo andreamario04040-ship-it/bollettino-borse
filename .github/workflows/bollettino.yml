@@ -55,6 +55,9 @@ jobs:
           VAPID_PUBBLICA:  ${{ secrets.VAPID_PUBBLICA }}
           VAPID_PRIVATA:   ${{ secrets.VAPID_PRIVATA }}
           VAPID_CONTATTO:  ${{ secrets.VAPID_CONTATTO }}
+          # Senza questa chiave l'agente non parte e le schede delle aziende
+          # restano alle frasi di base: il bollettino esce lo stesso.
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           ISCRIZIONE_PUSH:   ${{ secrets.ISCRIZIONE_PUSH }}
           ISCRIZIONE_PUSH_2: ${{ secrets.ISCRIZIONE_PUSH_2 }}
           ISCRIZIONE_PUSH_3: ${{ secrets.ISCRIZIONE_PUSH_3 }}

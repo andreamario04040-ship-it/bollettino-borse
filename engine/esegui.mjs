@@ -10,6 +10,8 @@ import { serieVuota } from './serie.mjs';
 import { scaricaNotizie } from './notizie.mjs';
 import { costruisciReport } from './report.mjs';
 import { aziendeDelGiorno } from './aziende.mjs';
+import { arricchisci } from './articoli.mjs';
+import { riassumiAziende } from './agente.mjs';
 import { verifica, stampaVerifica } from './verifica.mjs';
 import { leggiCorrezioni, daNotificare, segnaNotificate, notificaDi } from './correzioni.mjs';
 import { valutaAvviso, statoVuoto } from './avvisi.mjs';
@@ -91,12 +93,17 @@ if (modo === 'avviso') {
     ...r.sezioni.filter((s) => s.id === 'perche' || s.id === 'contesto'),
   ];
   r.utente = config.utente || null;
-  r.aziende = await aziendeDelGiorno(notizie, 3);
+  const az = await aziendeDelGiorno(notizie, 3);
+  const link = new Set(az.flatMap((a) => (a.titoli || []).map((t) => t.link)));
+  const testi = await arricchisci(notizie.filter((n) => link.has(n.link)), 8);
+  r.aziende = await riassumiAziende(az, testi, process.env, config.agente?.modello);
+  r.materialeAgente = testi;
   const controllo = stampaVerifica(verifica({ report: r, mercati, notizie, adesso }));
   if (controllo.blocchi) { console.error('  Non mando l’avviso: i dati non tornano.'); process.exit(1); }
 
-  await scriviJson(dentro('docs/data/report.json'), r);
-  await scriviJson(dentro(`docs/data/storico/${giornoRoma(adesso)}-avviso-${esito.evento.motivo}.json`), r);
+  const { materialeAgente: _m, ...avvisoDaPubblicare } = r;
+  await scriviJson(dentro('docs/data/report.json'), avvisoDaPubblicare);
+  await scriviJson(dentro(`docs/data/storico/${giornoRoma(adesso)}-avviso-${esito.evento.motivo}.json`), avvisoDaPubblicare);
   await inviaNotifica({ ...r.notifica, tipo: 'avviso' });
   console.log(`  AVVISO inviato: ${esito.evento.motivo} — ${esito.notifica.titolo}`);
   process.exit(0);
@@ -122,7 +129,13 @@ if (daCalendario) {
 
 const report = costruisciReport(mercati, notizie, tipo, adesso);
 report.utente = config.utente || null;   // serve all'app per il saluto
-report.aziende = await aziendeDelGiorno(notizie, config.aziende?.quante ?? 6);
+// Le aziende: prima si trovano, poi si legge il testo degli articoli che le
+// riguardano, poi l'agente scrive il riassunto di ciascuna.
+const aziendeTrovate = await aziendeDelGiorno(notizie, config.aziende?.quante ?? 6);
+const serviranno = new Set(aziendeTrovate.flatMap((a) => (a.titoli || []).map((t) => t.link)));
+const conTesto = await arricchisci(notizie.filter((n) => serviranno.has(n.link)), config.agente?.massimo_articoli ?? 20);
+report.aziende = await riassumiAziende(aziendeTrovate, conTesto, process.env, config.agente?.modello);
+report.materialeAgente = conTesto;   // serve alla verifica, non viene pubblicato
 
 // Niente esce senza controllo: se un numero scritto non corrisponde ai dati,
 // è meglio nessun bollettino che un bollettino falso.
@@ -132,8 +145,9 @@ if (blocchi) {
   process.exit(1);
 }
 
-await scriviJson(dentro('docs/data/report.json'), report);
-await scriviJson(archivio, report);
+const { materialeAgente, ...daPubblicare } = report;
+await scriviJson(dentro('docs/data/report.json'), daPubblicare);
+await scriviJson(archivio, daPubblicare);
 
 // Un bollettino azzera il contatore degli avvisi del giorno quando cambia la data.
 const stato = await leggiJson(dentro('docs/data/stato.json'), statoVuoto());
