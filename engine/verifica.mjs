@@ -27,6 +27,10 @@ function formeDi(v) {
 // quelli che stanno nel materiale che ha letto, più la sua quotazione.
 function numeriDi(testo) {
   return new Set((String(testo).match(/\d[\d.,]*/g) || [])
+    // La punteggiatura della frase si attacca al numero: "vale 149,30, in calo"
+    // dava il valore «149.30,», che non somiglia a nessun dato. Va tolta prima
+    // di tutto il resto, altrimenti una cifra giusta sembra inventata.
+    .map((x) => x.replace(/[.,]+$/, ''))
     .map((x) => x.replace(/[.,](?=\d{3}\b)/g, '').replace(',', '.').replace(/\.0+$/, ''))
     .filter((x) => x.replace('.', '').length >= 2));
 }

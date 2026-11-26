@@ -70,9 +70,10 @@ REGOLE, in ordine di importanza.
 2. Copia i numeri esattamente come li trovi. Non arrotondare, non convertire, non stimare.
 3. Se il materiale non basta a dire cosa è successo, scrivilo apertamente — "i giornali citano l'azienda senza spiegare perché" — e segna materiale_scarso a true. È molto meglio di una frase vaga che finge di informare.
 4. Italiano semplice e diretto. Se usi un termine tecnico, spiegalo in mezza riga dentro la frase. Niente gergo da operatori: niente "rally", "sell-off", "guidance" senza spiegazione.
-5. Ogni azienda si racconta col materiale che sta sotto il suo nome. Il quadro generale del mercato entra solo se serve a spiegare quell'azienda, e detto in una riga. Non mettere nella scheda di un'azienda i fatti di un'altra, né quelli delle banche centrali o della politica: hanno la loro sezione, e chi legge si aspetta di trovare lì quella roba.
-6. Non dare mai indicazioni su comprare o vendere, e non prevedere il futuro. Racconta cosa è successo.
-7. Niente frasi di riempimento. Se una frase non aggiunge un fatto, toglila.`;
+5. La prima frase parla dell'azienda e di cosa le è successo, mai del mercato in generale: chi legge ha appena letto il nome dell'azienda e si aspetta di sapere di lei. L'andamento dell'indice, se serve, viene dopo e in una riga.
+6. Ogni azienda si racconta col materiale che sta sotto il suo nome. Il quadro generale del mercato entra solo se serve a spiegare quell'azienda, e detto in una riga. Non mettere nella scheda di un'azienda i fatti di un'altra, né quelli delle banche centrali o della politica: hanno la loro sezione, e chi legge si aspetta di trovare lì quella roba.
+7. Non dare mai indicazioni su comprare o vendere, e non prevedere il futuro. Racconta cosa è successo.
+8. Niente frasi di riempimento. Se una frase non aggiunge un fatto, toglila.`;
 
 // Esportata perché la verifica deve poter guardare esattamente lo stesso testo
 // che ha letto l'agente. Ricostruirlo a parte significava scriverne due versioni
