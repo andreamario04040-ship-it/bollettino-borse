@@ -1,6 +1,12 @@
-// Punto d'ingresso. Due modi:
+// Punto d'ingresso. Tre modi:
 //   node engine/esegui.mjs bollettino [mattina|sera]   → il bollettino fisso
 //   node engine/esegui.mjs avviso                      → controllo del giorno, manda solo se serve
+//   node engine/esegui.mjs notifica                    → manda la notifica di un bollettino già scritto
+//
+// Il terzo serve al Mac. Lì l'agente scrive il bollettino usando l'abbonamento
+// Claude, ma le iscrizioni alle notifiche stanno nei segreti di GitHub e da casa
+// non si possono leggere. Quindi il Mac scrive, carica, e poi chiede a GitHub di
+// fare partire solo l'invio.
 
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -45,10 +51,45 @@ console.log(`\n▸ ${modo} — ${dataItalia(adesso)} ore ${oraItalia(adesso)} (o
 // A non farne partire due è il controllo sotto, che guarda se è già stato pubblicato.
 const FINESTRE = {
   mattina: { da: '08:00', a: '12:30' },
+  // Il ripiego: è lo stesso bollettino del mattino, ma la sua finestra si apre
+  // solo a mezzogiorno, quando il Mac non l'ha ancora fatto e l'agente è perso.
+  mezzogiorno: { da: '11:55', a: '13:10' },
   sera: { da: '17:30', a: '21:30' },
 };
 const inMinuti = (hhmm) => { const [h, m] = hhmm.split(':').map(Number); return h * 60 + m; };
 const daCalendario = !!process.env.DA_CALENDARIO;
+
+// ─── modo "notifica": non si genera niente, si manda quello che c'è già ───────
+if (modo === 'notifica') {
+  const r = await leggiJson(dentro('docs/data/report.json'));
+  if (!r?.notifica?.titolo) {
+    console.error('  non c’è nessun bollettino da notificare.');
+    process.exit(1);
+  }
+
+  // Lo stesso bollettino non si annuncia due volte: se il Mac chiede l'invio e
+  // qualcosa fa partire la richiesta un'altra volta, la seconda non disturba.
+  const giaFatto = await leggiJson(dentro('docs/data/notificato.json'), {});
+  if (giaFatto.generatoIl && giaFatto.generatoIl === r.generatoIl) {
+    console.log(`  il bollettino ${r.tipo} di ${r.data} è già stato annunciato: non lo ripeto.`);
+    process.exit(0);
+  }
+
+  console.log(`  » ${r.notifica.titolo}\n    ${r.notifica.corpo}`);
+  const esito = await inviaNotifica({ ...r.notifica, tipo: 'bollettino' });
+  if (esito.inviate > 0) await scriviJson(dentro('docs/data/notificato.json'), { generatoIl: r.generatoIl, quando: new Date().toISOString() });
+
+  const daDire = daNotificare(await leggiCorrezioni());
+  if (daDire.length) {
+    const e2 = await inviaNotifica(notificaDi(daDire));
+    if (e2.inviate > 0) {
+      await segnaNotificate(daDire.map((c) => c.id));
+      console.log(`  correzioni: notificata${daDire.length > 1 ? 'e ' + daDire.length : ''}`);
+    }
+  }
+  console.log('  fatto.\n');
+  process.exit(esito.inviate > 0 ? 0 : 1);
+}
 
 const serieSalvata = await leggiJson(dentro('docs/data/serie.json'), serieVuota());
 const oggi = giornoRoma(adesso);
@@ -97,7 +138,7 @@ if (modo === 'avviso') {
   const az = await aziendeDelGiorno(notizie, 3);
   const link = new Set(az.flatMap((a) => (a.titoli || []).map((t) => t.link)));
   const testi = await arricchisci(notizie.filter((n) => link.has(n.link)), 8);
-  r.aziende = await riassumiAziende(riassumiConEstratto(az, testi), testi, process.env, config.agente?.modello);
+  r.aziende = await riassumiAziende(riassumiConEstratto(az, testi), testi, process.env, config.agente?.modello, config.agente?.modello_cli);
   r.materialeAgente = testi;
   const controllo = stampaVerifica(verifica({ report: r, mercati, notizie, adesso }));
   if (controllo.blocchi) { console.error('  Non mando l’avviso: i dati non tornano.'); process.exit(1); }
@@ -111,14 +152,15 @@ if (modo === 'avviso') {
 }
 
 // Bollettino fisso: mattina o sera, dedotto dall'ora se non specificato.
-const tipo = quale || (minutiDaMezzanotteRoma(adesso) < 13 * 60 ? 'mattina' : 'sera');
+const richiesto = quale || (minutiDaMezzanotteRoma(adesso) < 13 * 60 ? 'mattina' : 'sera');
+const tipo = richiesto === 'mezzogiorno' ? 'mattina' : richiesto;
 const archivio = dentro(`docs/data/storico/${giornoRoma(adesso)}-${tipo}.json`);
 
 if (daCalendario) {
-  const f = FINESTRE[tipo];
+  const f = FINESTRE[richiesto];
   const ora = minutiDaMezzanotteRoma(adesso);
   if (f && (ora < inMinuti(f.da) || ora > inMinuti(f.a))) {
-    console.log(`  in Italia sono le ${oraItalia(adesso)}: fuori dalla finestra del bollettino ${tipo} (${f.da}–${f.a}).`);
+    console.log(`  in Italia sono le ${oraItalia(adesso)}: fuori dalla finestra del bollettino ${richiesto} (${f.da}–${f.a}).`);
     process.exit(0);
   }
   // Due appuntamenti coprono ora solare e ora legale: il secondo non deve ripetere il primo.
@@ -139,7 +181,7 @@ const conTesto = await arricchisci(notizie.filter((n) => serviranno.has(n.link))
 // senza chiave si estraggono le frasi vere degli articoli; se non c'è nemmeno il
 // testo, resta la frase di base, che lo dichiara.
 const conEstratto = riassumiConEstratto(aziendeTrovate, conTesto);
-report.aziende = await riassumiAziende(conEstratto, conTesto, process.env, config.agente?.modello);
+report.aziende = await riassumiAziende(conEstratto, conTesto, process.env, config.agente?.modello, config.agente?.modello_cli);
 report.materialeAgente = conTesto;   // serve alla verifica, non viene pubblicato
 
 // Niente esce senza controllo: se un numero scritto non corrisponde ai dati,
@@ -159,7 +201,8 @@ const stato = await leggiJson(dentro('docs/data/stato.json'), statoVuoto());
 if (stato.giorno !== giornoRoma(adesso)) await scriviJson(dentro('docs/data/stato.json'), { ...statoVuoto(), giorno: giornoRoma(adesso) });
 
 console.log(`  » ${report.notifica.titolo}\n    ${report.notifica.corpo}`);
-await inviaNotifica({ ...report.notifica, tipo: 'bollettino' });
+const esitoInvio = await inviaNotifica({ ...report.notifica, tipo: 'bollettino' });
+if (esitoInvio.inviate > 0) await scriviJson(dentro('docs/data/notificato.json'), { generatoIl: report.generatoIl, quando: new Date().toISOString() });
 
 // Se l'app ha detto qualcosa di sbagliato e la correzione non è ancora stata
 // comunicata, parte una notifica a parte. Una sola volta, qualunque sia il numero.

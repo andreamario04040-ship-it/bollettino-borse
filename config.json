@@ -12,8 +12,9 @@
   },
   "agente": {
     "modello": "claude-opus-5-5",
+    "modello_cli": "sonnet",
     "massimo_articoli": 20,
-    "nota": "Il modello che legge gli articoli e scrive i riassunti. claude-opus-5-5 è il più capace; claude-haiku-5-5 costa molto meno. Senza la chiave ANTHROPIC_API_KEY l'agente non parte e le schede usano le frasi di base."
+    "nota": "Chi legge gli articoli e scrive i riassunti delle aziende. Due strade: con la chiave ANTHROPIC_API_KEY si usa 'modello' e si paga a consumo (serve a GitHub, che non ha altro modo); sul Mac si usa il programma `claude` con l'abbonamento già pagato, e lì vale 'modello_cli' (alias: opus, sonnet, fable). Senza nessuna delle due le schede restano all'estratto: le frasi vere degli articoli, scelte senza intelligenza artificiale."
   },
   "aziende": {
     "quante": 6,

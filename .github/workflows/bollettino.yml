@@ -5,6 +5,7 @@ on:
     # GitHub usa sempre l'ora UTC. L'Italia è UTC+1 d'inverno e UTC+2 d'estate,
     # quindi ogni appuntamento ha due orari e il programma esce subito da quello sbagliato.
     - cron: '0 7,8 * * 1-5'        # bollettino del mattino, ore 9:00 italiane
+    - cron: '0 10,11 * * 1-5'      # ripiego di mezzogiorno, se il Mac non ha pubblicato
     - cron: '15 16,17 * * 1-5'     # bollettino della sera, ore 18:15 italiane
     - cron: '20 7-20 * * 1-5'      # controllo del giorno: manda solo se c'è un movimento grosso
   workflow_dispatch:
@@ -13,7 +14,7 @@ on:
         description: 'Cosa eseguire'
         type: choice
         default: 'bollettino mattina'
-        options: ['bollettino mattina', 'bollettino sera', 'avviso']
+        options: ['bollettino mattina', 'bollettino mezzogiorno', 'bollettino sera', 'avviso', 'solo notifica']
       riserva:
         description: 'Lancio di riserva dal Mac: rispetta finestra e anti-doppione'
         type: boolean
@@ -42,13 +43,22 @@ jobs:
 
       - name: Decidi cosa eseguire
         id: scelta
+        env:
+          CHIESTO: ${{ inputs.modo || 'bollettino mattina' }}
         run: |
           case "${{ github.event.schedule }}" in
-            "0 7,8 * * 1-5")     echo "modo=bollettino mattina" >> "$GITHUB_OUTPUT" ;;
-            "15 16,17 * * 1-5")  echo "modo=bollettino sera"    >> "$GITHUB_OUTPUT" ;;
-            "20 7-20 * * 1-5")   echo "modo=avviso"             >> "$GITHUB_OUTPUT" ;;
-            *)                   echo "modo=${{ inputs.modo || 'bollettino mattina' }}" >> "$GITHUB_OUTPUT" ;;
+            "0 7,8 * * 1-5")     modo="bollettino mattina"     ;;
+            "0 10,11 * * 1-5")   modo="bollettino mezzogiorno" ;;
+            "15 16,17 * * 1-5")  modo="bollettino sera"        ;;
+            "20 7-20 * * 1-5")   modo="avviso"                 ;;
+            # Richiesta a mano, o dal Mac. "solo notifica" non genera niente:
+            # manda la notifica di un bollettino che l'agente ha già scritto e caricato.
+            *) case "$CHIESTO" in
+                 "solo notifica") modo="notifica" ;;
+                 *)               modo="$CHIESTO" ;;
+               esac ;;
           esac
+          echo "modo=$modo" >> "$GITHUB_OUTPUT"
 
       - name: Genera e invia
         env:
@@ -80,6 +90,8 @@ jobs:
           # il messaggio dice quello che è successo davvero.
           if git diff --cached --name-only | grep -q 'docs/data/storico/'; then
             git commit -m "Bollettino del $(TZ=Europe/Rome date '+%d/%m/%Y alle %H:%M')"
+          elif [ "$(git diff --cached --name-only)" = "docs/data/notificato.json" ]; then
+            git commit -m "Notifica inviata il $(TZ=Europe/Rome date '+%d/%m/%Y alle %H:%M')"
           else
             git commit -m "Prezzi aggiornati il $(TZ=Europe/Rome date '+%d/%m/%Y alle %H:%M')"
           fi

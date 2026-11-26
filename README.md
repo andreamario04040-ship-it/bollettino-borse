@@ -122,33 +122,75 @@ fra i due appuntamenti pensa il controllo sull'archivio.
 GitHub ragiona in UTC e l'Italia cambia ora due volte l'anno: ogni appuntamento parte a due orari
 diversi e il programma chiude subito quello sbagliato. Non devi toccare niente quando cambia l'ora.
 
-### Se GitHub non fa partire niente
+### Chi fa il lavoro, e dove
 
 Le partenze programmate di GitHub sono "al meglio delle possibilità": vengono ritardate quando il
 servizio è carico e a volte saltate del tutto. Su questo progetto, finora, non ne è partita
-**nessuna**. Per questo c'è una rete di sicurezza sul Mac:
+**nessuna**. E comunque in cloud l'agente che legge gli articoli dovrebbe pagare la chiave API.
+
+Quindi il turno di punta lo fa il Mac, dove l'abbonamento Claude c'è già:
 
 ```bash
-./installa-riserva.sh
+./installa-mac.sh
 ```
 
-Installa un promemoria di sistema che alle 9:00 e alle 18:15 lancia il bollettino al posto di
-GitHub. Se il Mac dorme, parte appena si sveglia; se è spento, quel turno salta.
+| Quando | Chi lavora | Le schede delle aziende |
+|---|---|---|
+| Accensione o risveglio del Mac, dalle 6 alle 12 | l'agente, qui in casa | riassunto scritto leggendo gli articoli |
+| Da mezzogiorno alle 13, se non è ancora uscito | GitHub | estratto: le frasi vere degli articoli |
+| Dalle 17:30 alle 21:30 | l'agente, se il Mac è acceso | riassunto, altrimenti estratto |
 
-**Non può produrre doppioni**, e per due motivi indipendenti: prima di lanciare chiede a GitHub se
-il bollettino di oggi esiste già, e comunque passa l'ingresso `riserva`, che attiva nel motore le
-stesse regole delle partenze programmate — finestra oraria e controllo sull'archivio.
+L'installazione mette tre cose a posto: una copia dello script in `~/Library/Application Support/Borsa/`
+(macOS impedisce ai programmi avviati automaticamente di leggere dalla Scrivania, e da lì fallirebbero
+con "Operation not permitted"), un clone del progetto nella stessa cartella — l'agente lavora là, non
+nella tua — e un file `segreti.env` leggibile solo da te con i due gettoni che servono a lavorare
+senza nessuno davanti allo schermo: `GH_TOKEN` (preso da `gh`) e `CLAUDE_CODE_OAUTH_TOKEN`.
 
-Il diario è in `~/Library/Logs/borsa-riserva.log`. Per toglierlo:
+Il secondo lo generi tu, una volta:
 
 ```bash
-launchctl bootout gui/$(id -u)/com.andrea.borsa.riserva && rm ~/Library/LaunchAgents/com.andrea.borsa.riserva.plist
+claude setup-token
 ```
 
-Lo script installato vive in `~/Library/Application Support/Borsa/`, non nella cartella del
-progetto: macOS impedisce agli agenti di sistema di leggere dalla Scrivania, e da lì fallirebbe
-con "Operation not permitted". Dopo averlo modificato nel progetto, rilancia `./installa-riserva.sh`
-per aggiornare la copia.
+Si apre il browser, accedi col tuo account Claude, e ti stampa un gettone da incollare nello
+script di installazione. Senza quel gettone l'agente non parte e le schede restano all'estratto:
+l'app funziona comunque.
+
+**Perché la notifica la manda GitHub.** Il Mac scrive il bollettino e lo carica, ma le iscrizioni
+dei dispositivi stanno nei segreti del repository, e i segreti non si possono rileggere da casa.
+Così appena l'agente ha finito il Mac chiede a GitHub di fare partire solo l'invio
+(`modo: solo notifica`): ci passa circa un minuto.
+
+**Non può produrre doppioni**, e per tre motivi indipendenti: prima di muoversi chiede a GitHub se
+il bollettino di oggi esiste già; il motore rispetta finestra oraria e archivio quando riceve
+`DA_CALENDARIO`; e lo stesso bollettino non viene annunciato due volte, perché `notificato.json`
+ricorda qual era l'ultimo.
+
+Il diario è in `~/Library/Logs/borsa.log`:
+
+```bash
+tail -f ~/Library/Logs/borsa.log
+```
+
+Per provarlo subito, per vederlo e per toglierlo:
+
+```bash
+launchctl kickstart -k gui/$(id -u)/com.andrea.borsa
+```
+
+```bash
+launchctl print gui/$(id -u)/com.andrea.borsa | head -20
+```
+
+```bash
+launchctl bootout gui/$(id -u)/com.andrea.borsa && rm ~/Library/LaunchAgents/com.andrea.borsa.plist
+```
+
+Dopo aver modificato `borsa-mac.sh` nel progetto, rilancia `./installa-mac.sh` per aggiornare la copia.
+
+Resta un limite che nessuna riga di codice può togliere: **se il Mac è spento e GitHub non fa
+partire niente, quel giorno il bollettino non esce.** Lo vedi dal diario, che in quel caso non ha
+nessuna riga per quella mattina.
 
 ### Quando scatta un avviso
 
@@ -179,7 +221,7 @@ Tre livelli, dal migliore al sempre disponibile. Il primo che riesce vince.
 
 | Livello | Come | Costo |
 |---|---|---|
-| **Riassunto scritto** | Un modello legge gli articoli e racconta cosa è successo | a consumo, serve `ANTHROPIC_API_KEY` |
+| **Riassunto scritto** | Un modello legge gli articoli e racconta cosa è successo | **zero** col tuo abbonamento sul Mac; a consumo con `ANTHROPIC_API_KEY` |
 | **Estratto dagli articoli** | Si scelgono le frasi dell'articolo che parlano davvero dell'azienda | **zero** |
 | **Frase di base** | Nessun articolo leggibile: la scheda lo dichiara | zero |
 
@@ -200,17 +242,22 @@ bollettino un agente scarica il **testo vero** degli articoli del giorno su quel
 e scrive cosa è successo, con i fatti concreti: cifre, decisioni, prodotti, conti, mosse
 delle autorità.
 
-Serve una chiave dell'API di Claude, nel segreto `ANTHROPIC_API_KEY`:
+Due motori, provati in quest'ordine.
+
+**1. L'abbonamento Claude, sul Mac.** Usa il programma `claude` da riga di comando, che non è
+l'applicazione con la finestra: non deve essere aperta, non deve girare in background. Viene
+lanciato, lavora, finisce. Non costa niente in più perché consuma l'abbonamento già pagato, ma
+gira solo in casa e solo se il Mac è acceso. Il modello si sceglie in `config.json`, voce
+`agente.modello_cli`; il predefinito è `sonnet`, che per riassumere testo già fornito basta e
+lascia margine nella giornata.
+
+**2. La chiave API, su GitHub.** È l'unica strada in cloud, e si paga a consumo:
 
 ```bash
 gh secret set ANTHROPIC_API_KEY
 ```
 
-**Senza chiave l'app funziona lo stesso**: le schede tornano alle frasi di base, e sotto
-ognuna c'è scritto *«Sintesi automatica: gli articoli non sono stati letti»*, così non si
-scambia un riempitivo per un riassunto.
-
-Il modello si sceglie in `config.json`, voce `agente`. Il predefinito è `claude-opus-5-5`.
+Il modello è in `config.json`, voce `agente.modello`.
 
 | Modello | Costo indicativo al mese (due bollettini al giorno) |
 |---|---|
@@ -218,6 +265,14 @@ Il modello si sceglie in `config.json`, voce `agente`. Il predefinito è `claude
 | `claude-haiku-5-5` | circa 0,20 $ |
 
 Le stime valgono per una decina di articoli a giro; nelle giornate fitte salgono un po'.
+
+**Senza nessuno dei due l'app funziona lo stesso**: le schede tornano all'estratto — le frasi vere
+degli articoli — e sotto ognuna c'è scritto da dove vengono, così non si scambia un riempitivo per
+un riassunto.
+
+L'agente non vede altro che il materiale della giornata: gli strumenti sono disattivati
+(`--disallowed-tools`), gira fuori dalla cartella del progetto e non ha accesso a internet.
+Non può andarsi a cercare niente, e quindi non può raccontare niente che non abbia letto oggi.
 
 ### Come ci si difende dalle invenzioni
 
