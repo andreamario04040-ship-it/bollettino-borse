@@ -17,8 +17,17 @@ function leggiIscrizioni(env) {
     for (const x of (Array.isArray(v) ? v : [v])) if (x && x.endpoint) trovate.push(x);
   }
   // Lo stesso dispositivo iscritto due volte riceverebbe due notifiche uguali.
+  // Lo si dice a voce alta: senza, chi aggiunge un dispositivo e ne vede
+  // sempre uno solo non ha modo di capire perché.
   const viste = new Set();
-  return trovate.filter((x) => !viste.has(x.endpoint) && viste.add(x.endpoint));
+  const uniche = trovate.filter((x) => !viste.has(x.endpoint) && viste.add(x.endpoint));
+  const scartate = trovate.length - uniche.length;
+  if (scartate) {
+    console.warn(`  ⚠ ${scartate} iscrizion${scartate === 1 ? 'e' : 'i'} identic${scartate === 1 ? 'a' : 'he'} a un'altra: la salto.`);
+    console.warn('    Succede incollando due volte lo stesso codice: vale quello copiato');
+    console.warn('    DAL dispositivo che vuoi aggiungere, non quello di un altro.');
+  }
+  return uniche;
 }
 
 export async function inviaNotifica(notifica, env = process.env) {
