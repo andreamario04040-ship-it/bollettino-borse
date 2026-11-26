@@ -51,8 +51,16 @@ poi branch `main` e cartella **`/docs`**. Dopo un minuto l'indirizzo è
 
 ### 3. Metti le tre chiavi nei segreti
 
-**Settings → Secrets and variables → Actions → New repository secret.** I valori sono nel file
-`CHIAVI-SEGRETE.txt`, che resta sul tuo Mac e non viene caricato.
+Un comando solo, dalla cartella del progetto:
+
+```bash
+./carica-segreti.sh
+```
+
+Legge le chiavi da `CHIAVI-SEGRETE.txt` (che resta sul tuo Mac e non viene mai caricato),
+chiede il tuo indirizzo email e carica i tre segreti su GitHub.
+
+A mano si fa da **Settings → Secrets and variables → Actions → New repository secret**:
 
 | Nome del segreto | Cosa ci va |
 |---|---|
