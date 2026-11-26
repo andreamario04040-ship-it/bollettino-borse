@@ -102,7 +102,7 @@ export function verifica({ report, mercati, notizie = [], adesso = new Date() })
   //      che non ha letto da nessuna parte se l'è inventato.
   const materiale = report.materialeAgente || [];
   for (const a of report.aziende || []) {
-    if (a.scritto !== 'agente' || !a.motivo) continue;
+    if (!['agente', 'estratto'].includes(a.scritto) || !a.motivo) continue;
 
     const ammessi = new Set();
     for (const t of a.titoli || []) {

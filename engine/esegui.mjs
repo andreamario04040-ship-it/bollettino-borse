@@ -12,6 +12,7 @@ import { costruisciReport } from './report.mjs';
 import { aziendeDelGiorno } from './aziende.mjs';
 import { arricchisci } from './articoli.mjs';
 import { riassumiAziende } from './agente.mjs';
+import { riassumiConEstratto } from './estratto.mjs';
 import { verifica, stampaVerifica } from './verifica.mjs';
 import { leggiCorrezioni, daNotificare, segnaNotificate, notificaDi } from './correzioni.mjs';
 import { valutaAvviso, statoVuoto } from './avvisi.mjs';
@@ -96,7 +97,7 @@ if (modo === 'avviso') {
   const az = await aziendeDelGiorno(notizie, 3);
   const link = new Set(az.flatMap((a) => (a.titoli || []).map((t) => t.link)));
   const testi = await arricchisci(notizie.filter((n) => link.has(n.link)), 8);
-  r.aziende = await riassumiAziende(az, testi, process.env, config.agente?.modello);
+  r.aziende = await riassumiAziende(riassumiConEstratto(az, testi), testi, process.env, config.agente?.modello);
   r.materialeAgente = testi;
   const controllo = stampaVerifica(verifica({ report: r, mercati, notizie, adesso }));
   if (controllo.blocchi) { console.error('  Non mando l’avviso: i dati non tornano.'); process.exit(1); }
@@ -134,7 +135,11 @@ report.utente = config.utente || null;   // serve all'app per il saluto
 const aziendeTrovate = await aziendeDelGiorno(notizie, config.aziende?.quante ?? 6);
 const serviranno = new Set(aziendeTrovate.flatMap((a) => (a.titoli || []).map((t) => t.link)));
 const conTesto = await arricchisci(notizie.filter((n) => serviranno.has(n.link)), config.agente?.massimo_articoli ?? 20);
-report.aziende = await riassumiAziende(aziendeTrovate, conTesto, process.env, config.agente?.modello);
+// Tre livelli, dal migliore al sempre disponibile: l'agente scrive il riassunto;
+// senza chiave si estraggono le frasi vere degli articoli; se non c'è nemmeno il
+// testo, resta la frase di base, che lo dichiara.
+const conEstratto = riassumiConEstratto(aziendeTrovate, conTesto);
+report.aziende = await riassumiAziende(conEstratto, conTesto, process.env, config.agente?.modello);
 report.materialeAgente = conTesto;   // serve alla verifica, non viene pubblicato
 
 // Niente esce senza controllo: se un numero scritto non corrisponde ai dati,

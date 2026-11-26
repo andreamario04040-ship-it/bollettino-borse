@@ -173,6 +173,26 @@ Per cambiare le soglie o spegnere gli avvisi, apri `config.json` alla voce `avvi
 
 ---
 
+## Cosa c'è scritto nelle schede delle aziende
+
+Tre livelli, dal migliore al sempre disponibile. Il primo che riesce vince.
+
+| Livello | Come | Costo |
+|---|---|---|
+| **Riassunto scritto** | Un modello legge gli articoli e racconta cosa è successo | a consumo, serve `ANTHROPIC_API_KEY` |
+| **Estratto dagli articoli** | Si scelgono le frasi dell'articolo che parlano davvero dell'azienda | **zero** |
+| **Frase di base** | Nessun articolo leggibile: la scheda lo dichiara | zero |
+
+L'estratto non scrive niente di nuovo: **sceglie**. Dalle frasi dell'articolo tiene quelle
+che nominano l'azienda e portano un fatto — un verbo d'azione, una cifra — e scarta il
+contorno. Non può inventare, perché ogni parola viene dall'articolo, che resta citato con
+il suo nome e il suo link sotto la scheda.
+
+Due regole imparate provandolo: una frase che **non nomina** l'azienda non la racconta
+(senza questa regola il riepilogo di Piazza Affari finiva nella scheda di Stellantis
+parlando dello spread dei BTP), e oltre i 420 caratteri si smette, perché tre frasi di
+linguaggio legale non sono un riassunto.
+
 ## L'agente che legge gli articoli
 
 Le schede delle aziende non contengono più frasi scelte da espressioni regolari. A ogni
