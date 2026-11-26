@@ -6,7 +6,7 @@
       "titolo": "Anthropic risultava non quotata",
       "sbagliato": "Nella sezione delle aziende l'app scriveva che Anthropic «non è quotata». Non era un dato letto dal mercato: era una frase scritta a mano nell'archivio delle aziende, rimasta lì da quando l'archivio è stato compilato. Anthropic si è quotata e la frase è diventata falsa senza che nessuno se ne accorgesse.",
       "corretto": "Anthropic è quotata con il simbolo ANT, e l'app ne mostra la quotazione come per ogni altra azienda. Ho tolto dall'archivio tutte le frasi di questo tipo — primati, classifiche, stato di quotazione — perché invecchiano in silenzio. E quando il simbolo di un'azienda manca, l'app ora scrive «quotazione non disponibile» invece di «non quotata»: non sapere una cosa non è la stessa cosa che sapere il contrario.",
-      "notificata": false
+      "notificata": true
     }
   ]
 }
