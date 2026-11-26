@@ -73,6 +73,36 @@ function notaClima(p, vix) {
   return vix != null ? `${base} Indice della paura a ${num(vix, 1)}.` : base;
 }
 
+/* ——————————————— saluto ——————————————— */
+const PAROLE = ['nessuna', 'una', 'due', 'tre', 'quattro', 'cinque', 'sei', 'sette', 'otto', 'nove'];
+const maiuscola = (t = '') => t.charAt(0).toUpperCase() + t.slice(1);
+
+// Il nome scritto nell'app vince su quello del motore: l'app è sua.
+function nomeUtente() {
+  try { const n = localStorage.getItem('nome'); if (n !== null) return n; } catch { /* finestra privata */ }
+  return REPORT?.utente?.nome || '';
+}
+
+function disegnaSaluto() {
+  const adesso = new Date();
+  const o = adesso.getHours();
+  const momento = o < 5 ? 'Buonanotte' : o < 13 ? 'Buongiorno' : o < 18 ? 'Buon pomeriggio' : 'Buonasera';
+  const nome = nomeUtente().trim();
+
+  $('saluto-riga').textContent = nome ? `${momento} ${nome}` : momento;
+  $('saluto-data').textContent = maiuscola(new Intl.DateTimeFormat('it-IT',
+    { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(adesso));
+
+  const quante = (REPORT?.sezioni || []).length;
+  $('saluto-invito').textContent = !REPORT
+    ? 'Il bollettino di oggi non è ancora stato pubblicato.'
+    : REPORT.tipo === 'avviso'
+      ? 'Ti ho scritto perché sui mercati è successo qualcosa che vale la pena sapere subito.'
+      : `Queste sono le ${PAROLE[quante] || quante} cose che devi sapere oggi, una per paragrafo.`;
+
+  $('saluto').hidden = false;
+}
+
 /* ——————————————— disegno ——————————————— */
 function disegnaNastro() {
   const scelti = ['FTSEMIB.MI', '^STOXX50E', '^GSPC', '^IXIC', '^N225', '^VIX', 'GC=F', 'BTC-USD'];
@@ -160,6 +190,7 @@ function dettaglio(m) {
 }
 
 function disegnaInfo() {
+  if (document.activeElement !== campoNome) campoNome.value = nomeUtente();
   $('elenco-fonti').innerHTML = (REPORT?.fonti || []).map((f) => `<li>${fuga(f)}</li>`).join('')
     || '<li>in attesa del primo bollettino</li>';
   $('aggiornato').textContent = REPORT?.ora ? `alle ${REPORT.ora} del ${REPORT.data}` : 'mai';
@@ -173,7 +204,7 @@ async function carica() {
   const [r, m] = await Promise.all([prendi('data/report.json', null), prendi('data/mercati.json', [])]);
   REPORT = r; MERCATI = Array.isArray(m) ? m : [];
   // Se una parte si rompe, le altre devono restare in piedi.
-  for (const [nome, f] of [['nastro', disegnaNastro], ['oggi', disegnaOggi], ['mercati', disegnaMercati], ['info', disegnaInfo]]) {
+  for (const [nome, f] of [['saluto', disegnaSaluto], ['nastro', disegnaNastro], ['oggi', disegnaOggi], ['mercati', disegnaMercati], ['info', disegnaInfo]]) {
     try { f(); } catch (e) { console.error('disegno ' + nome + ':', e); }
   }
 }
@@ -275,6 +306,13 @@ function misuraTesta() {
 misuraTesta();
 addEventListener('resize', misuraTesta);
 if (document.fonts?.ready) document.fonts.ready.then(misuraTesta);
+
+// Il campo del nome: si scrive e il saluto cambia subito.
+const campoNome = $('nome-utente');
+campoNome.addEventListener('input', () => {
+  try { localStorage.setItem('nome', campoNome.value); } catch { /* pazienza */ }
+  disegnaSaluto();
+});
 
 let temaSalvato = 'auto';
 try { temaSalvato = localStorage.getItem('tema') || 'auto'; } catch { /* niente */ }

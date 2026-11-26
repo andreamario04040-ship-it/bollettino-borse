@@ -102,6 +102,13 @@ main{max-width:640px;margin:0 auto;
 .caricamento{padding:1.6rem 0;text-align:center;color:var(--testo3);font-size:.88rem}
 .piede-nota{margin:.3rem 0 0;font-size:.8rem;color:var(--testo3);text-align:center}
 
+/* ——— saluto ——— */
+.saluto{padding:1.15rem 1.1rem 1.2rem}
+.saluto-riga{margin:0;font-family:var(--fd);font-size:1.65rem;font-weight:800;letter-spacing:-.03em;
+  line-height:1.1;color:var(--testo)}
+.saluto-data{margin:.35rem 0 0;font-size:.86rem;color:var(--testo3)}
+.saluto-invito{margin:.7rem 0 0;font-size:.95rem;color:var(--testo2);line-height:1.5}
+
 /* ——— clima ——— */
 .clima-scheda{display:flex;align-items:center;gap:1rem;justify-content:space-between}
 .clima-sx{min-width:0}
@@ -189,6 +196,9 @@ textarea{width:100%;margin-top:.5rem;font-family:var(--fm);font-size:.68rem;back
 code{font-family:var(--fm);font-size:.82rem;background:var(--superficie2);padding:.08rem .3rem;border-radius:5px}
 .elenco-fonti{list-style:none;margin:.7rem 0 0;padding:0;display:flex;flex-wrap:wrap;gap:.35rem}
 .elenco-fonti li{font-size:.78rem;padding:.26rem .55rem;border-radius:999px;background:var(--superficie2);color:var(--testo2)}
+.campo{width:100%;margin-top:.7rem;font:inherit;font-size:.95rem;color:var(--testo);
+  background:var(--superficie2);border:1px solid var(--bordo);border-radius:var(--raggio-s);padding:.6rem .7rem}
+.campo:focus{outline:2px solid var(--marchio);outline-offset:1px}
 .avvertenza{background:var(--superficie2);box-shadow:none}
 .avvertenza .testo{margin:0;font-size:.84rem}
 
@@ -211,7 +221,10 @@ code{font-family:var(--fm);font-size:.82rem;background:var(--superficie2);paddin
    Il limite di altezza evita di coprire un computer, che è sempre "orizzontale". */
 #ruota{display:none}
 @media (orientation:landscape) and (max-height:500px){
-  #ruota{display:flex;position:fixed;inset:0;z-index:100;flex-direction:column;
+  /* La barra in basso è composita per via della sfocatura e resterebbe sopra:
+     in orizzontale si toglie di mezzo insieme all'intestazione. */
+  .schede,.testa{display:none}
+  #ruota{display:flex;position:fixed;inset:0;z-index:200;flex-direction:column;
     align-items:center;justify-content:center;gap:.7rem;text-align:center;
     background:var(--fondo);
     padding:1.5rem max(16px,env(safe-area-inset-left)) calc(1.5rem + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-right))}

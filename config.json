@@ -1,11 +1,35 @@
 {
   "nome": "Borsa",
+  "utente": {
+    "nome": "Andrea"
+  },
   "fuso": "Europe/Rome",
   "orari": {
     "mattina": "07:00",
     "mattina_locale": "09:00",
     "sera": "18:15",
     "nota": "Gli orari sono in ora italiana; nel workflow sono convertiti in UTC."
+  },
+  "avvisi": {
+    "attivi": true,
+    "finestra": {
+      "da": "08:00",
+      "a": "22:30"
+    },
+    "massimo_al_giorno": 2,
+    "minuti_tra_un_avviso_e_l_altro": 180,
+    "minuti_di_silenzio_attorno_ai_bollettini": 45,
+    "soglie": {
+      "indice_azionario_percento": 2.0,
+      "vix_livello": 30,
+      "vix_variazione_percento": 12,
+      "vix_scatto_percento": 20,
+      "petrolio_percento": 4.5,
+      "oro_percento": 3.0,
+      "bitcoin_percento": 7.0,
+      "tasso_10anni_percento": 4.0
+    },
+    "nota": "Un avviso parte solo se il movimento è nuovo rispetto all'ultimo controllo: superare la soglia e restarci non fa suonare di nuovo il telefono."
   },
   "strumenti": [
     {
@@ -230,26 +254,5 @@
       "peso": 3,
       "ufficiale": true
     }
-  ],
-  "avvisi": {
-    "attivi": true,
-    "finestra": {
-      "da": "08:00",
-      "a": "22:30"
-    },
-    "massimo_al_giorno": 2,
-    "minuti_tra_un_avviso_e_l_altro": 180,
-    "minuti_di_silenzio_attorno_ai_bollettini": 45,
-    "soglie": {
-      "indice_azionario_percento": 2.0,
-      "vix_livello": 30,
-      "vix_variazione_percento": 12,
-      "vix_scatto_percento": 20,
-      "petrolio_percento": 4.5,
-      "oro_percento": 3.0,
-      "bitcoin_percento": 7.0,
-      "tasso_10anni_percento": 4.0
-    },
-    "nota": "Un avviso parte solo se il movimento è nuovo rispetto all'ultimo controllo: superare la soglia e restarci non fa suonare di nuovo il telefono."
-  }
+  ]
 }

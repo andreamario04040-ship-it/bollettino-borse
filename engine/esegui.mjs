@@ -87,6 +87,7 @@ if (modo === 'avviso') {
     { id: 'avviso', titolo: 'Perché ti ho avvisato', testo: esito.evento.corpo },
     ...r.sezioni.filter((s) => s.id === 'perche' || s.id === 'contesto'),
   ];
+  r.utente = config.utente || null;
   await scriviJson(dentro('docs/data/report.json'), r);
   await scriviJson(dentro(`docs/data/storico/${giornoRoma(adesso)}-avviso-${esito.evento.motivo}.json`), r);
   await inviaNotifica({ ...r.notifica, tipo: 'avviso' });
@@ -113,6 +114,7 @@ if (daCalendario) {
 }
 
 const report = costruisciReport(mercati, notizie, tipo, adesso);
+report.utente = config.utente || null;   // serve all'app per il saluto
 
 await scriviJson(dentro('docs/data/report.json'), report);
 await scriviJson(archivio, report);
