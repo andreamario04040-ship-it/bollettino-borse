@@ -14,7 +14,7 @@
 <link rel="icon" href="icons/icona-192.png">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Inter:wght@400;450;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="stile.css?v=17">
+<link rel="stylesheet" href="stile.css?v=18">
 </head>
 <body>
 
@@ -96,7 +96,18 @@
         <span class="pillola" id="aziende-conteggio"></span>
       </div>
       <p class="testo">Non un elenco fisso: ogni giorno vengono scelte quelle a cui è davvero successo qualcosa, e su ognuna c'è scritto perché è qui e cosa è successo.</p>
-      <div id="aziende"></div>
+      <div class="carosello-cornice">
+        <div class="carosello" id="aziende"></div>
+        <div class="carosello-barra">
+          <button class="freccia" id="az-indietro" aria-label="Azienda precedente">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 6-6 6 6 6"/></svg>
+          </button>
+          <div class="pallini" id="az-pallini"></div>
+          <button class="freccia" id="az-avanti" aria-label="Azienda successiva">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m10 6 6 6-6 6"/></svg>
+          </button>
+        </div>
+      </div>
     </section>
 
     <p class="piede-nota" id="piede-oggi"></p>
@@ -221,6 +232,13 @@
   </button>
 </nav>
 
+<dialog id="foglio" aria-label="Scheda dell'azienda">
+  <div class="foglio-cassa">
+    <button class="pan-chiudi foglio-chiudi" id="foglio-chiudi" aria-label="Chiudi">&times;</button>
+    <div id="foglio-corpo"></div>
+  </div>
+</dialog>
+
 <dialog id="pannello">
   <div class="pan-testa">
     <span class="pan-tipo" id="pan-tipo"></span>
@@ -230,6 +248,6 @@
   <div id="pan-corpo"></div>
 </dialog>
 
-<script src="app.js?v=17"></script>
+<script src="app.js?v=18"></script>
 </body>
 </html>

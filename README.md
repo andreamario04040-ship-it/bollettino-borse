@@ -398,6 +398,21 @@ invecchiano** — primati, classifiche, se un'azienda è quotata. Quelli si legg
 L'app aveva scritto che Anthropic non era quotata perché la frase era stata messa a mano
 e non è più stata rivista.
 
+## Le card, e come si leggono
+
+Le aziende del giorno sono un **carosello**: una card per azienda, una alla volta, con frecce e
+pallini. In fila erano un muro di testo in cui non si capiva dove finisse una e cominciasse
+l'altra.
+
+Nel carosello il testo si accorcia a sette righe, perché la card dice il necessario e il resto si
+apre: **toccando una card** — qui e nei preferiti — si apre grande, con il corpo del testo di un
+articolo invece che di un riquadro (1,12rem contro 0,95). Su uno schermo da Mac è la differenza
+fra scorrere e leggere davvero.
+
+Un dettaglio che è costato una correzione: il carosello ha `position:relative`. Senza,
+`offsetLeft` delle card è riferito alla pagina invece che al contenitore, e le frecce saltavano
+al punto sbagliato.
+
 ## Preferiti
 
 Una pagina sua, nel menu. Dentro ci sono le aziende che hai scelto di tenere d'occhio, e ogni

@@ -280,7 +280,6 @@ code{font-family:var(--fm);font-size:.82rem;background:var(--superficie2);paddin
 
 /* ——— aziende ——— */
 .aziende-scheda{padding-bottom:.8rem}
-#aziende{display:flex;flex-direction:column;gap:.8rem;margin-top:.9rem}
 .azienda{background:var(--superficie2);border:1px solid var(--bordo);border-radius:var(--raggio-s);padding:.8rem .85rem}
 .az-testa{display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap}
 .az-identita{display:flex;align-items:center;gap:.6rem;min-width:0}
@@ -304,6 +303,81 @@ code{font-family:var(--fm);font-size:.82rem;background:var(--superficie2);paddin
 .az-firma{margin:.6rem 0 0;font-size:.64rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--testo3)}
 .azienda .fonti-link{margin-top:.6rem}
 .azienda .fonte-link{background:var(--superficie)}
+
+/* ——— carosello delle aziende del giorno ———
+   Una card per azienda, una alla volta. In fila erano un muro di testo in cui
+   non si capiva dove finisse una e cominciasse l'altra; così invece ognuna ha
+   il suo spazio, e il testo lungo si legge toccandola. */
+.carosello-cornice{margin-top:.9rem}
+/* position:relative non è decorativo: senza, offsetLeft delle card è riferito
+   alla pagina invece che al carosello, e le frecce saltano al punto sbagliato. */
+.carosello{position:relative;display:flex;gap:.8rem;overflow-x:auto;scroll-snap-type:x mandatory;
+  scroll-padding:0 .2rem;padding:.2rem .2rem .4rem;margin:-.2rem -.2rem 0;
+  scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.carosello::-webkit-scrollbar{display:none}
+.carosello .azienda{flex:0 0 86%;scroll-snap-align:center;cursor:pointer;
+  transition:border-color .15s,transform .15s}
+.carosello .azienda:hover{border-color:var(--accento)}
+.carosello .azienda:active{transform:scale(.995)}
+/* Il testo lungo si accorcia: la card dice il necessario, il resto si apre. */
+.carosello .az-motivo{display:-webkit-box;-webkit-line-clamp:7;-webkit-box-orient:vertical;overflow:hidden}
+.carosello .fonti-link{display:none}
+.az-apri{margin:.7rem 0 0;font-size:.68rem;font-weight:600;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--accento)}
+#preferiti .az-apri,.preferita .az-apri{display:none}
+
+.carosello-barra{display:flex;align-items:center;justify-content:center;gap:.8rem;margin-top:.4rem}
+.freccia{width:32px;height:32px;flex:none;border-radius:50%;border:1px solid var(--bordo);
+  background:var(--superficie);display:grid;place-items:center;color:var(--testo2);cursor:pointer}
+.freccia svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.freccia:hover:not(:disabled){color:var(--accento);border-color:var(--accento)}
+.freccia:disabled{opacity:.35;cursor:default}
+.pallini{display:flex;gap:.4rem}
+.pallino{width:7px;height:7px;padding:0;border:0;border-radius:50%;background:var(--bordo);cursor:pointer}
+.pallino.attivo{background:var(--accento);transform:scale(1.25)}
+
+/* ——— la scheda ingrandita ——— */
+#foglio{border:0;padding:0;background:none;max-width:none;max-height:none;width:100%;height:100%;
+  overflow:visible;display:grid;place-items:center}
+#foglio:not([open]){display:none}
+#foglio::backdrop{background:rgba(0,0,0,.55);backdrop-filter:blur(3px)}
+.foglio-cassa{position:relative;width:min(760px,calc(100vw - 2rem));max-height:min(86vh,calc(100vh - 3rem))}
+#foglio-corpo{background:var(--superficie);border:1px solid var(--bordo);
+  border-radius:var(--raggio);box-shadow:var(--ombra);
+  max-height:inherit;overflow-y:auto;padding:1.4rem 1.5rem 1.6rem}
+.foglio-chiudi{position:absolute;top:.7rem;right:.8rem;z-index:2;
+  background:var(--superficie);border:1px solid var(--bordo)}
+.fg-testa{display:flex;align-items:center;gap:.85rem;padding-right:2.2rem}
+.fg-logo{width:48px;height:48px;flex:none;border-radius:11px;background:#fff;object-fit:contain;padding:4px}
+.fg-iniziale{width:48px;height:48px;flex:none;border-radius:11px;display:grid;place-items:center;
+  background:var(--accento-tenue);color:var(--accento);font-family:var(--fd);font-weight:800;font-size:1.3rem}
+.fg-nomi{min-width:0;flex:1}
+.fg-nomi h2{font-family:var(--fd);font-size:1.5rem;font-weight:800;letter-spacing:-.02em}
+.fg-nomi p{margin:.1rem 0 0;font-size:.72rem;font-weight:600;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--testo3)}
+.fg-prezzo{font-family:var(--fm);font-variant-numeric:tabular-nums;font-size:1.05rem;font-weight:600;white-space:nowrap}
+.fg-fa{margin:.9rem 0 0;font-size:1rem;color:var(--testo3);line-height:1.5}
+.fg-perche{margin:1rem 0 0;padding:.7rem .85rem .75rem;border-left:3px solid var(--accento);
+  background:var(--accento-tenue);border-radius:0 var(--raggio-s) var(--raggio-s) 0;
+  font-size:1.05rem;line-height:1.55}
+/* Il motivo per cui questa scheda esiste: qui si legge, e il corpo del testo
+   è quello di un articolo, non quello di un riquadro. */
+.fg-testo{margin:1.1rem 0 0;font-size:1.12rem;line-height:1.72;color:var(--testo)}
+.fg-quieta{margin:1.1rem 0 0;font-size:1rem;color:var(--testo3);font-style:italic}
+#foglio-corpo .fonti-link{margin-top:1.1rem}
+#foglio-corpo .az-firma,#foglio-corpo .az-nota{margin-top:1rem}
+
+@media (max-width:600px){
+  .foglio-cassa{width:calc(100vw - 1.2rem);max-height:88vh}
+  #foglio-corpo{padding:1.15rem 1.1rem 1.4rem}
+  /* Sul telefono il prezzo si accavallava al settore: va a capo per conto suo. */
+  .fg-testa{flex-wrap:wrap}
+  .fg-nomi{flex:1 1 100%;order:2}
+  .fg-prezzo{order:3;margin-left:auto}
+  .fg-nomi h2{font-size:1.3rem}
+  .fg-testo{font-size:1.06rem;line-height:1.68}
+  .fg-perche{font-size:1rem}
+}
 
 /* ——— preferiti ——— */
 #pref-lista{display:flex;flex-direction:column;gap:.8rem}
@@ -498,7 +572,7 @@ code{font-family:var(--fm);font-size:.82rem;background:var(--superficie2);paddin
   .sezione p{font-size:.97rem}
 
   .tessere{grid-template-columns:repeat(2,1fr)}
-  #aziende{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;align-items:start}
+  .carosello .azienda{flex:0 0 calc(50% - .4rem)}
 
   /* Mercati: i gruppi affiancati, ciascuno intero. */
   #lista-indici{display:grid;grid-template-columns:1fr 1fr;gap:.4rem 1rem;align-items:start}
@@ -524,7 +598,8 @@ code{font-family:var(--fm);font-size:.82rem;background:var(--superficie2);paddin
   main{margin-left:214px;max-width:1340px}
   #lista-indici{grid-template-columns:repeat(3,1fr)}
   .tessere{grid-template-columns:repeat(3,1fr)}
-  #aziende,#pref-lista{grid-template-columns:repeat(3,1fr)}
+  .carosello .azienda{flex:0 0 calc(33.333% - .54rem)}
+  #pref-lista{grid-template-columns:repeat(3,1fr)}
   /* Oltre una certa larghezza la riga diventa troppo lunga per l'occhio:
      il riquadro cresce, il testo dentro no. */
   .sezione p,.az-motivo{max-width:76ch}

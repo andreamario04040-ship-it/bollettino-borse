@@ -3,7 +3,7 @@
 // Si alza a ogni modifica dell'app, insieme a docs/versione.json.
 // Serve perché un'app aggiunta alla schermata Home resta viva in memoria:
 // riaprendola dal selettore non ricarica, e resterebbe vecchia per giorni.
-const VERSIONE_APP = 17;
+const VERSIONE_APP = 18;
 
 const CHIAVE_PUBBLICA = 'BEX2Ep7AZJPgrIF_cHwKOWk9VSiE8OLd1WLxSJDANLNEbox4xiHYb5pgRslEapXEXZs35jhSmHRhrLcfFhyPwVk';
 const MENO = '−', SOTTILE = ' ';
@@ -363,7 +363,7 @@ function schedaPreferita(nome) {
       : `<p class="az-quieta">Oggi i giornali non ne hanno parlato.</p>`;
   }
 
-  return `<article class="azienda preferita${a.notizia ? '' : ' quieta'}">
+  return `<article class="azienda preferita${a.notizia ? '' : ' quieta'}" data-apri="${fuga(nome)}" role="button" tabindex="0">
     <div class="az-testa">
       <span class="az-identita">
         ${a.logo
@@ -448,6 +448,91 @@ async function caricaTitoli() {
   } catch { /* senza titoli le aziende aggiunte da te restano senza nulla */ }
 }
 
+/* ——————————————— la scheda ingrandita ———————————————
+   Le card stanno strette: nel carosello il testo è tagliato, e anche dove non
+   lo è si legge in una colonna sottile. Toccandola si apre qui, grande, con il
+   testo intero — che su uno schermo da Mac è la differenza fra scorrere e
+   leggere davvero. */
+function datiAzienda(nome) {
+  return (REPORT?.aziende || []).find((a) => a.nome === nome)
+    || (typeof catalogo === 'function' ? catalogo().find((a) => a.nome === nome) : null);
+}
+
+function apriAzienda(nome) {
+  const a = datiAzienda(nome);
+  if (!a) return;
+
+  const prezzo = a.prezzo != null
+    ? `<span class="fg-prezzo">${num(a.prezzo, 2)} <span class="varia ${classe(a.giorno)}">${pct(a.giorno)}</span></span>`
+    : `<span class="fg-prezzo az-nonquotata">${a.tua ? 'azienda aggiunta da te' : 'quotazione non disponibile'}</span>`;
+
+  const link = (a.titoli || []).map((t) => `<a class="fonte-link" href="${fuga(t.link || '#')}" target="_blank" rel="noopener">
+    <span class="testata">${fuga(t.fonte)}</span>${fuga(t.titolo)}</a>`).join('');
+
+  let corpo = '';
+  if (a.motivo) corpo = `<p class="fg-testo">${testo(a.motivo)}</p>`;
+  else if (a.notizia) corpo = `<p class="fg-testo">${testo(a.notizia)}</p>`;
+  else {
+    const t = typeof titoliChePerlano === 'function' ? titoliChePerlano(nome) : [];
+    corpo = t.length
+      ? `<p class="fg-quieta">Niente di rilevante oggi, ma la nominano:</p>
+         <div class="fonti-link">${t.map((x) => `<a class="fonte-link" href="${fuga(x.l || '#')}" target="_blank" rel="noopener">
+           <span class="testata">${fuga(x.f)}</span>${fuga(x.t)}</a>`).join('')}</div>`
+      : '<p class="fg-quieta">Oggi i giornali non ne hanno parlato.</p>';
+  }
+
+  $('foglio-corpo').innerHTML = `
+    <div class="fg-testa">
+      ${a.logo
+        ? `<img class="fg-logo" src="loghi/${fuga(a.logo)}.png" alt="" width="48" height="48" decoding="async">`
+        : `<span class="fg-iniziale">${fuga(a.nome.slice(0, 1))}</span>`}
+      <div class="fg-nomi">
+        <h2>${fuga(a.nome)}</h2>
+        <p>${fuga(a.settore)}</p>
+      </div>
+      ${prezzo}
+    </div>
+    ${a.fa ? `<p class="fg-fa">${fuga(a.nome)} ${testo(a.fa)}.</p>` : ''}
+    ${a.perche ? `<p class="fg-perche"><span class="az-perche-et">Perché oggi</span>${testo(a.perche)}</p>` : ''}
+    ${corpo}
+    ${a.materialeScarso ? '<p class="az-nota">Oggi i giornali la citano senza spiegare bene cosa sia successo.</p>' : ''}
+    ${a.scritto === 'agente' ? '<p class="az-firma">Riassunto dagli articoli di oggi</p>' : ''}
+    ${link ? `<div class="fonti-link">${link}</div>` : ''}`;
+
+  const d = $('foglio');
+  if (typeof d.showModal === 'function') d.showModal(); else d.setAttribute('open', '');
+}
+
+/* ——————————————— carosello delle aziende del giorno ——————————————— */
+function vetrineAziende() { return [...$('aziende').querySelectorAll('.azienda')]; }
+
+function vetrinaCorrente() {
+  const v = vetrineAziende();
+  if (!v.length) return 0;
+  const centro = $('aziende').scrollLeft + $('aziende').clientWidth / 2;
+  let vicina = 0, distanza = Infinity;
+  v.forEach((el, i) => {
+    const d = Math.abs(el.offsetLeft + el.offsetWidth / 2 - centro);
+    if (d < distanza) { distanza = d; vicina = i; }
+  });
+  return vicina;
+}
+
+function vaiAVetrina(i) {
+  const v = vetrineAziende();
+  if (!v.length) return;
+  const n = Math.max(0, Math.min(v.length - 1, i));
+  $('aziende').scrollTo({ left: v[n].offsetLeft - ($('aziende').clientWidth - v[n].offsetWidth) / 2, behavior: 'smooth' });
+}
+
+function aggiornaPallini() {
+  const corrente = vetrinaCorrente();
+  const v = vetrineAziende();
+  for (const [i, p] of [...$('az-pallini').children].entries()) p.classList.toggle('attivo', i === corrente);
+  $('az-indietro').disabled = corrente === 0;
+  $('az-avanti').disabled = corrente >= v.length - 1;
+}
+
 function disegnaAziende() {
   const az = REPORT?.aziende || [];
   $('aziende-scheda').hidden = az.length === 0;
@@ -461,7 +546,7 @@ function disegnaAziende() {
       : '<span class="az-prezzo az-nonquotata">quotazione non disponibile</span>';
     const link = (a.titoli || []).map((t) => `<a class="fonte-link" href="${fuga(t.link || '#')}" target="_blank" rel="noopener">
       <span class="testata">${fuga(t.fonte)}</span>${fuga(t.titolo)}</a>`).join('');
-    return `<article class="azienda">
+    return `<article class="azienda" data-apri="${fuga(a.nome)}" role="button" tabindex="0">
       <div class="az-testa">
         <span class="az-identita">
           ${a.logo
@@ -481,8 +566,13 @@ function disegnaAziende() {
           ? `Parole di ${fuga((a.fontiEstratto || []).join(', '))}, dall'articolo di oggi`
           : 'Nessun articolo leggibile oggi su questa azienda'}</p>
       ${link ? `<div class="fonti-link">${link}</div>` : ''}
+      <p class="az-apri">Tocca per leggere tutto</p>
     </article>`;
   }).join('');
+
+  $('az-pallini').innerHTML = az.map((a, i) =>
+    `<button class="pallino" data-vai="${i}" aria-label="Vai a ${fuga(a.nome)}"></button>`).join('');
+  aggiornaPallini();
 
   // Se un logo non c'è o non si carica, al suo posto va l'iniziale.
   for (const img of $('aziende').querySelectorAll('.az-logo')) {
@@ -660,6 +750,14 @@ function cambiaVista(nome) {
 }
 
 document.addEventListener('click', (e) => {
+  // I comandi dentro la card vengono prima: un link o un tasto non deve
+  // aprire la scheda grande, e viceversa.
+  const vai = e.target.closest('[data-vai]');
+  if (vai) return vaiAVetrina(Number(vai.dataset.vai));
+
+  const apri = e.target.closest('[data-apri]');
+  if (apri && !e.target.closest('a, button')) return apriAzienda(apri.dataset.apri);
+
   const termine = e.target.closest('[data-termine]');
   if (termine) return spiegaTermine(termine.dataset.termine);
 
@@ -737,6 +835,21 @@ document.addEventListener('click', (e) => {
 });
 
 $('pref-cerca').addEventListener('input', (e) => { filtro = e.target.value; disegnaRisultati(); });
+
+$('foglio-chiudi').addEventListener('click', () => $('foglio').close());
+$('foglio').addEventListener('click', (e) => { if (e.target === $('foglio')) $('foglio').close(); });
+$('az-indietro').addEventListener('click', () => vaiAVetrina(vetrinaCorrente() - 1));
+$('az-avanti').addEventListener('click', () => vaiAVetrina(vetrinaCorrente() + 1));
+$('aziende').addEventListener('scroll', () => {
+  clearTimeout($('aziende').dataset.t);
+  $('aziende').dataset.t = setTimeout(aggiornaPallini, 90);
+});
+// Con la tastiera una card si apre con Invio, come un tasto vero.
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Enter' && e.key !== ' ') return;
+  const card = e.target.closest?.('[data-apri]');
+  if (card) { e.preventDefault(); apriAzienda(card.dataset.apri); }
+});
 $('pan-chiudi').addEventListener('click', () => $('pannello').close());
 $('pannello').addEventListener('click', (e) => { if (e.target === $('pannello')) $('pannello').close(); });
 
