@@ -16,7 +16,8 @@
       "unita": "punti",
       "perche": "Misura quanta paura c'è sul mercato americano. Sotto 15 è calma, sopra 25 è nervosismo, sopra 35 è panico.",
       "inverso": true,
-      "decimali": 2
+      "decimali": 2,
+      "cnbc": ".VIX"
     },
     {
       "sym": "^TNX",
@@ -26,7 +27,8 @@
       "unita": "%",
       "perche": "Quanto rende prestare soldi allo Stato americano per 10 anni. Se sale, le azioni (soprattutto tecnologiche) soffrono.",
       "inverso": true,
-      "decimali": 2
+      "decimali": 2,
+      "cnbc": "US10Y"
     },
     {
       "sym": "^GSPC",
@@ -34,7 +36,8 @@
       "breve": "Il termometro del mondo",
       "gruppo": "Stati Uniti",
       "unita": "punti",
-      "perche": "Le 500 maggiori aziende americane. Se sale questo, di solito sale quasi tutto il resto."
+      "perche": "Le 500 maggiori aziende americane. Se sale questo, di solito sale quasi tutto il resto.",
+      "cnbc": ".SPX"
     },
     {
       "sym": "^IXIC",
@@ -42,7 +45,8 @@
       "breve": "Tecnologia e intelligenza artificiale",
       "gruppo": "Stati Uniti",
       "unita": "punti",
-      "perche": "Pieno di Nvidia, Apple, Microsoft. Si muove più degli altri, sia in salita sia in discesa."
+      "perche": "Pieno di Nvidia, Apple, Microsoft. Si muove più degli altri, sia in salita sia in discesa.",
+      "cnbc": ".IXIC"
     },
     {
       "sym": "^DJI",
@@ -50,7 +54,8 @@
       "breve": "L'America della vecchia economia",
       "gruppo": "Stati Uniti",
       "unita": "punti",
-      "perche": "30 colossi industriali e finanziari. Confrontandolo col Nasdaq capisci se il calo riguarda solo la tecnologia."
+      "perche": "30 colossi industriali e finanziari. Confrontandolo col Nasdaq capisci se il calo riguarda solo la tecnologia.",
+      "cnbc": ".DJI"
     },
     {
       "sym": "^RUT",
@@ -58,7 +63,8 @@
       "breve": "Le piccole aziende americane",
       "gruppo": "Stati Uniti",
       "unita": "punti",
-      "perche": "Le aziende piccole soffrono quando i tassi sono alti. Raccontano l'economia reale, non quella delle grandi multinazionali."
+      "perche": "Le aziende piccole soffrono quando i tassi sono alti. Raccontano l'economia reale, non quella delle grandi multinazionali.",
+      "cnbc": ".RUT"
     },
     {
       "sym": "^STOXX50E",
@@ -66,7 +72,8 @@
       "breve": "Il listino dell'Europa",
       "gruppo": "Europa",
       "unita": "punti",
-      "perche": "Le 50 aziende maggiori dell'eurozona. È il riferimento europeo numero uno."
+      "perche": "Le 50 aziende maggiori dell'eurozona. È il riferimento europeo numero uno.",
+      "cnbc": ".STOXX50E"
     },
     {
       "sym": "FTSEMIB.MI",
@@ -74,7 +81,8 @@
       "breve": "La Borsa di Milano",
       "gruppo": "Europa",
       "unita": "punti",
-      "perche": "I 40 titoli italiani principali, con moltissime banche. Questo è il mercato di casa."
+      "perche": "I 40 titoli italiani principali, con moltissime banche. Questo è il mercato di casa.",
+      "cnbc": ".FTMIB"
     },
     {
       "sym": "^GDAXI",
@@ -82,7 +90,8 @@
       "breve": "La locomotiva tedesca",
       "gruppo": "Europa",
       "unita": "punti",
-      "perche": "Industria e automobili. Se frena la Germania, frena tutta l'Europa."
+      "perche": "Industria e automobili. Se frena la Germania, frena tutta l'Europa.",
+      "cnbc": ".GDAXI"
     },
     {
       "sym": "^FCHI",
@@ -90,7 +99,8 @@
       "breve": "Parigi, lusso e industria",
       "gruppo": "Europa",
       "unita": "punti",
-      "perche": "LVMH, Hermès, TotalEnergies. Molto sensibile ai consumi in Cina."
+      "perche": "LVMH, Hermès, TotalEnergies. Molto sensibile ai consumi in Cina.",
+      "cnbc": ".FCHI"
     },
     {
       "sym": "^FTSE",
@@ -98,7 +108,8 @@
       "breve": "Londra, petrolio e miniere",
       "gruppo": "Europa",
       "unita": "punti",
-      "perche": "Composto soprattutto da energia e materie prime: spesso va in direzione opposta al resto d'Europa."
+      "perche": "Composto soprattutto da energia e materie prime: spesso va in direzione opposta al resto d'Europa.",
+      "cnbc": ".FTSE"
     },
     {
       "sym": "^N225",
@@ -106,7 +117,8 @@
       "breve": "Il Giappone",
       "gruppo": "Asia",
       "unita": "punti",
-      "perche": "È il primo grande mercato ad aprire: ti anticipa l'umore della giornata."
+      "perche": "È il primo grande mercato ad aprire: ti anticipa l'umore della giornata.",
+      "cnbc": ".N225"
     },
     {
       "sym": "^HSI",
@@ -114,7 +126,8 @@
       "breve": "Hong Kong, la porta sulla Cina",
       "gruppo": "Asia",
       "unita": "punti",
-      "perche": "Qui si vedono subito le tensioni geopolitiche e gli effetti dei dazi."
+      "perche": "Qui si vedono subito le tensioni geopolitiche e gli effetti dei dazi.",
+      "cnbc": ".HSI"
     },
     {
       "sym": "000001.SS",
@@ -122,7 +135,8 @@
       "breve": "La Cina interna",
       "gruppo": "Asia",
       "unita": "punti",
-      "perche": "Un mercato guidato molto dalle decisioni del governo di Pechino."
+      "perche": "Un mercato guidato molto dalle decisioni del governo di Pechino.",
+      "cnbc": ".SSEC"
     },
     {
       "sym": "EURUSD=X",
@@ -131,7 +145,8 @@
       "gruppo": "Valute e materie prime",
       "unita": "$",
       "perche": "Decide se un investimento negli Stati Uniti ti rende di più o di meno una volta riportato in euro.",
-      "decimali": 4
+      "decimali": 4,
+      "cnbc": "EUR="
     },
     {
       "sym": "GC=F",
@@ -140,7 +155,8 @@
       "gruppo": "Valute e materie prime",
       "unita": "$",
       "perche": "Sale quando la gente ha paura o si aspetta che i prezzi corrano.",
-      "decimali": 2
+      "decimali": 2,
+      "cnbc": "@GC.1"
     },
     {
       "sym": "CL=F",
@@ -149,7 +165,8 @@
       "gruppo": "Valute e materie prime",
       "unita": "$",
       "perche": "Finisce nel pieno dell'auto e nelle bollette: è inflazione con due o tre mesi di ritardo.",
-      "decimali": 2
+      "decimali": 2,
+      "cnbc": "@CL.1"
     },
     {
       "sym": "BTC-USD",
@@ -158,7 +175,8 @@
       "gruppo": "Valute e materie prime",
       "unita": "$",
       "perche": "Misura la voglia di rischiare. Quando gli investitori si spaventano, di solito scende per primo.",
-      "decimali": 0
+      "decimali": 0,
+      "cnbc": "BTC.CM="
     }
   ],
   "feed": [

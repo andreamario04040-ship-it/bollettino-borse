@@ -19,12 +19,20 @@ Non costa niente: il motore gira su GitHub Actions, l'app è una pagina pubblica
 | `engine/` | Il motore: scarica dati e notizie, scrive il report, manda le notifiche |
 | `docs/` | L'app vera e propria, quella che GitHub Pages pubblica |
 | `docs/data/` | I dati aggiornati, riscritti a ogni esecuzione |
+| `docs/data/serie.json` | L'archivio delle chiusure, da cui nascono grafici e variazioni lunghe |
 | `config.json` | Indici, fonti, orari e soglie degli avvisi: si cambia tutto da qui |
 | `.github/workflows/` | Gli appuntamenti automatici |
 
-**Le fonti.** Le quotazioni arrivano dagli endpoint pubblici di Yahoo Finance. Il *perché* arriva
-da Il Sole 24 Ore, Financial Times, CNBC, ANSA Economia, MarketWatch, Investing.com e dai
-comunicati ufficiali di BCE e Federal Reserve. Sono state tutte verificate una per una.
+**Le fonti.** Le quotazioni arrivano da **Yahoo Finance** quando il motore gira da casa, e da
+**CNBC** quando gira su GitHub — perché Yahoo rifiuta le richieste che arrivano dai data center,
+e GitHub Actions è un data center. Il *perché* arriva da Il Sole 24 Ore, Financial Times, CNBC,
+ANSA Economia, MarketWatch, Investing.com e dai comunicati ufficiali di BCE e Federal Reserve.
+Sono state tutte verificate una per una.
+
+**Lo storico.** CNBC dà il prezzo di adesso ma non il passato, quindi le variazioni su settimana,
+mese e anno e i grafici vengono da `docs/data/serie.json`, un archivio di chiusure conservato nel
+repository. Si semina una volta da casa con `npm run storico` (un anno di dati da Yahoo) e poi si
+allunga da solo di un punto al giorno a ogni bollettino.
 
 ---
 
@@ -77,7 +85,12 @@ non consegna nessuna notifica.
 ### 5. Attiva le notifiche e copia il codice
 
 Apri l'app **dall'icona**, tocca *Attiva le notifiche*, concedi il permesso. Comparirà un codice:
-copialo e crea l'ultimo segreto su GitHub, chiamato **`ISCRIZIONE_PUSH`**.
+copialo e crea l'ultimo segreto su GitHub, chiamato **`ISCRIZIONE_PUSH`**. Dal Mac, con il codice
+negli appunti, basta:
+
+```bash
+pbpaste | gh secret set ISCRIZIONE_PUSH
+```
 
 > Se un domani cancelli l'icona e la riaggiungi, il codice cambia: ripeti questo passaggio.
 > Per ricevere le notifiche anche su un secondo dispositivo, metti i due codici in un elenco:
@@ -96,7 +109,7 @@ Entro un minuto la notifica arriva sull'iPhone.
 |---|---|
 | 9:00, da lunedì a venerdì | Bollettino del mattino |
 | 18:15, da lunedì a venerdì | Bollettino della sera |
-| Ogni ora, tra le 10:20 e le 21:20 | Controlla, e manda solo se serve |
+| Ogni ora, dalle 8:20 alle 21:20 | Controlla, e manda solo se serve |
 
 GitHub ragiona in UTC e l'Italia cambia ora due volte l'anno: ogni appuntamento parte a due orari
 diversi e il programma chiude subito quello sbagliato. Non devi toccare niente quando cambia l'ora.
@@ -147,11 +160,14 @@ riparte a mezzanotte, il comunicato della BCE, l'orario notturno) che girano sen
 
 ## Limiti, detti chiaramente
 
-- **Yahoo Finance non è un servizio ufficiale.** È gratuito e completo, ma se interrogato troppo
-  spesso risponde "troppe richieste". Per questo il motore chiede tutti i diciotto indici in
-  **un'unica chiamata**, ripiega sulle chiamate singole solo per quello che manca, e se un indice
-  resta muto tiene l'ultimo valore buono segnandolo con un puntino nell'app. Se un giorno Yahoo
-  chiudesse, in `config.json` si cambia fonte senza toccare il resto.
+- **Yahoo blocca i data center.** Da GitHub risponde sempre "troppe richieste": è il motivo per
+  cui esiste la seconda fonte. Il motore prova Yahoo, si arrende in fretta e passa a CNBC con
+  l'archivio delle chiusure. Se anche CNBC tacesse, l'app tiene gli ultimi valori buoni
+  segnandoli con un puntino, e se mancasse più di metà degli strumenti il bollettino non verrebbe
+  pubblicato affatto.
+- **Lo storico va seminato una volta.** Senza `docs/data/serie.json` l'app mostra il prezzo di
+  oggi e la variazione giornaliera, ma non mese e anno, e lo dice apertamente nel dettaglio di
+  ogni indice. `npm run storico` da casa risolve.
 - **Le notifiche web su iPhone funzionano solo dall'icona sulla Home.** È una regola di Apple.
 - **I dati sono in ritardo di qualche minuto** rispetto al mercato: vanno bene per capire, non per
   comprare e vendere al secondo.

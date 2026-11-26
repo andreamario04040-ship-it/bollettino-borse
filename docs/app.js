@@ -92,7 +92,7 @@ function disegnaIndici() {
       <span class="val">${num(m.prezzo, m.decimali)}${m.obsoleto ? '<span class="fermo" title="valore dell\'ultimo aggiornamento riuscito">·</span>' : ''}</span>
       <span class="var ${classe(v, m.inverso)}">${pct(v)}</span>
       ${apertoQui ? `<span class="spark">${spark(m.spark, 300, 34, m.inverso)}</span>
-        <span class="dettaglio">${m.obsoleto ? '<b>Questo valore non si è aggiornato all’ultimo controllo.</b> ' : ''}${fuga(m.perche || '')}
+        <span class="dettaglio">${m.obsoleto ? '<b>Questo valore non si è aggiornato all’ultimo controllo.</b> ' : ''}${m.storicoScarso ? '<b>Lo storico di questo strumento è ancora breve:</b> le variazioni su mese e anno diventeranno attendibili col passare dei giorni. ' : ''}${fuga(m.perche || '')}
           <dl>
             <div><dt>Oggi</dt><dd class="${classe(m.giorno, m.inverso)}">${pct(m.giorno)}</dd></div>
             <div><dt>7 giorni</dt><dd class="${classe(m.settimana, m.inverso)}">${pct(m.settimana, 1)}</dd></div>

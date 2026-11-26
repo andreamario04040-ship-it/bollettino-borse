@@ -1,37 +1,36 @@
-// Quotazioni da Yahoo Finance.
-// Strada principale: un'unica chiamata per tutti i simboli insieme (endpoint "spark").
-// È molto più leggera e non viene limitata come le chiamate una per una,
-// che restano come riserva per i simboli che dovessero mancare.
+// Quotazioni. Due fonti, con ruoli diversi:
+//
+//  · Yahoo Finance dà prezzo e un anno di storico in un'unica chiamata, ma rifiuta
+//    le richieste che arrivano dai data center — quindi da GitHub Actions non risponde.
+//  · CNBC risponde ovunque, ma dà solo il prezzo di adesso.
+//
+// Si prova prima Yahoo (quando il motore gira da casa funziona, ed è la fonte migliore);
+// se non risponde si usa CNBC e lo storico conservato nel repository.
+
+import { quotazioniCnbc } from './cnbc.mjs';
+import { daSerie, aggiungiPunto, sostituisciSerie } from './serie.mjs';
 
 const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0 Safari/537.36';
 const HOSTS = ['query1.finance.yahoo.com', 'query2.finance.yahoo.com'];
-const ATTESE = [2000, 6000, 15000, 40000];
+const ATTESE_YAHOO = [1500, 5000];   // poche e brevi: se Yahoo blocca, meglio passare subito a CNBC
 
 const pausa = (ms) => new Promise((r) => setTimeout(r, ms));
 const aPezzi = (v, n) => Array.from({ length: Math.ceil(v.length / n) }, (_, i) => v.slice(i * n, i * n + n));
-
-// I due indirizzi di Yahoo hanno limiti separati: si alternano a ogni richiesta,
-// così se uno sta limitando le chiamate l'altro risponde subito.
 let giro = Math.floor(Math.random() * HOSTS.length);
 
-async function chiedi(url, tentativo = 0) {
+async function chiediYahoo(url, tentativo = 0) {
   const host = HOSTS[giro++ % HOSTS.length];
   try {
-    const r = await fetch(`https://${host}${url}`, { headers: { 'User-Agent': UA, Accept: 'application/json' }, signal: AbortSignal.timeout(20000) });
-    if (!r.ok) { const e = new Error(`HTTP ${r.status}`); e.stato = r.status; e.ritenta = r.headers.get('retry-after'); throw e; }
+    const r = await fetch(`https://${host}${url}`, { headers: { 'User-Agent': UA, Accept: 'application/json' }, signal: AbortSignal.timeout(15000) });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
     return await r.json();
   } catch (e) {
-    if (tentativo >= ATTESE.length) throw e;
-    // Un 429 vuol dire "stai chiedendo troppo": si aspetta molto di più,
-    // e se il server dice quanto, si rispetta quello che dice.
-    const dettato = Number(e.ritenta) * 1000;
-    const attesa = e.stato === 429 ? Math.max(ATTESE[tentativo] * 3, dettato || 0) : ATTESE[tentativo];
-    await pausa(attesa);
-    return chiedi(url, tentativo + 1);
+    if (tentativo >= ATTESE_YAHOO.length) throw e;
+    await pausa(ATTESE_YAHOO[tentativo]);
+    return chiediYahoo(url, tentativo + 1);
   }
 }
 
-// Variazione percentuale rispetto a N sedute fa.
 function variazione(chiusure, sedute) {
   if (!chiusure || chiusure.length < 2) return null;
   const base = chiusure[Math.max(0, chiusure.length - 1 - sedute)];
@@ -44,8 +43,7 @@ export function componi(sym, prezzo, giorno, chiusure) {
   if (prezzo == null && !serie.length) return { sym, errore: 'nessun dato' };
   const p = prezzo ?? serie[serie.length - 1];
   return {
-    sym,
-    prezzo: p,
+    sym, prezzo: p,
     giorno: giorno ?? variazione(serie, 1),
     settimana: variazione(serie, 5),
     mese: variazione(serie, 22),
@@ -58,61 +56,75 @@ export function componi(sym, prezzo, giorno, chiusure) {
   };
 }
 
-async function inBlocco(simboli) {
+// Prova Yahoo. Restituisce una mappa, eventualmente vuota.
+export async function daYahoo(simboli, date = '1y') {
   const out = new Map();
   for (const pezzo of aPezzi(simboli, 10)) {
-    const url = `/v8/finance/spark?symbols=${pezzo.map(encodeURIComponent).join(',')}&range=1y&interval=1d`;
     try {
-      const j = await chiedi(url);
+      const j = await chiediYahoo(`/v8/finance/spark?symbols=${pezzo.map(encodeURIComponent).join(',')}&range=${date}&interval=1d`);
       for (const sym of pezzo) {
         const v = j?.[sym];
-        if (!v) continue;
-        out.set(sym, componi(sym, v.fulldayPrice, v.fulldayChangePercent, v.close));
+        if (v) out.set(sym, { ...componi(sym, v.fulldayPrice, v.fulldayChangePercent, v.close), timestamp: v.timestamp, chiusure: (v.close || []).filter((x) => x != null) });
       }
     } catch (e) {
-      console.error(`  ! blocco (${pezzo.length} simboli): ${e.message}`);
+      console.error(`  · Yahoo non risponde (${e.message})`);
+      return out;   // se blocca un pezzo blocca tutto: inutile insistere
     }
-    await pausa(500);
+    await pausa(400);
   }
   return out;
 }
 
-async function unoAlloVolta(sym) {
-  const j = await chiedi(`/v8/finance/chart/${encodeURIComponent(sym)}?interval=1d&range=1y`);
-  const res = j?.chart?.result?.[0];
-  if (!res) throw new Error(j?.chart?.error?.description || 'risposta vuota');
-  const m = res.meta;
-  const d = componi(sym, m.regularMarketPrice, m.regularMarketChangePercent, res.indicators?.quote?.[0]?.close);
-  return { ...d, valuta: m.currency, mercato: m.exchangeName, max52: m.fiftyTwoWeekHigh ?? d.max52, min52: m.fiftyTwoWeekLow ?? d.min52 };
-}
+const giornoDa = (ts) => new Date(ts * 1000).toISOString().slice(0, 10);
 
-// Oltre questo numero di mancanti non si insiste con le chiamate singole:
-// vuol dire che Yahoo sta limitando le richieste, e insistere peggiora le cose.
-// Chi ci chiama riuserà l'ultimo valore buono.
-const MASSIMO_RECUPERI = 4;
+export async function scaricaMercati(strumenti, serie = {}, giornoOggi = new Date().toISOString().slice(0, 10)) {
+  const presi = await daYahoo(strumenti.map((s) => s.sym));
+  let fonte = 'Yahoo Finance';
 
-export async function scaricaMercati(strumenti) {
-  const simboli = strumenti.map((s) => s.sym);
-  const presi = await inBlocco(simboli);
-
-  const mancanti = simboli.filter((s) => !presi.has(s));
-  let recuperati = 0;
-
-  if (mancanti.length && mancanti.length <= MASSIMO_RECUPERI) {
-    for (const sym of mancanti) {
-      try { presi.set(sym, await unoAlloVolta(sym)); recuperati++; }
-      catch (e) { console.error(`  ! ${sym}: ${e.message}`); presi.set(sym, { sym, errore: e.message }); }
-      await pausa(400);
+  if (presi.size >= strumenti.length / 2) {
+    // Yahoo ha risposto: si approfitta per rinfrescare tutto lo storico.
+    for (const [sym, d] of presi) {
+      if (d.timestamp?.length && d.chiusure?.length) {
+        const punti = d.timestamp.map((t, i) => [giornoDa(t), d.chiusure[i]]).filter(([, c]) => c != null);
+        sostituisciSerie(serie, sym, punti);
+      }
     }
-  } else if (mancanti.length) {
-    console.error(`  ! ${mancanti.length} simboli non arrivati: Yahoo sta limitando le richieste, non insisto.`);
-    for (const sym of mancanti) presi.set(sym, { sym, errore: 'troppe richieste' });
+  } else {
+    fonte = 'CNBC';
+    console.log('  · passo a CNBC e allo storico salvato');
+    const perCnbc = new Map(strumenti.map((s) => [s.cnbc, s.sym]));
+    try {
+      const q = await quotazioniCnbc(strumenti.map((s) => s.cnbc).filter(Boolean));
+      for (const [simboloCnbc, d] of q) {
+        const sym = perCnbc.get(simboloCnbc);
+        if (!sym) continue;
+        aggiungiPunto(serie, sym, giornoOggi, d.prezzo);
+        const st = daSerie(serie, sym, d.prezzo, giornoOggi);
+        presi.set(sym, {
+          sym, prezzo: d.prezzo, giorno: d.giorno,
+          settimana: st.settimana ?? null, mese: st.mese ?? null,
+          trimestre: st.trimestre ?? null, anno: st.anno ?? null,
+          max52: st.max52 ?? null, min52: st.min52 ?? null,
+          spark: (st.spark || []).map((x) => Number(x.toFixed(4))),
+          storicoScarso: st.scarsa === true,
+          aggiornato: new Date().toISOString(),
+        });
+      }
+    } catch (e) {
+      console.error(`  ! anche CNBC non risponde: ${e.message}`);
+    }
   }
 
-  const out = strumenti.map((s) => ({ ...s, ...presi.get(s.sym) }));
+  // Lo storico si allunga comunque di un punto al giorno.
+  for (const [sym, d] of presi) if (d.prezzo != null) aggiungiPunto(serie, sym, giornoOggi, d.prezzo);
+
+  const out = strumenti.map((s) => {
+    const d = presi.get(s.sym);
+    if (!d) return { ...s, errore: 'non arrivato' };
+    const { timestamp, chiusure, ...pulito } = d;
+    return { ...s, ...pulito };
+  });
   const ok = out.filter((x) => !x.errore).length;
-  const come = mancanti.length === 0 ? ' in un’unica chiamata'
-    : recuperati ? ` (${recuperati} recuperati con chiamata singola)` : '';
-  console.log(`  mercati: ${ok}/${out.length} strumenti${come}`);
-  return out;
+  console.log(`  mercati: ${ok}/${out.length} strumenti da ${fonte}`);
+  return { mercati: out, serie, fonte };
 }

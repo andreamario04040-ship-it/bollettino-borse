@@ -6,6 +6,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { scaricaMercati } from './mercati.mjs';
+import { serieVuota } from './serie.mjs';
 import { scaricaNotizie } from './notizie.mjs';
 import { costruisciReport } from './report.mjs';
 import { valutaAvviso, statoVuoto } from './avvisi.mjs';
@@ -44,10 +45,15 @@ if (attesa) {
   }
 }
 
-const [appena, notizie] = await Promise.all([
-  scaricaMercati(config.strumenti),
+const serieSalvata = await leggiJson(dentro('docs/data/serie.json'), serieVuota());
+const oggi = giornoRoma(adesso);
+
+const [esitoMercati, notizie] = await Promise.all([
+  scaricaMercati(config.strumenti, serieSalvata, oggi),
   scaricaNotizie(config.feed),
 ]);
+const appena = esitoMercati.mercati;
+await scriviJson(dentro('docs/data/serie.json'), esitoMercati.serie);
 
 // Se un indice non risponde (succede: Yahoo limita chi lo interroga spesso) si tiene
 // l'ultimo valore buono e lo si segna come fermo, invece di lasciare un buco nell'app.

@@ -6,7 +6,7 @@ on:
     # quindi ogni appuntamento ha due orari e il programma esce subito da quello sbagliato.
     - cron: '0 7,8 * * 1-5'        # bollettino del mattino, ore 9:00 italiane
     - cron: '15 16,17 * * 1-5'     # bollettino della sera, ore 18:15 italiane
-    - cron: '20 9-20 * * 1-5'      # controllo del giorno: manda solo se c'è un movimento grosso
+    - cron: '20 7-20 * * 1-5'      # controllo del giorno: manda solo se c'è un movimento grosso
   workflow_dispatch:
     inputs:
       modo:
@@ -42,7 +42,7 @@ jobs:
           case "${{ github.event.schedule }}" in
             "0 7,8 * * 1-5")     echo "modo=bollettino mattina" >> "$GITHUB_OUTPUT"; echo "ora=09:00" >> "$GITHUB_OUTPUT" ;;
             "15 16,17 * * 1-5")  echo "modo=bollettino sera"    >> "$GITHUB_OUTPUT"; echo "ora=18:15" >> "$GITHUB_OUTPUT" ;;
-            "20 9-20 * * 1-5")   echo "modo=avviso"             >> "$GITHUB_OUTPUT"; echo "ora=" >> "$GITHUB_OUTPUT" ;;
+            "20 7-20 * * 1-5")   echo "modo=avviso"             >> "$GITHUB_OUTPUT"; echo "ora=" >> "$GITHUB_OUTPUT" ;;
             *)                   echo "modo=${{ inputs.modo || 'bollettino mattina' }}" >> "$GITHUB_OUTPUT"; echo "ora=" >> "$GITHUB_OUTPUT" ;;
           esac
 
