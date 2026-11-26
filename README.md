@@ -398,6 +398,24 @@ invecchiano** — primati, classifiche, se un'azienda è quotata. Quelli si legg
 L'app aveva scritto che Anthropic non era quotata perché la frase era stata messa a mano
 e non è più stata rivista.
 
+## Le aziende che segui
+
+Oltre a quelle che l'agente sceglie ogni giorno, puoi tenerne d'occhio alcune tue. Si scelgono
+dall'app, col tasto **Scegli**: un elenco delle quarantadue aziende che l'app conosce, diviso per
+settore, con un segno accanto a quelle che oggi hanno una notizia.
+
+La scelta **resta sul dispositivo**: nessuno la carica da nessuna parte, e iPhone e Mac possono
+avere liste diverse. Il motore non sa quali siano, quindi fa una cosa più semplice e più robusta:
+nello stesso giro in cui sceglie le aziende del giorno, l'agente passa in rassegna tutte e
+quarantadue e dice quali hanno **oggi** una notizia vera, una riga ciascuna. L'app mostra quelle
+che hai scelto, e per le altre scrive *«Oggi i giornali non ne hanno parlato»*.
+
+Vale la pena dirlo chiaramente: quella frase non è un buco. I titoli del giorno sono stati letti
+tutti, e di quell'azienda non c'era niente. È una risposta, ed è diversa dal silenzio.
+
+Le righe del radar passano dallo stesso verificatore delle altre: due cifre che non stanno nei
+titoli né nei dati bloccano la pubblicazione.
+
 ## Spiegazioni e glossario
 
 Ogni indice ha una scheda (`guida` dentro `config.json`): cos'è, come si legge, cosa
@@ -441,6 +459,29 @@ I numeri si vedono; le notifiche no, perché servono HTTPS e l'icona sulla Home.
 riparte a mezzanotte, il comunicato della BCE, l'orario notturno) che girano senza rete.
 
 ---
+
+## L'impaginato da Mac
+
+Lo schermo largo non serve a mettere più roba: serve a mettere ogni cosa dove la si cerca.
+
+- A sinistra **ciò che si legge**: il titolo del giorno e i paragrafi del bollettino, uno sotto
+  l'altro, con righe della lunghezza giusta. Prima stavano a due colonne e si alternavano ai
+  riquadri dei numeri, così l'occhio ricominciava da capo a ogni riga.
+- A destra **ciò che si guarda**: il clima, i numeri segnalati oggi, le tessere fisse.
+- Sotto, a tutta larghezza, le aziende: due colonne, tre oltre i 1500 pixel.
+
+Ogni argomento ha il suo colore sul bordo e sul numero — verde *Cos'è successo*, indaco *Perché*,
+ambra *Il dato da non perdere*, ciano *Cosa guardare adesso*, grigio *Il contesto* — e fra un
+blocco e l'altro c'è un capitolo che dice dove si è. Il colore sta solo sul bordo, mai sul testo:
+serve a orientarsi, non a far rumore.
+
+Sul telefono resta una colonna sola, e l'ordine è quello di prima: i due raggruppamenti esistono
+solo da 900 pixel in su, e sotto tornano a essere una lista unica.
+
+**La barra in cima non c'è più.** Aveva il logo e la scritta «Borsa», e l'app sa già di essere sé
+stessa: quello spazio serviva solo a ripeterlo. È rimasto il nastro dei prezzi, che invece dice
+qualcosa. Il tasto per ricaricare, che stava lì ed è l'unico modo di rinfrescare i dati quando
+l'app è aggiunta alla schermata Home, adesso galleggia in basso a destra.
 
 ## Limiti, detti chiaramente
 

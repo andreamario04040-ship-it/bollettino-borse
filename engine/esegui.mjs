@@ -15,7 +15,7 @@ import { scaricaMercati } from './mercati.mjs';
 import { serieVuota } from './serie.mjs';
 import { scaricaNotizie } from './notizie.mjs';
 import { costruisciReport } from './report.mjs';
-import { aziendeDelGiorno, componiAziende, componiIndici } from './aziende.mjs';
+import { aziendeDelGiorno, componiAziende, componiIndici, componiRadar, NOMI_CONOSCIUTI } from './aziende.mjs';
 import { scegliIlGiorno } from './scelta.mjs';
 import { arricchisci } from './articoli.mjs';
 import { riassumiAziende } from './agente.mjs';
@@ -181,13 +181,16 @@ report.utente = config.utente || null;   // serve all'app per il saluto
 // o non ce la fa, si torna al conteggio delle citazioni: meno sveglio, sempre
 // disponibile.
 const scelta = await scegliIlGiorno({
-  notizie, mercati, env: process.env,
+  notizie, mercati, conosciute: NOMI_CONOSCIUTI, env: process.env,
   modello: config.agente?.modello, modelloCli: config.agente?.modello_cli,
 });
 let aziendeTrovate;
 if (scelta) {
   aziendeTrovate = await componiAziende(scelta.aziende);
   report.daGuardare = componiIndici(scelta.indici, mercati);
+  // Le aziende che si possono seguire: la lista intera, con la notizia di oggi
+  // dove c'è. Quali seguire lo decide l'app, sul dispositivo.
+  report.radar = await componiRadar(scelta.radar);
 } else {
   console.log('  scelta: nessun agente, torno al conteggio delle citazioni nei titoli');
   aziendeTrovate = await aziendeDelGiorno(notizie, config.aziende?.quante ?? 6);

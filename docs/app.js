@@ -3,7 +3,7 @@
 // Si alza a ogni modifica dell'app, insieme a docs/versione.json.
 // Serve perché un'app aggiunta alla schermata Home resta viva in memoria:
 // riaprendola dal selettore non ricarica, e resterebbe vecchia per giorni.
-const VERSIONE_APP = 15;
+const VERSIONE_APP = 16;
 
 const CHIAVE_PUBBLICA = 'BEX2Ep7AZJPgrIF_cHwKOWk9VSiE8OLd1WLxSJDANLNEbox4xiHYb5pgRslEapXEXZs35jhSmHRhrLcfFhyPwVk';
 const MENO = '−', SOTTILE = ' ';
@@ -214,7 +214,7 @@ function disegnaOggi() {
     return;
   }
   const n = REPORT.notifica || {};
-  $('quando').textContent = `${REPORT.tipo === 'sera' ? 'Sera' : REPORT.tipo === 'avviso' ? 'Avviso' : 'Mattino'} · ${REPORT.data || ''}${REPORT.ora ? ', ' + REPORT.ora : ''}`;
+  $('quando').textContent = `Bollettino del ${REPORT.tipo === 'sera' ? 'pomeriggio' : REPORT.tipo === 'avviso' ? 'giorno' : 'mattino'}${REPORT.ora ? `, delle ${REPORT.ora}` : ''}`;
 
   if (REPORT.clima) {
     $('clima-scheda').hidden = false;
@@ -290,6 +290,89 @@ function disegnaGuardare() {
       ${m.spark?.length ? `<div class="gu-graf">${linea(m.spark, 320, 46, m.inverso, true)}</div>` : ''}
     </article>`;
   }).join('');
+}
+
+/* ——————————————— le aziende che segui ———————————————
+   La scelta resta sul dispositivo: il motore prepara ogni giorno la lista
+   intera con la notizia dove c'è, e qui si mostra solo quello che hai scelto.
+   Dove la notizia manca si scrive che oggi non c'era niente — i titoli sono
+   stati letti davvero, quindi l'assenza è una risposta, non un buco. */
+function preferiteSalvate() {
+  try { return JSON.parse(localStorage.getItem('preferite') || '[]'); } catch { return []; }
+}
+function salvaPreferite(lista) {
+  try { localStorage.setItem('preferite', JSON.stringify(lista)); } catch { /* finestra privata: pazienza */ }
+}
+const radarDi = (nome) => (REPORT?.radar || []).find((x) => x.nome === nome);
+
+function disegnaPreferite() {
+  const radar = REPORT?.radar || [];
+  $('capitolo-preferite').hidden = radar.length === 0;
+  $('preferite-scheda').hidden = radar.length === 0;
+  if (!radar.length) return;
+
+  const scelte = preferiteSalvate().filter((n) => radarDi(n));
+  const conNotizia = scelte.filter((n) => radarDi(n)?.notizia).length;
+
+  $('preferite-nota').textContent = !scelte.length
+    ? 'Scegli le aziende che ti interessano di più: ogni giorno guardo i giornali per loro e qui ti scrivo cosa ho trovato. Se non c\u2019è niente, te lo dico.'
+    : conNotizia
+      ? `Oggi ho trovato qualcosa su ${conNotizia} delle ${scelte.length} che segui.`
+      : `Oggi sui giornali non c\u2019era niente su nessuna delle ${scelte.length} che segui. Succede: non tutti i giorni accade qualcosa.`;
+
+  $('preferite').innerHTML = scelte.map((nome) => {
+    const a = radarDi(nome);
+    const prezzo = a.prezzo != null
+      ? `<span class="az-prezzo">${num(a.prezzo, 2)} <span class="varia ${classe(a.giorno)}">${pct(a.giorno)}</span></span>`
+      : '<span class="az-prezzo az-nonquotata">quotazione non disponibile</span>';
+    return `<article class="azienda preferita${a.notizia ? '' : ' quieta'}">
+      <div class="az-testa">
+        <span class="az-identita">
+          ${a.logo
+            ? `<img class="az-logo" src="loghi/${fuga(a.logo)}.png" alt="" width="34" height="34" loading="lazy" decoding="async">`
+            : `<span class="az-iniziale">${fuga(a.nome.slice(0, 1))}</span>`}
+          <span><span class="az-nome">${fuga(a.nome)}</span><span class="az-settore">${fuga(a.settore)}</span></span>
+        </span>
+        ${prezzo}
+      </div>
+      ${a.notizia
+        ? `<p class="az-motivo">${testo(a.notizia)}</p>`
+        : `<p class="az-quieta">Oggi i giornali non ne hanno parlato.</p>`}
+    </article>`;
+  }).join('');
+
+  for (const img of $('preferite').querySelectorAll('.az-logo')) {
+    img.addEventListener('error', () => {
+      const i = document.createElement('span');
+      i.className = 'az-iniziale';
+      i.textContent = (img.closest('.azienda')?.querySelector('.az-nome')?.textContent || '?').slice(0, 1);
+      img.replaceWith(i);
+    }, { once: true });
+  }
+}
+
+function corpoSceltaPreferite() {
+  const scelte = new Set(preferiteSalvate());
+  const gruppi = new Map();
+  for (const a of REPORT?.radar || []) {
+    if (!gruppi.has(a.settore)) gruppi.set(a.settore, []);
+    gruppi.get(a.settore).push(a);
+  }
+  const righe = [...gruppi].map(([settore, lista]) => `<div class="pref-gruppo">
+    <p class="pref-settore">${fuga(settore)}</p>
+    ${lista.map((a) => `<button class="pref-voce" data-preferita="${fuga(a.nome)}" aria-pressed="${scelte.has(a.nome)}">
+      <span class="pref-stella" aria-hidden="true">${scelte.has(a.nome) ? '★' : '☆'}</span>
+      <span class="pref-nome">${fuga(a.nome)}</span>
+      ${a.notizia ? '<span class="pref-oggi">oggi</span>' : ''}
+    </button>`).join('')}
+  </div>`).join('');
+
+  return `<p class="pan-testo">Tocca le aziende che vuoi seguire. Ogni giorno guardo i giornali per loro, e te lo scrivo nella sezione «Le aziende che segui». Quelle segnate <b>oggi</b> hanno una notizia in giornata.</p>
+    <div class="pref-elenco">${righe}</div>`;
+}
+
+function apriSceltaPreferite() {
+  apriPannello({ tipo: 'Le tue aziende', titolo: 'Scegli quali seguire', corpo: corpoSceltaPreferite() });
 }
 
 function disegnaAziende() {
@@ -414,7 +497,7 @@ async function carica() {
     .map((t) => ({ ...t, forme: [...t.forme].sort((a, b) => b.length - a.length) }))
     .sort((a, b) => Math.max(...b.forme.map((f) => f.length)) - Math.max(...a.forme.map((f) => f.length)));
   // Se una parte si rompe, le altre devono restare in piedi.
-  for (const [nome, f] of [['correzioni', disegnaCorrezioni], ['saluto', disegnaSaluto], ['nastro', disegnaNastro], ['oggi', disegnaOggi], ['da guardare', disegnaGuardare], ['tessere', disegnaTessere], ['aziende', disegnaAziende], ['mercati', disegnaMercati], ['info', disegnaInfo]]) {
+  for (const [nome, f] of [['correzioni', disegnaCorrezioni], ['saluto', disegnaSaluto], ['nastro', disegnaNastro], ['oggi', disegnaOggi], ['da guardare', disegnaGuardare], ['tessere', disegnaTessere], ['aziende', disegnaAziende], ['le tue aziende', disegnaPreferite], ['mercati', disegnaMercati], ['info', disegnaInfo]]) {
     try { f(); } catch (e) { console.error('disegno ' + nome + ':', e); }
   }
 }
@@ -509,6 +592,17 @@ document.addEventListener('click', (e) => {
   const guida = e.target.closest('[data-guida]');
   if (guida) { e.stopPropagation(); return spiegaIndice(guida.dataset.guida); }
 
+  const pref = e.target.closest('[data-preferita]');
+  if (pref) {
+    const nome = pref.dataset.preferita;
+    const lista = preferiteSalvate();
+    const i = lista.indexOf(nome);
+    if (i >= 0) lista.splice(i, 1); else lista.push(nome);
+    salvaPreferite(lista);
+    $('pan-corpo').innerHTML = corpoSceltaPreferite();
+    return disegnaPreferite();
+  }
+
   const chiudi = e.target.closest('[data-chiudi]');
   if (chiudi) {
     const lette = letteSalvate();
@@ -533,6 +627,7 @@ document.addEventListener('click', (e) => {
   if (tema) return applicaTema(tema.dataset.tema);
 });
 
+$('scegli-preferite').addEventListener('click', apriSceltaPreferite);
 $('pan-chiudi').addEventListener('click', () => $('pannello').close());
 $('pannello').addEventListener('click', (e) => { if (e.target === $('pannello')) $('pannello').close(); });
 

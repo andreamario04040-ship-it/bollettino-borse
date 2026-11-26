@@ -57,6 +57,12 @@ Scegli quelli che oggi stanno dicendo qualcosa: si sono mossi più del solito, o
 - "nome": copiato esattamente dall'elenco, carattere per carattere.
 - "perche": UNA frase breve, al massimo 140 caratteri, che lega il numero di oggi a quello che sta succedendo.
 
+RADAR — in fondo trovi l'elenco completo delle aziende che l'app conosce, perché il lettore può sceglierne alcune da seguire ogni giorno.
+
+Dimmi quali di quelle, OGGI, hanno una notizia vera nei titoli che ti ho dato, e per ognuna scrivi una frase sola col fatto. Vale la stessa severità: una menzione di passaggio dentro un riepilogo di borsa non è una notizia, un movimento senza causa raccontata nemmeno. Le aziende senza notizia NON vanno elencate: la loro assenza è già la risposta, e l'app scriverà da sé che oggi non c'era niente. Scrivi il nome esattamente come compare nell'elenco.
+
+Qui l'elenco è lungo e la maggior parte delle aziende non avrà niente: è normale. Meglio tre righe vere che venti di niente.
+
 REGOLE SU TUTTO
 1. Scrivi soltanto fatti che stanno nei titoli o nei dati che ti ho dato. Non aggiungere nulla che ricordi da altrove: chi legge non può distinguere ciò che hai letto oggi da ciò che ricordi, e un ricordo vecchio diventa una bugia.
 2. Copia le cifre esattamente come le trovi. Non costruire intervalli e non arrotondare: se il materiale dice 110 punti scrivi 110, non "circa 108-110".
@@ -74,6 +80,7 @@ const Schema = z.object({
     dominio: z.string().nullable(),
   })),
   indici: z.array(z.object({ nome: z.string(), perche: z.string() })),
+  radar: z.array(z.object({ nome: z.string(), notizia: z.string() })),
 });
 
 const SCHEMA_JSON = {
@@ -108,14 +115,26 @@ const SCHEMA_JSON = {
         additionalProperties: false,
       },
     },
+    radar: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          nome: { type: 'string', description: 'Esattamente come compare nell’elenco delle aziende conosciute' },
+          notizia: { type: 'string', description: 'Una frase sola col fatto di oggi' },
+        },
+        required: ['nome', 'notizia'],
+        additionalProperties: false,
+      },
+    },
   },
-  required: ['aziende', 'indici'],
+  required: ['aziende', 'indici', 'radar'],
   additionalProperties: false,
 };
 
 // ───────────────────────────────  il materiale  ───────────────────────────────
 
-function materiale(notizie, mercati) {
+function materiale(notizie, mercati, conosciute = []) {
   const usabili = notizie.slice(0, MASSIMO_TITOLI);
   const righe = usabili.map((n, i) => {
     const s = n.sommario ? `\n    ${taglia(n.sommario, 300)}` : '';
@@ -131,7 +150,11 @@ function materiale(notizie, mercati) {
     return `  ${pezzi.join(' · ')}`;
   });
 
-  return { usabili, testo: `=== TITOLI DI OGGI ===\n${righe.join('\n')}\n\n=== DATI DI MERCATO DI OGGI ===\n${dati.join('\n')}` };
+  const elenco = conosciute.length
+    ? `\n\n=== AZIENDE CHE L'APP CONOSCE (per il radar) ===\n${conosciute.join(' · ')}`
+    : '';
+
+  return { usabili, testo: `=== TITOLI DI OGGI ===\n${righe.join('\n')}\n\n=== DATI DI MERCATO DI OGGI ===\n${dati.join('\n')}${elenco}` };
 }
 
 // ─────────────────────────────────  i motori  ─────────────────────────────────
@@ -190,9 +213,9 @@ function viaCli(testo, comando, modello, env) {
 
 // ──────────────────────────────  la scelta vera  ──────────────────────────────
 
-export async function scegliIlGiorno({ notizie, mercati, env = process.env, modello, modelloCli }) {
+export async function scegliIlGiorno({ notizie, mercati, conosciute = [], env = process.env, modello, modelloCli }) {
   if (!notizie?.length) return null;
-  const { usabili, testo } = materiale(notizie, mercati);
+  const { usabili, testo } = materiale(notizie, mercati, conosciute);
 
   let scelta = null;
   const avvio = Date.now();
@@ -233,6 +256,12 @@ export async function scegliIlGiorno({ notizie, mercati, env = process.env, mode
     perche: taglia(String(x.perche || '').trim(), 200),
   })).filter((x) => x.nome && x.perche);
 
+  const radar = (scelta.radar || []).map((x) => ({
+    nome: String(x.nome || '').trim(),
+    notizia: taglia(String(x.notizia || '').trim(), 260),
+  })).filter((x) => x.nome && x.notizia);
+
   console.log(`  scelta: ${aziende.length} aziende e ${indici.length} indici, decisi dall’agente in ${secondi} s`);
-  return { aziende, indici };
+  if (conosciute.length) console.log(`  radar: ${radar.length} aziende seguite hanno una notizia oggi su ${conosciute.length} guardate`);
+  return { aziende, indici, radar };
 }

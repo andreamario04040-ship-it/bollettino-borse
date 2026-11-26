@@ -79,22 +79,21 @@ svg{fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-l
 
 /* ——— barra in alto ——— */
 .testa{position:sticky;top:0;z-index:30}
-.barra-alta{display:flex;align-items:center;justify-content:space-between;
-  gap:1rem;background:color-mix(in srgb,var(--fondo) 86%,transparent);backdrop-filter:saturate(1.6) blur(14px);
-  border-bottom:1px solid var(--bordo);
-  padding:.7rem max(16px,env(safe-area-inset-right)) .7rem max(16px,env(safe-area-inset-left));
-  padding-top:calc(.7rem + env(safe-area-inset-top))}
-.marchio{display:flex;align-items:center;gap:.65rem;min-width:0}
-.segno{width:36px;height:36px;flex:none;border-radius:11px;display:block;
-  box-shadow:var(--bagliore);background:#000}
-.titoli{min-width:0}
-.titoli h1{font-size:1.1rem;font-weight:800;letter-spacing:-.02em}
-.titoli p{margin:0;font-size:.74rem;color:var(--testo2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* La barra con il logo e la scritta "Borsa" non c'è più: l'app sa già di
+   essere sé stessa, e quello spazio in cima serviva solo a ripeterlo. Resta il
+   nastro dei prezzi, che invece dice qualcosa. Il tasto per ricaricare, che
+   stava lì ed è l'unico modo di rinfrescare i dati quando l'app è aggiunta alla
+   schermata Home, galleggia in basso a destra. */
 .tondo{width:38px;height:38px;flex:none;border-radius:50%;border:1px solid var(--bordo);background:var(--superficie);
   display:grid;place-items:center;color:var(--testo2);transition:color .15s,border-color .15s}
 .tondo svg{width:18px;height:18px}
 .tondo:hover{color:var(--accento);border-color:var(--accento)}
 .tondo.gira svg{animation:gira .7s ease}
+.tondo.galleggia{position:fixed;right:max(14px,env(safe-area-inset-right));
+  bottom:calc(var(--barra) + .7rem + env(safe-area-inset-bottom));z-index:25;
+  box-shadow:var(--ombra);background:var(--superficie)}
+
+.nastro{padding-top:env(safe-area-inset-top)}
 @keyframes gira{to{transform:rotate(360deg)}}
 
 /* ——— nastro prezzi ——— */
@@ -154,6 +153,7 @@ main{max-width:640px;margin:0 auto;
   line-height:1.1;color:var(--testo)}
 .saluto-data{margin:.35rem 0 0;font-size:.86rem;color:var(--testo3)}
 .saluto-invito{margin:.7rem 0 0;font-size:.95rem;color:var(--testo2);line-height:1.5}
+.saluto-quando{margin:.15rem 0 0;font-size:.78rem;color:var(--testo3)}
 
 /* ——— clima ——— */
 .clima-scheda{display:flex;align-items:center;gap:1rem;justify-content:space-between}
@@ -305,6 +305,33 @@ code{font-family:var(--fm);font-size:.82rem;background:var(--superficie2);paddin
 .azienda .fonti-link{margin-top:.6rem}
 .azienda .fonte-link{background:var(--superficie)}
 
+/* ——— le aziende che segui ——— */
+.preferite-scheda{padding-bottom:.9rem}
+#preferite{display:flex;flex-direction:column;gap:.8rem;margin-top:.9rem}
+#preferite:empty{display:none}
+.tasto-pillola{font-size:.7rem;font-weight:600;letter-spacing:.03em;padding:.3rem .75rem;border-radius:999px;
+  border:1px solid var(--accento);background:none;color:var(--accento);cursor:pointer}
+.tasto-pillola:hover{background:var(--accento-tenue)}
+/* Quando oggi non c'è niente la scheda non sparisce: resta, più spenta.
+   Vedere che l'azienda è stata guardata vale più di non vederla affatto. */
+.azienda.quieta{opacity:.72}
+.az-quieta{margin:.5rem 0 0;font-size:.88rem;color:var(--testo3);font-style:italic}
+
+/* il pannello che fa scegliere */
+.pref-elenco{margin-top:.9rem;display:flex;flex-direction:column;gap:.9rem}
+.pref-settore{margin:0 0 .35rem;font-size:.64rem;font-weight:700;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--testo3)}
+.pref-voce{display:flex;align-items:center;gap:.6rem;width:100%;text-align:left;
+  padding:.45rem .55rem;border:1px solid transparent;border-radius:9px;background:none;
+  color:var(--testo);font:inherit;font-size:.92rem;cursor:pointer}
+.pref-voce:hover{background:var(--superficie2)}
+.pref-voce[aria-pressed="true"]{border-color:var(--accento);background:var(--accento-tenue)}
+.pref-stella{font-size:1rem;line-height:1;color:var(--accento);width:1.1em;flex:none}
+.pref-voce[aria-pressed="false"] .pref-stella{color:var(--testo3)}
+.pref-nome{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pref-oggi{flex:none;font-size:.6rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--accento);background:var(--accento-tenue);padding:.14rem .4rem;border-radius:999px}
+
 /* ——— da guardare oggi ——— */
 /* Le tessere mostrano sempre gli stessi sei numeri. Questa scheda invece cambia
    ogni giorno: sono i dati che oggi dicono qualcosa, e sotto ognuno c'è perché. */
@@ -429,21 +456,35 @@ code{font-family:var(--fm);font-size:.82rem;background:var(--superficie2);paddin
   .schede button[aria-selected="true"] span{font-weight:600}
   .schede button:hover{background:var(--superficie2)}
 
-  /* Oggi: saluto e clima affiancati, poi il titolo a tutta larghezza,
-     poi i paragrafi a due colonne. */
-  #vista-oggi{display:grid;grid-template-columns:1fr 1fr;gap:1rem;align-items:start}
-  #saluto{grid-column:1}
-  #clima-scheda{grid-column:2;height:100%}
-  #titolone,#sezioni,#piede-oggi,#tessere,#aziende-scheda,#correzioni{grid-column:1/-1}
-  #sezioni{display:grid;grid-template-columns:1fr 1fr;gap:1rem;align-items:start}
-  .saluto-riga{font-size:1.9rem}
+  /* Oggi, su schermo largo: due colonne di natura diversa, non due colonne
+     uguali in cui cade quel che capita. A sinistra ciò che si legge — il
+     titolo e i paragrafi del bollettino, uno sotto l'altro, con righe di
+     lunghezza giusta. A destra ciò che si guarda: il clima, i numeri segnalati
+     oggi, le tessere fisse. Prima racconto e numeri si alternavano nella
+     stessa colonna e l'occhio doveva ricominciare da capo ogni volta. */
+  #vista-oggi{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+    gap:1rem 1.4rem;align-items:start;align-content:start}
+  #correzioni,#saluto,#capitolo-aziende,#aziende-scheda,
+  #capitolo-preferite,#preferite-scheda,#piede-oggi{grid-column:1/-1}
+  #preferite{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;align-items:start}
+  .col-principale{grid-column:1;min-width:0;display:flex;flex-direction:column;gap:.9rem}
+  .col-lato{grid-column:2;min-width:0;display:flex;flex-direction:column;gap:.9rem}
+  #sezioni{display:flex;flex-direction:column;gap:.9rem}
+
+  /* Il saluto diventa una fascia: a sinistra chi sei e che giorno è,
+     a destra cosa ti aspetta. Occupava un riquadro intero per tre righe. */
+  #saluto{display:grid;grid-template-columns:1fr auto;align-items:end;column-gap:2.5rem}
+  .saluto-riga{grid-column:1;grid-row:1;font-size:1.9rem}
+  .saluto-data{grid-column:1;grid-row:2}
+  .saluto-quando{grid-column:1;grid-row:3}
+  .saluto-invito{grid-column:2;grid-row:1/-1;align-self:end;margin:0;max-width:42ch;text-align:right}
+
   .titolone h2{font-size:1.85rem}
   .titolone .sommario{font-size:1.06rem;max-width:62ch}
   .sezione p{font-size:.97rem}
 
-  .tessere{grid-template-columns:repeat(3,1fr);grid-column:1/-1}
+  .tessere{grid-template-columns:repeat(2,1fr)}
   #aziende{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;align-items:start}
-  #aziende-scheda{grid-column:1/-1}
 
   /* Mercati: i gruppi affiancati, ciascuno intero. */
   #lista-indici{display:grid;grid-template-columns:1fr 1fr;gap:.4rem 1rem;align-items:start}
@@ -466,7 +507,27 @@ code{font-family:var(--fm);font-size:.82rem;background:var(--superficie2);paddin
 /* Tre colonne solo quando c'è davvero spazio: sotto, i paragrafi
    diventerebbero strisce troppo strette da leggere. */
 @media (min-width:1500px){
-  main{margin-left:214px;max-width:1400px}
-  #sezioni{grid-template-columns:repeat(3,1fr)}
+  main{margin-left:214px;max-width:1340px}
   #lista-indici{grid-template-columns:repeat(3,1fr)}
+  .tessere{grid-template-columns:repeat(3,1fr)}
+  #aziende,#preferite{grid-template-columns:repeat(3,1fr)}
+  /* Oltre una certa larghezza la riga diventa troppo lunga per l'occhio:
+     il riquadro cresce, il testo dentro no. */
+  .sezione p,.az-motivo{max-width:76ch}
+}
+
+/* Sul telefono le due colonne non esistono: i loro contenuti tornano a essere
+   figli diretti della lista, e l'ordine lo decide `order` — clima e numeri
+   prima, il racconto dopo, come si leggeva finora. */
+@media (max-width:899.98px){
+  .col-principale,.col-lato{display:contents}
+  #correzioni{order:1} #saluto{order:2}
+  #capitolo-quadro{order:3} #clima-scheda{order:4}
+  #titolone{order:5}
+  #capitolo-guardare{order:6} #guardare-scheda{order:7}
+  #capitolo-numeri{order:8} #tessere{order:9}
+  #capitolo-bollettino{order:10} #sezioni{order:11}
+  #capitolo-aziende{order:12} #aziende-scheda{order:13}
+  #capitolo-preferite{order:14} #preferite-scheda{order:15}
+  #piede-oggi{order:16}
 }

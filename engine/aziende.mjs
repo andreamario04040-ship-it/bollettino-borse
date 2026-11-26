@@ -255,3 +255,45 @@ export function componiIndici(indici, mercati) {
   if (out.length) console.log(`  da guardare: ${out.map((x) => x.nome).join(', ')}`);
   return out;
 }
+
+// ────────────────────────  le aziende che si possono seguire  ────────────────
+//
+// L'app lascia scegliere quali aziende tenere d'occhio ogni giorno, e la scelta
+// resta sul dispositivo: il motore non sa quali siano. Quindi prepara la lista
+// intera, con la quotazione di oggi e — per quelle di cui l'agente ha trovato
+// qualcosa — la notizia. Per tutte le altre il campo resta vuoto, e l'app
+// scrive da sé che oggi non c'era niente. Non sapere non è sapere il contrario,
+// ma qui l'assenza di una riga è una risposta vera: i titoli sono stati letti.
+
+export const NOMI_CONOSCIUTI = AZIENDE.map((a) => a.nome);
+
+export async function componiRadar(note = []) {
+  const perNome = new Map();
+  for (const n of note) {
+    const trovata = AZIENDE.find((a) => stessoNome(a.nome, n.nome));
+    if (trovata) perNome.set(trovata.nome, n.notizia);
+  }
+
+  let prezzi = new Map();
+  const simboli = AZIENDE.map((a) => a.cnbc).filter(Boolean);
+  // CNBC accetta i simboli in una richiesta sola, ma a gruppi si resta
+  // prudenti: un elenco lungo ogni tanto torna incompleto.
+  for (let i = 0; i < simboli.length; i += 20) {
+    try {
+      const parte = await quotazioniCnbc(simboli.slice(i, i + 20));
+      for (const [k, v] of parte) prezzi.set(k, v);
+    } catch (e) { console.error(`  ! quotazioni del radar non disponibili: ${e.message}`); }
+  }
+
+  const out = AZIENDE.map((a) => {
+    const q = a.cnbc ? prezzi.get(a.cnbc) : null;
+    return {
+      nome: a.nome, settore: a.settore, fa: a.fa,
+      logo: a.dominio ? slug(a.nome) : null,
+      prezzo: q?.prezzo ?? null, giorno: q?.giorno ?? null,
+      notizia: perNome.get(a.nome) || null,
+    };
+  });
+  console.log(`  radar: ${out.length} aziende seguibili, ${out.filter((x) => x.notizia).length} con una notizia oggi, ${out.filter((x) => x.prezzo != null).length} con la quotazione`);
+  return out;
+}

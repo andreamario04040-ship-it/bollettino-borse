@@ -14,7 +14,7 @@
 <link rel="icon" href="icons/icona-192.png">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Inter:wght@400;450;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="stile.css?v=14">
+<link rel="stylesheet" href="stile.css?v=15">
 </head>
 <body>
 
@@ -25,21 +25,12 @@
 </div>
 
 <div class="testa">
-<header class="barra-alta">
-  <div class="marchio">
-    <img class="segno" src="icons/icona-192.png?v=14" alt="" width="36" height="36" decoding="async">
-    <div class="titoli">
-      <h1>Borsa</h1>
-      <p id="quando">—</p>
-    </div>
-  </div>
-  <button class="tondo" id="ricarica" aria-label="Ricarica i dati">
-    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-.6 3M20 5v6h-6"/></svg>
-  </button>
-</header>
-
 <div class="nastro" aria-label="Variazioni principali"><div class="nastro-int" id="nastro-int"></div></div>
 </div>
+
+<button class="tondo galleggia" id="ricarica" aria-label="Ricarica i dati">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-.6 3M20 5v6h-6"/></svg>
+</button>
 
 <main id="contenuto">
 
@@ -51,10 +42,25 @@
     <div class="scheda saluto" id="saluto" hidden>
       <p class="saluto-riga" id="saluto-riga">—</p>
       <p class="saluto-data" id="saluto-data"></p>
+      <p class="saluto-quando" id="quando"></p>
       <p class="saluto-invito" id="saluto-invito"></p>
     </div>
 
-    <p class="capitolo" data-tinta="1"><i></i><span>Il quadro di oggi</span></p>
+    <div class="col-principale">
+
+    <div class="scheda titolone" id="titolone">
+      <div class="caricamento">Carico il bollettino…</div>
+    </div>
+
+    <p class="capitolo" data-tinta="2" id="capitolo-bollettino"><i></i><span>Il bollettino, un pezzo alla volta</span></p>
+
+    <div id="sezioni"></div>
+
+    </div>
+
+    <aside class="col-lato">
+
+    <p class="capitolo" data-tinta="1" id="capitolo-quadro"><i></i><span>Il quadro di oggi</span></p>
 
     <div class="scheda clima-scheda" id="clima-scheda" hidden>
       <div class="clima-sx">
@@ -63,10 +69,6 @@
         <p class="clima-nota" id="clima-nota"></p>
       </div>
       <div class="clima-dx" id="clima-arco"></div>
-    </div>
-
-    <div class="scheda titolone" id="titolone">
-      <div class="caricamento">Carico il bollettino…</div>
     </div>
 
     <p class="capitolo" data-tinta="4" id="capitolo-guardare" hidden><i></i><span>I numeri che oggi dicono qualcosa</span></p>
@@ -80,13 +82,11 @@
       <div id="guardare"></div>
     </section>
 
-    <p class="capitolo" data-tinta="5"><i></i><span>Sempre sott'occhio</span></p>
+    <p class="capitolo" data-tinta="5" id="capitolo-numeri"><i></i><span>Sempre sott'occhio</span></p>
 
     <div class="tessere" id="tessere"></div>
 
-    <p class="capitolo" data-tinta="2"><i></i><span>Il bollettino, un pezzo alla volta</span></p>
-
-    <div id="sezioni"></div>
+    </aside>
 
     <p class="capitolo" data-tinta="3" id="capitolo-aziende" hidden><i></i><span>Le aziende del giorno</span></p>
 
@@ -97,6 +97,17 @@
       </div>
       <p class="testo">Non un elenco fisso: ogni giorno vengono scelte quelle a cui è davvero successo qualcosa, e su ognuna c'è scritto perché è qui e cosa è successo.</p>
       <div id="aziende"></div>
+    </section>
+
+    <p class="capitolo" data-tinta="1" id="capitolo-preferite"><i></i><span>Le tue aziende</span></p>
+
+    <section class="scheda preferite-scheda" id="preferite-scheda">
+      <div class="riga-titolo">
+        <h2 class="scheda-titolo">Le aziende che segui</h2>
+        <button class="tasto-pillola" id="scegli-preferite">Scegli</button>
+      </div>
+      <p class="testo" id="preferite-nota"></p>
+      <div id="preferite"></div>
     </section>
 
     <p class="piede-nota" id="piede-oggi"></p>
@@ -206,6 +217,6 @@
   <div id="pan-corpo"></div>
 </dialog>
 
-<script src="app.js?v=14"></script>
+<script src="app.js?v=16"></script>
 </body>
 </html>

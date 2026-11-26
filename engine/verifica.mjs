@@ -169,20 +169,21 @@ export function verifica({ report, mercati, notizie = [], adesso = new Date() })
   for (const n of notizie) for (const x of numeriDi(`${n.titolo} ${n.sommario || ''}`)) cifreDeiTitoli.add(x);
   const ammesseNellaScelta = new Set([...cifreDeiTitoli, ...cifreDelMercato]);
 
-  const controllaScelta = (dove, chi, frase) => {
+  const controllaScelta = (dove, chi, come, frase) => {
     const fuori = [...numeriDi(frase)].filter((x) => !ammesseNellaScelta.has(x));
     // Una frase sola, breve: due cifre inventate lì dentro non sono una sbavatura.
-    if (fuori.length >= 2) segnala('blocco', dove, `${chi}: la riga «perché oggi» cita ${fuori.length} cifre che non stanno né nei titoli né nei dati (${fuori.slice(0, 3).join(', ')})`);
-    else for (const x of fuori) segnala('avviso', dove, `${chi}: la cifra ${x} della riga «perché oggi» non sta né nei titoli né nei dati`);
+    if (fuori.length >= 2) segnala('blocco', dove, `${chi}: ${come} cita ${fuori.length} cifre che non stanno né nei titoli né nei dati (${fuori.slice(0, 3).join(', ')})`);
+    else for (const x of fuori) segnala('avviso', dove, `${chi}: la cifra ${x} di ${come} non sta né nei titoli né nei dati`);
   };
 
-  for (const a of report.aziende || []) if (a.perche) controllaScelta('scelta', a.nome, a.perche);
+  for (const a of report.aziende || []) if (a.perche) controllaScelta('scelta', a.nome, 'la riga «perché oggi»', a.perche);
+  for (const a of report.radar || []) if (a.notizia) controllaScelta('radar', a.nome, 'la riga nelle aziende seguite', a.notizia);
 
   for (const d of report.daGuardare || []) {
     const m = mercati.find((x) => x.sym === d.sym);
     if (!m) { segnala('blocco', 'scelta', `«${d.nome}» è segnalato fra i dati da guardare, ma non è fra gli strumenti scaricati`); continue; }
     if (m.prezzo == null) { segnala('avviso', 'scelta', `«${d.nome}» è segnalato da guardare ma oggi non ha un valore`); continue; }
-    if (d.perche) controllaScelta('scelta', d.nome, d.perche);
+    if (d.perche) controllaScelta('scelta', d.nome, 'la riga «perché oggi»', d.perche);
   }
 
   // ——— 6. Le notizie citate devono essere fra quelle lette oggi.
