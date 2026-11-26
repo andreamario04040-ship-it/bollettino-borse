@@ -1,12 +1,24 @@
 // Spedisce la notifica ai dispositivi iscritti.
 import webpush from 'web-push';
 
-function leggiIscrizioni(grezzo) {
-  if (!grezzo) return [];
-  let v;
-  try { v = JSON.parse(grezzo); } catch { throw new Error('ISCRIZIONE_PUSH non è un JSON valido: ricopia il codice dall’app.'); }
-  const lista = Array.isArray(v) ? v : [v];
-  return lista.filter((x) => x && x.endpoint);
+// Un dispositivo per segreto: ISCRIZIONE_PUSH per il primo, poi _2, _3, _4.
+// Così si aggiunge il Mac senza dover rincollare quella dell'iPhone, che
+// una volta salvata nei segreti non è più leggibile da nessuno.
+const NOMI_ISCRIZIONE = ['ISCRIZIONE_PUSH', 'ISCRIZIONE_PUSH_2', 'ISCRIZIONE_PUSH_3', 'ISCRIZIONE_PUSH_4'];
+
+function leggiIscrizioni(env) {
+  const trovate = [];
+  for (const nome of NOMI_ISCRIZIONE) {
+    const grezzo = (env[nome] || '').trim();
+    if (!grezzo) continue;
+    let v;
+    try { v = JSON.parse(grezzo); }
+    catch { console.error(`  ! ${nome} non è un JSON valido: lo salto. Ricopia il codice dall’app.`); continue; }
+    for (const x of (Array.isArray(v) ? v : [v])) if (x && x.endpoint) trovate.push(x);
+  }
+  // Lo stesso dispositivo iscritto due volte riceverebbe due notifiche uguali.
+  const viste = new Set();
+  return trovate.filter((x) => !viste.has(x.endpoint) && viste.add(x.endpoint));
 }
 
 export async function inviaNotifica(notifica, env = process.env) {
@@ -18,10 +30,11 @@ export async function inviaNotifica(notifica, env = process.env) {
     console.warn('  ⚠ VAPID_CONTATTO non impostato: uso un indirizzo di riserva.');
     console.warn('    Se Apple rifiuta l’invio, imposta il segreto con un tuo indirizzo vero.');
   }
-  const iscrizioni = leggiIscrizioni(env.ISCRIZIONE_PUSH);
+  const iscrizioni = leggiIscrizioni(env);
 
   if (!pubblica || !privata) { console.log('  push: chiavi assenti, non invio niente'); return { inviate: 0, saltata: 'chiavi' }; }
   if (!iscrizioni.length) { console.log('  push: nessun dispositivo iscritto (apri l’app e attiva le notifiche)'); return { inviate: 0, saltata: 'iscrizioni' }; }
+  console.log(`  push: ${iscrizioni.length} dispositiv${iscrizioni.length === 1 ? 'o' : 'i'} iscritt${iscrizioni.length === 1 ? 'o' : 'i'}`);
 
   webpush.setVapidDetails(contatto, pubblica, privata);
   const carico = JSON.stringify({ titolo: notifica.titolo, corpo: notifica.corpo, tipo: notifica.tipo || 'bollettino', url: notifica.url || './' });

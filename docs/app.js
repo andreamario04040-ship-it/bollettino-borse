@@ -1,5 +1,10 @@
 /* Borsa — nessuna libreria: legge due file JSON e disegna l'app. */
 
+// Si alza a ogni modifica dell'app, insieme a docs/versione.json.
+// Serve perché un'app aggiunta alla schermata Home resta viva in memoria:
+// riaprendola dal selettore non ricarica, e resterebbe vecchia per giorni.
+const VERSIONE_APP = 7;
+
 const CHIAVE_PUBBLICA = 'BEX2Ep7AZJPgrIF_cHwKOWk9VSiE8OLd1WLxSJDANLNEbox4xiHYb5pgRslEapXEXZs35jhSmHRhrLcfFhyPwVk';
 const MENO = '−', SOTTILE = ' ';
 const $ = (id) => document.getElementById(id);
@@ -209,6 +214,25 @@ async function carica() {
   }
 }
 
+/* ——————————————— aggiornamenti ——————————————— */
+async function controllaAggiornamenti() {
+  let pubblicata;
+  try {
+    const r = await fetch(`versione.json?t=${Date.now()}`, { cache: 'no-store' });
+    if (!r.ok) return;
+    pubblicata = (await r.json()).app;
+  } catch { return; }                       // senza rete non c'è niente da fare
+  if (!pubblicata || pubblicata <= VERSIONE_APP) return;
+
+  // Un solo ricarico per versione: se non è bastato, il ricarico non serve,
+  // e insistere lascerebbe l'app a sbattere contro la stessa copia in cache.
+  let giaProvato = 0;
+  try { giaProvato = Number(sessionStorage.getItem('ricaricatoPer') || 0); } catch { /* niente */ }
+  if (giaProvato >= pubblicata) { $('aggiornamento').hidden = false; return; }
+  try { sessionStorage.setItem('ricaricatoPer', String(pubblicata)); } catch { /* niente */ }
+  location.reload();
+}
+
 /* ——————————————— tema ——————————————— */
 function applicaTema(t) {
   if (t === 'auto') document.documentElement.removeAttribute('data-tema');
@@ -296,7 +320,15 @@ $('ricarica').addEventListener('click', async (e) => {
   await carica();
   setTimeout(() => b.classList.remove('gira'), 700);
 });
-document.addEventListener('visibilitychange', () => { if (!document.hidden) carica(); });
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) return;
+  carica();
+  controllaAggiornamenti();
+});
+
+$('chiudi-riapri').addEventListener('click', () => {
+  $('aggiornamento').innerHTML = '<span>Chiudi del tutto l’app (scorri via dal selettore) e riaprila dall’icona.</span>';
+});
 
 // L'intestazione è alta quanto è alta: la barra dei periodi deve fermarsi appena sotto.
 function misuraTesta() {
@@ -323,4 +355,5 @@ applicaTema(temaSalvato);
 try { screen.orientation?.lock?.('portrait').catch(() => {}); } catch { /* non supportato */ }
 
 carica();
+controllaAggiornamenti();
 preparaNotifiche().catch((e) => console.warn('notifiche:', e));
