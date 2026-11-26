@@ -172,7 +172,10 @@ async function carica() {
     .then((r) => r.ok ? r.json() : vuoto).catch(() => vuoto);
   const [r, m] = await Promise.all([prendi('data/report.json', null), prendi('data/mercati.json', [])]);
   REPORT = r; MERCATI = Array.isArray(m) ? m : [];
-  disegnaNastro(); disegnaOggi(); disegnaMercati(); disegnaInfo();
+  // Se una parte si rompe, le altre devono restare in piedi.
+  for (const [nome, f] of [['nastro', disegnaNastro], ['oggi', disegnaOggi], ['mercati', disegnaMercati], ['info', disegnaInfo]]) {
+    try { f(); } catch (e) { console.error('disegno ' + nome + ':', e); }
+  }
 }
 
 /* ——————————————— tema ——————————————— */
