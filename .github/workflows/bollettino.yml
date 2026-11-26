@@ -88,9 +88,10 @@ jobs:
           git add docs/data
           # Anche quando non si pubblica un bollettino i prezzi si aggiornano:
           # il messaggio dice quello che è successo davvero.
-          if git diff --cached --name-only | grep -q 'docs/data/storico/'; then
+          cambiati="$(git diff --cached --name-only)"
+          if echo "$cambiati" | grep -q 'docs/data/storico/'; then
             git commit -m "Bollettino del $(TZ=Europe/Rome date '+%d/%m/%Y alle %H:%M')"
-          elif [ "$(git diff --cached --name-only)" = "docs/data/notificato.json" ]; then
+          elif echo "$cambiati" | grep -q 'docs/data/notificato.json'; then
             git commit -m "Notifica inviata il $(TZ=Europe/Rome date '+%d/%m/%Y alle %H:%M')"
           else
             git commit -m "Prezzi aggiornati il $(TZ=Europe/Rome date '+%d/%m/%Y alle %H:%M')"

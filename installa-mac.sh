@@ -62,7 +62,10 @@ else
   echo "      claude setup-token"
   echo
   echo "  Si apre il browser, accedi col tuo account, e ti stampa un gettone."
-  read -r -p "  Incollalo qui (o premi Invio per saltare): " GETTONE
+  # Senza terminale (per esempio se lo script viene eseguito da un'altra cosa)
+  # `read` fallisce: con set -e fermerebbe tutto, e invece va solo saltato.
+  GETTONE=""
+  read -r -p "  Incollalo qui (o premi Invio per saltare): " GETTONE || true
   if [ -n "${GETTONE:-}" ]; then
     scrivi_chiave CLAUDE_CODE_OAUTH_TOKEN "$GETTONE"
     echo "  ✓ gettone salvato"
