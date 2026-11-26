@@ -1,0 +1,240 @@
+{
+ "termini": [
+  {
+   "id": "volatilita",
+   "forme": [
+    "volatilità"
+   ],
+   "spiega": "Quanto un prezzo oscilla, in su e in giù, in poco tempo. Alta volatilità non vuol dire che il mercato sta scendendo: vuol dire che si muove molto e in modo imprevedibile. L'indice della paura (VIX) misura esattamente questo."
+  },
+  {
+   "id": "rendimento",
+   "forme": [
+    "rendimento",
+    "rendimenti"
+   ],
+   "spiega": "Quanto ti rende in percentuale un investimento ogni anno. Per un titolo di Stato è l'interesse che incassi; per un'azione è il guadagno che ti aspetti. Attenzione: sui titoli di Stato, quando il prezzo scende il rendimento sale, perché compri a meno la stessa cedola."
+  },
+  {
+   "id": "titolo-di-stato",
+   "forme": [
+    "titoli di Stato",
+    "titolo di Stato"
+   ],
+   "spiega": "Un prestito che fai allo Stato: gli dai dei soldi oggi, lui te li restituisce dopo un certo numero di anni pagandoti un interesse. Il BTP è quello italiano, il Treasury quello americano. Sono considerati gli investimenti meno rischiosi che esistono."
+  },
+  {
+   "id": "bene-rifugio",
+   "forme": [
+    "bene rifugio",
+    "beni rifugio"
+   ],
+   "spiega": "Un investimento verso cui la gente scappa quando ha paura: oro, dollaro, titoli di Stato tedeschi e americani. Non è detto che renda bene; serve a non perdere troppo quando tutto il resto crolla."
+  },
+  {
+   "id": "inflazione",
+   "forme": [
+    "inflazione"
+   ],
+   "spiega": "L'aumento generale dei prezzi. Se è al 3%, quello che l'anno scorso costava 100 euro oggi ne costa 103: gli stessi soldi comprano meno cose. È il nemico numero uno delle banche centrali."
+  },
+  {
+   "id": "banca-centrale",
+   "forme": [
+    "banca centrale",
+    "banche centrali"
+   ],
+   "spiega": "L'istituzione che decide quanto costa il denaro in un'area: la BCE per l'euro, la Federal Reserve per il dollaro. Alzando o abbassando i tassi frena o accelera l'economia intera. Non risponde al governo: è indipendente apposta."
+  },
+  {
+   "id": "tassi",
+   "forme": [
+    "tassi di interesse",
+    "tasso di interesse"
+   ],
+   "spiega": "Il prezzo del denaro: quanto costa farsi prestare soldi. Se salgono, mutui e prestiti costano di più, le aziende investono meno e le borse di solito soffrono. Se scendono, succede il contrario."
+  },
+  {
+   "id": "politica-monetaria",
+   "forme": [
+    "politica monetaria"
+   ],
+   "spiega": "Le scelte di una banca centrale su quanto denaro far circolare e a che prezzo. È restrittiva quando frena l'economia per fermare l'inflazione, espansiva quando la stimola."
+  },
+  {
+   "id": "recessione",
+   "forme": [
+    "recessione"
+   ],
+   "spiega": "Un periodo in cui l'economia si restringe invece di crescere. La definizione tecnica più usata è due trimestri di fila con il PIL in calo. Di solito porta disoccupazione e cali di borsa."
+  },
+  {
+   "id": "pil",
+   "forme": [
+    "PIL"
+   ],
+   "spiega": "Prodotto interno lordo: il valore di tutto ciò che un paese produce in un anno. È la misura più usata della dimensione di un'economia, e la sua variazione dice se il paese sta crescendo o arretrando."
+  },
+  {
+   "id": "capitalizzazione",
+   "forme": [
+    "capitalizzazione"
+   ],
+   "spiega": "Quanto vale un'azienda in borsa: il prezzo di un'azione moltiplicato per il numero di azioni. È il metro con cui si dice se un'azienda è grande o piccola, e con cui pesa dentro un indice."
+  },
+  {
+   "id": "utili",
+   "forme": [
+    "utili",
+    "utile netto"
+   ],
+   "spiega": "Quanto guadagna davvero un'azienda dopo aver pagato tutto: fornitori, stipendi, interessi e tasse. È il numero che più di ogni altro muove il prezzo di un'azione."
+  },
+  {
+   "id": "trimestrale",
+   "forme": [
+    "trimestrale",
+    "trimestrali",
+    "conti trimestrali"
+   ],
+   "spiega": "Il resoconto che le aziende quotate pubblicano ogni tre mesi su ricavi e utili. Quattro volte l'anno il mercato scopre se un'azienda sta andando come sperava, e il titolo reagisce spesso con violenza."
+  },
+  {
+   "id": "guidance",
+   "forme": [
+    "guidance"
+   ],
+   "spiega": "La previsione che l'azienda stessa fornisce su come andranno i prossimi mesi. Conta spesso più dei conti appena pubblicati: il mercato compra il futuro, non il passato."
+  },
+  {
+   "id": "indice",
+   "forme": [
+    "indice di borsa",
+    "indice azionario"
+   ],
+   "spiega": "Un paniere di titoli riassunto in un solo numero, per capire come va un intero mercato senza guardare azienda per azienda. Il FTSE MIB raccoglie Milano, l'S&P 500 l'America."
+  },
+  {
+   "id": "spread",
+   "forme": [
+    "spread"
+   ],
+   "spiega": "La differenza fra due rendimenti. In Italia si intende quasi sempre la distanza fra il titolo di Stato italiano a dieci anni e quello tedesco: più è larga, più il mercato considera rischioso prestare soldi all'Italia."
+  },
+  {
+   "id": "liquidita",
+   "forme": [
+    "liquidità"
+   ],
+   "spiega": "Quanto è facile comprare o vendere qualcosa senza spostarne il prezzo. Un titolo liquido si vende in un istante; uno illiquido può richiedere giorni e uno sconto. In senso più ampio, indica anche quanto denaro circola nel sistema."
+  },
+  {
+   "id": "correzione",
+   "forme": [
+    "correzione"
+   ],
+   "spiega": "Un calo di borsa fra il 10% e il 20% dai massimi. È considerato fisiologico: serve una parola diversa, mercato orso, quando il calo supera il 20%."
+  },
+  {
+   "id": "mercato-orso",
+   "forme": [
+    "mercato orso",
+    "bear market"
+   ],
+   "spiega": "Un calo di oltre il 20% dai massimi, di solito accompagnato da pessimismo diffuso. Il contrario è il mercato toro, quando i prezzi salgono a lungo."
+  },
+  {
+   "id": "copertura",
+   "forme": [
+    "coprirsi",
+    "si coprono",
+    "copertura",
+    "si stanno coprendo",
+    "si stanno proteggendo"
+   ],
+   "spiega": "Comprare qualcosa che guadagna se il resto del portafoglio perde, come un'assicurazione. Costa, ma limita i danni in caso di crollo: ecco perché quando aumenta la paura aumenta anche il prezzo delle coperture."
+  },
+  {
+   "id": "dazi",
+   "forme": [
+    "dazi",
+    "dazio"
+   ],
+   "spiega": "Una tassa sulle merci importate. Rende più care le cose che arrivano dall'estero: protegge chi produce in casa, ma alza i prezzi per tutti e può far scattare ritorsioni."
+  },
+  {
+   "id": "quotata",
+   "forme": [
+    "quotata",
+    "quotate",
+    "quotazione"
+   ],
+   "spiega": "Un'azienda quotata è un'azienda le cui azioni si possono comprare e vendere in borsa. La quotazione è il prezzo a cui questo avviene in un dato momento."
+  },
+  {
+   "id": "ipo",
+   "forme": [
+    "IPO",
+    "Ipo"
+   ],
+   "spiega": "Il momento in cui un'azienda si quota in borsa per la prima volta e chiunque può comprarne le azioni. Serve a raccogliere denaro e a permettere ai vecchi soci di vendere."
+  },
+  {
+   "id": "obbligazione",
+   "forme": [
+    "obbligazione",
+    "obbligazioni",
+    "bond"
+   ],
+   "spiega": "Un prestito a un'azienda o a uno Stato, che paga un interesse e restituisce il capitale a scadenza. Rende meno di un'azione ma è più prevedibile."
+  },
+  {
+   "id": "materie-prime",
+   "forme": [
+    "materie prime"
+   ],
+   "spiega": "Le risorse di base da cui parte tutto il resto: petrolio, gas, rame, grano, oro. I loro prezzi finiscono dentro quelli di ogni prodotto finito, con qualche mese di ritardo."
+  },
+  {
+   "id": "esportatori",
+   "forme": [
+    "esportatori",
+    "esportazioni",
+    "export"
+   ],
+   "spiega": "Le aziende che vendono all'estero. Quando la loro moneta si indebolisce guadagnano di più, perché i loro prodotti costano meno agli stranieri."
+  },
+  {
+   "id": "analisti",
+   "forme": [
+    "analisti"
+   ],
+   "spiega": "Chi studia le aziende per mestiere e pubblica stime su quanto guadagneranno e quanto dovrebbe valere il titolo. Il mercato si muove spesso sulla distanza fra i conti veri e le loro attese."
+  },
+  {
+   "id": "rating",
+   "forme": [
+    "rating",
+    "declassamento",
+    "declassa"
+   ],
+   "spiega": "Un voto sull'affidabilità di chi si fa prestare denaro, assegnato da agenzie come S&P e Moody's. Un declassamento significa che chi ha prestato considera il debitore più rischioso di prima, e vorrà interessi più alti."
+  },
+  {
+   "id": "multiplo",
+   "forme": [
+    "multipli",
+    "multiplo"
+   ],
+   "spiega": "Quante volte gli utili annui stai pagando per comprare un'azienda. Se vale 25 volte gli utili, significa che a parità di guadagni servirebbero 25 anni per rientrare. Serve a capire se un titolo è caro o a buon mercato."
+  },
+  {
+   "id": "seduta",
+   "forme": [
+    "seduta",
+    "sedute"
+   ],
+   "spiega": "Una giornata di contrattazioni in borsa. Milano apre alle 9 e chiude alle 17:30; New York, per noi, va dalle 15:30 alle 22."
+  }
+ ]
+}

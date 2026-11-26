@@ -11,7 +11,8 @@ self.addEventListener('push', (event) => {
     body: d.corpo,
     icon: 'icons/icona-192.png',
     badge: 'icons/icona-192.png',
-    tag: d.tipo === 'avviso' ? 'avviso' : 'bollettino',  // un avviso non si accumula sul precedente
+    // Ogni tipo ha la sua corsia: una correzione non deve sostituire il bollettino.
+    tag: d.tipo === 'avviso' ? 'avviso' : d.tipo === 'correzione' ? 'correzione' : 'bollettino',
     renotify: true,
     data: { url: d.url || './' },
   }));

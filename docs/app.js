@@ -3,13 +3,13 @@
 // Si alza a ogni modifica dell'app, insieme a docs/versione.json.
 // Serve perché un'app aggiunta alla schermata Home resta viva in memoria:
 // riaprendola dal selettore non ricarica, e resterebbe vecchia per giorni.
-const VERSIONE_APP = 10;
+const VERSIONE_APP = 12;
 
 const CHIAVE_PUBBLICA = 'BEX2Ep7AZJPgrIF_cHwKOWk9VSiE8OLd1WLxSJDANLNEbox4xiHYb5pgRslEapXEXZs35jhSmHRhrLcfFhyPwVk';
 const MENO = '−', SOTTILE = ' ';
 const $ = (id) => document.getElementById(id);
 
-let MERCATI = [], REPORT = null, periodo = 'giorno', aperto = null;
+let MERCATI = [], REPORT = null, CORREZIONI = [], GLOSSARIO = [], periodo = 'giorno', aperto = null;
 
 /* ——————————————— numeri all'italiana ——————————————— */
 const num = (n, dec) => {
@@ -78,6 +78,96 @@ function notaClima(p, vix) {
   return vix != null ? `${base} Indice della paura a ${num(vix, 1)}.` : base;
 }
 
+/* ——————————————— glossario ——————————————— */
+// Sottolinea la prima comparsa di ogni termine economico, e non di più:
+// una pagina tutta sottolineata non si legge.
+function evidenziaTermini(sicuro) {
+  if (!GLOSSARIO.length || !sicuro) return sicuro;
+
+  // Si lavora a pezzi: quelli già trasformati in pulsanti non si toccano più.
+  let pezzi = [{ testo: true, v: sicuro }];
+  for (const t of GLOSSARIO) {
+    let fatto = false;
+    pezzi = pezzi.flatMap((p) => {
+      if (fatto || !p.testo) return [p];
+      for (const forma of t.forme) {
+        const re = new RegExp(`(^|[^\\p{L}])(${forma.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})(?![\\p{L}])`, 'iu');
+        const m = p.v.match(re);
+        if (!m) continue;
+        fatto = true;
+        const i = m.index + m[1].length;
+        return [
+          { testo: true, v: p.v.slice(0, i) },
+          { testo: false, v: `<button class="termine" data-termine="${t.id}">${p.v.slice(i, i + m[2].length)}</button>` },
+          { testo: true, v: p.v.slice(i + m[2].length) },
+        ];
+      }
+      return [p];
+    });
+  }
+  return pezzi.map((p) => p.v).join('');
+}
+
+const testo = (t) => evidenziaTermini(fuga(t));
+
+/* ——————————————— pannello delle spiegazioni ——————————————— */
+function apriPannello({ tipo, titolo, corpo }) {
+  $('pan-tipo').textContent = tipo;
+  $('pan-titolo').textContent = titolo;
+  $('pan-corpo').innerHTML = corpo;
+  const d = $('pannello');
+  if (typeof d.showModal === 'function') d.showModal(); else d.setAttribute('open', '');
+}
+
+function spiegaTermine(id) {
+  const t = GLOSSARIO.find((x) => x.id === id);
+  if (!t) return;
+  apriPannello({ tipo: 'Parola di economia', titolo: t.forme[0], corpo: `<p class="pan-testo">${fuga(t.spiega)}</p>` });
+}
+
+function spiegaIndice(sym) {
+  const m = MERCATI.find((x) => x.sym === sym);
+  if (!m?.guida) return;
+  const g = m.guida;
+  const scala = (g.scala || []).length
+    ? `<dl class="pan-scala">${g.scala.map(([q, c]) => `<div><dt>${fuga(q)}</dt><dd>${fuga(c)}</dd></div>`).join('')}</dl>`
+    : '';
+  const riga = (et, v) => v ? `<p class="pan-voce"><span>${et}</span>${testo(v)}</p>` : '';
+  apriPannello({
+    tipo: m.breve || 'Indice',
+    titolo: m.nome,
+    corpo: `<p class="pan-testo">${testo(g.cosa)}</p>${scala}
+      ${riga('Se sale', g.sesale)}${riga('Se scende', g.sescende)}${riga('Perché conta', g.conta)}
+      <p class="pan-ora">Adesso: <b>${num(m.prezzo, m.decimali)}</b> <span class="varia ${classe(m.giorno, m.inverso)}">${pct(m.giorno)}</span></p>`,
+  });
+}
+
+/* ——————————————— correzioni ——————————————— */
+const GIORNI_CORREZIONE = 14;
+
+function letteSalvate() {
+  try { return new Set(JSON.parse(localStorage.getItem('correzioniLette') || '[]')); }
+  catch { return new Set(); }
+}
+
+function disegnaCorrezioni() {
+  const lette = letteSalvate();
+  const limite = Date.now() - GIORNI_CORREZIONE * 86400000;
+  const da = CORREZIONI
+    .filter((c) => !lette.has(c.id))
+    .filter((c) => !c.data || new Date(c.data + 'T00:00:00').getTime() > limite);
+
+  $('correzioni').innerHTML = da.map((c) => `<section class="correzione" data-id="${fuga(c.id)}">
+    <div class="corr-testa">
+      <span class="corr-etichetta">Ho fatto un errore</span>
+      <button class="corr-chiudi" data-chiudi="${fuga(c.id)}">Ho capito</button>
+    </div>
+    <h2 class="corr-titolo">${fuga(c.titolo)}</h2>
+    <p class="corr-voce"><span>Cosa avevo sbagliato</span>${fuga(c.sbagliato)}</p>
+    <p class="corr-voce"><span>Com'è adesso</span>${fuga(c.corretto)}</p>
+  </section>`).join('');
+}
+
 /* ——————————————— saluto ——————————————— */
 const PAROLE = ['nessuna', 'una', 'due', 'tre', 'quattro', 'cinque', 'sei', 'sette', 'otto', 'nove'];
 const maiuscola = (t = '') => t.charAt(0).toUpperCase() + t.slice(1);
@@ -129,7 +219,7 @@ function disegnaOggi() {
   if (REPORT.clima) {
     $('clima-scheda').hidden = false;
     $('clima-parola').textContent = REPORT.clima.parola;
-    $('clima-nota').textContent = notaClima(REPORT.clima.punteggio, REPORT.clima.vix);
+    $('clima-nota').innerHTML = testo(notaClima(REPORT.clima.punteggio, REPORT.clima.vix));
     $('clima-arco').innerHTML = arcoClima(REPORT.clima.punteggio);
   }
 
@@ -148,7 +238,7 @@ function disegnaOggi() {
       <div class="sg-piede">ultimi tre mesi</div></div>` : '';
     return `<article class="sezione">
       <div class="sezione-testa"><span class="gettone">${i + 1}</span><h3>${fuga(s.titolo)}</h3></div>
-      <p>${fuga(s.testo)}</p>${disegno}${link ? `<div class="fonti-link">${link}</div>` : ''}</article>`;
+      <p>${testo(s.testo)}</p>${disegno}${link ? `<div class="fonti-link">${link}</div>` : ''}</article>`;
   }).join('');
 
   $('piede-oggi').textContent = REPORT.ora ? `Bollettino delle ${REPORT.ora}` : '';
@@ -164,7 +254,8 @@ const TESSERE = [
 function disegnaTessere() {
   const voci = TESSERE.map(([sym, et]) => [MERCATI.find((m) => m.sym === sym), et]).filter(([m]) => m?.prezzo != null);
   $('tessere').innerHTML = voci.map(([m, et]) => `<div class="tessera">
-    <span class="t-nome">${fuga(et)}</span>
+    <span class="t-nome">${fuga(et)}
+      ${m.guida ? `<button class="chiedi" data-guida="${fuga(m.sym)}" aria-label="Cos'è ${fuga(m.nome)}">?</button>` : ''}</span>
     <span class="t-riga">
       <span class="t-valore">${num(m.prezzo, m.decimali)}</span>
       <span class="varia ${classe(m.giorno, m.inverso)}">${pct(m.giorno)}</span>
@@ -183,19 +274,34 @@ function disegnaAziende() {
   $('aziende').innerHTML = az.map((a) => {
     const prezzo = a.prezzo != null
       ? `<span class="az-prezzo">${num(a.prezzo, 2)} <span class="varia ${classe(a.giorno)}">${pct(a.giorno)}</span></span>`
-      : '<span class="az-prezzo az-nonquotata">non quotata</span>';
+      : '<span class="az-prezzo az-nonquotata">quotazione non disponibile</span>';
     const link = (a.titoli || []).map((t) => `<a class="fonte-link" href="${fuga(t.link || '#')}" target="_blank" rel="noopener">
       <span class="testata">${fuga(t.fonte)}</span>${fuga(t.titolo)}</a>`).join('');
     return `<article class="azienda">
       <div class="az-testa">
-        <span><span class="az-nome">${fuga(a.nome)}</span><span class="az-settore">${fuga(a.settore)}</span></span>
+        <span class="az-identita">
+          ${a.logo
+            ? `<img class="az-logo" src="loghi/${fuga(a.logo)}.png" alt="" width="34" height="34" loading="lazy" decoding="async">`
+            : `<span class="az-iniziale">${fuga(a.nome.slice(0, 1))}</span>`}
+          <span><span class="az-nome">${fuga(a.nome)}</span><span class="az-settore">${fuga(a.settore)}</span></span>
+        </span>
         ${prezzo}
       </div>
-      <p class="az-fa">${fuga(a.nome)} ${fuga(a.fa)}.</p>
-      <p class="az-motivo">${fuga(a.motivo)}</p>
+      <p class="az-fa">${fuga(a.nome)} ${testo(a.fa)}.</p>
+      <p class="az-motivo">${testo(a.motivo)}</p>
       ${link ? `<div class="fonti-link">${link}</div>` : ''}
     </article>`;
   }).join('');
+
+  // Se un logo non c'è o non si carica, al suo posto va l'iniziale.
+  for (const img of $('aziende').querySelectorAll('.az-logo')) {
+    img.addEventListener('error', () => {
+      const iniziale = document.createElement('span');
+      iniziale.className = 'az-iniziale';
+      iniziale.textContent = (img.closest('.azienda')?.querySelector('.az-nome')?.textContent || '?').slice(0, 1);
+      img.replaceWith(iniziale);
+    }, { once: true });
+  }
 }
 
 function disegnaMercati() {
@@ -235,7 +341,8 @@ function dettaglio(m) {
   ].join('');
   const voce = (et, val, cls) => `<div><dt>${et}</dt><dd class="${cls || ''}">${val}</dd></div>`;
   return `<div class="dettaglio">
-    <p>${avvisi}${fuga(m.perche || '')}</p>
+    <p>${avvisi}${testo(m.perche || '')}
+      ${m.guida ? `<button class="chiedi in-riga" data-guida="${fuga(m.sym)}">Cos'è e come si legge</button>` : ''}</p>
     <div class="grafico-grande">${linea(m.spark, 300, 76, m.inverso, true)}</div>
     <dl class="dati">
       ${voce('Oggi', pct(m.giorno), classe(m.giorno, m.inverso))}
@@ -259,10 +366,20 @@ async function carica() {
   const v = Date.now();
   const prendi = (f, vuoto) => fetch(`${f}?v=${v}`, { cache: 'no-store' })
     .then((r) => r.ok ? r.json() : vuoto).catch(() => vuoto);
-  const [r, m] = await Promise.all([prendi('data/report.json', null), prendi('data/mercati.json', [])]);
+  const [r, m, c, gl] = await Promise.all([
+    prendi('data/report.json', null),
+    prendi('data/mercati.json', []),
+    prendi('data/correzioni.json', { correzioni: [] }),
+    prendi('glossario.json', { termini: [] }),
+  ]);
   REPORT = r; MERCATI = Array.isArray(m) ? m : [];
+  CORREZIONI = Array.isArray(c?.correzioni) ? c.correzioni : [];
+  // I termini più lunghi per primi: "titoli di Stato" prima di "titolo".
+  GLOSSARIO = (Array.isArray(gl?.termini) ? gl.termini : [])
+    .map((t) => ({ ...t, forme: [...t.forme].sort((a, b) => b.length - a.length) }))
+    .sort((a, b) => Math.max(...b.forme.map((f) => f.length)) - Math.max(...a.forme.map((f) => f.length)));
   // Se una parte si rompe, le altre devono restare in piedi.
-  for (const [nome, f] of [['saluto', disegnaSaluto], ['nastro', disegnaNastro], ['oggi', disegnaOggi], ['tessere', disegnaTessere], ['aziende', disegnaAziende], ['mercati', disegnaMercati], ['info', disegnaInfo]]) {
+  for (const [nome, f] of [['correzioni', disegnaCorrezioni], ['saluto', disegnaSaluto], ['nastro', disegnaNastro], ['oggi', disegnaOggi], ['tessere', disegnaTessere], ['aziende', disegnaAziende], ['mercati', disegnaMercati], ['info', disegnaInfo]]) {
     try { f(); } catch (e) { console.error('disegno ' + nome + ':', e); }
   }
 }
@@ -351,6 +468,20 @@ function cambiaVista(nome) {
 }
 
 document.addEventListener('click', (e) => {
+  const termine = e.target.closest('[data-termine]');
+  if (termine) return spiegaTermine(termine.dataset.termine);
+
+  const guida = e.target.closest('[data-guida]');
+  if (guida) { e.stopPropagation(); return spiegaIndice(guida.dataset.guida); }
+
+  const chiudi = e.target.closest('[data-chiudi]');
+  if (chiudi) {
+    const lette = letteSalvate();
+    lette.add(chiudi.dataset.chiudi);
+    try { localStorage.setItem('correzioniLette', JSON.stringify([...lette])); } catch { /* niente */ }
+    return disegnaCorrezioni();
+  }
+
   const scheda = e.target.closest('.schede button');
   if (scheda) return cambiaVista(scheda.dataset.vista);
 
@@ -366,6 +497,9 @@ document.addEventListener('click', (e) => {
   const tema = e.target.closest('.periodo.tema button');
   if (tema) return applicaTema(tema.dataset.tema);
 });
+
+$('pan-chiudi').addEventListener('click', () => $('pannello').close());
+$('pannello').addEventListener('click', (e) => { if (e.target === $('pannello')) $('pannello').close(); });
 
 $('ricarica').addEventListener('click', async (e) => {
   const b = e.currentTarget;

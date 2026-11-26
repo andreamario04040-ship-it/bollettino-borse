@@ -102,6 +102,21 @@ main{max-width:640px;margin:0 auto;
 .caricamento{padding:1.6rem 0;text-align:center;color:var(--testo3);font-size:.88rem}
 .piede-nota{margin:.3rem 0 0;font-size:.8rem;color:var(--testo3);text-align:center}
 
+/* ——— correzioni: devono farsi notare, non nascondersi ——— */
+#correzioni:empty{display:none}
+#correzioni{display:flex;flex-direction:column;gap:.7rem;margin-bottom:.85rem}
+.correzione{background:var(--superficie);border:1px solid var(--attenzione);border-left-width:4px;
+  border-radius:var(--raggio);padding:.95rem 1.05rem;box-shadow:var(--ombra)}
+.corr-testa{display:flex;align-items:center;justify-content:space-between;gap:.6rem}
+.corr-etichetta{font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--attenzione)}
+.corr-chiudi{border:1px solid var(--bordo);background:none;color:var(--testo2);font-size:.74rem;font-weight:600;
+  border-radius:999px;padding:.22rem .6rem}
+.corr-chiudi:hover{border-color:var(--attenzione);color:var(--attenzione)}
+.corr-titolo{margin:.45rem 0 0;font-size:1.1rem;font-weight:700}
+.corr-voce{margin:.7rem 0 0;font-size:.9rem;line-height:1.55;color:var(--testo2)}
+.corr-voce span{display:block;font-size:.66rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--testo3);margin-bottom:.15rem}
+
 /* ——— saluto ——— */
 .saluto{padding:1.15rem 1.1rem 1.2rem}
 .saluto-riga{margin:0;font-family:var(--fd);font-size:1.65rem;font-weight:800;letter-spacing:-.03em;
@@ -227,7 +242,11 @@ code{font-family:var(--fm);font-size:.82rem;background:var(--superficie2);paddin
 .aziende-scheda{padding-bottom:.8rem}
 #aziende{display:flex;flex-direction:column;gap:.6rem;margin-top:.9rem}
 .azienda{background:var(--superficie2);border-radius:var(--raggio-s);padding:.75rem .8rem}
-.az-testa{display:flex;align-items:baseline;justify-content:space-between;gap:.6rem;flex-wrap:wrap}
+.az-testa{display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap}
+.az-identita{display:flex;align-items:center;gap:.6rem;min-width:0}
+.az-logo{width:34px;height:34px;flex:none;border-radius:8px;background:#fff;object-fit:contain;padding:3px}
+.az-iniziale{width:34px;height:34px;flex:none;border-radius:8px;display:grid;place-items:center;
+  background:var(--accento-tenue);color:var(--accento);font-family:var(--fd);font-weight:800;font-size:1rem}
 .az-nome{display:block;font-family:var(--fd);font-size:1.02rem;font-weight:700;letter-spacing:-.01em}
 .az-settore{display:block;font-size:.7rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--testo3)}
 .az-prezzo{font-family:var(--fm);font-variant-numeric:tabular-nums;font-size:.88rem;font-weight:600;white-space:nowrap}
@@ -236,6 +255,39 @@ code{font-family:var(--fm);font-size:.82rem;background:var(--superficie2);paddin
 .az-motivo{margin:.4rem 0 0;font-size:.92rem;color:var(--testo);line-height:1.55}
 .azienda .fonti-link{margin-top:.6rem}
 .azienda .fonte-link{background:var(--superficie)}
+
+/* ——— termini da imparare e pannello che li spiega ——— */
+.termine{border:0;background:none;padding:0;font:inherit;color:inherit;cursor:pointer;
+  text-decoration:underline;text-decoration-style:dotted;text-decoration-color:var(--accento);
+  text-underline-offset:3px;text-decoration-thickness:1.5px}
+.termine:hover{color:var(--accento)}
+.chiedi{width:17px;height:17px;flex:none;border-radius:50%;border:1px solid var(--bordo);background:none;
+  color:var(--testo3);font-size:.64rem;font-weight:700;line-height:1;display:inline-grid;place-items:center;
+  vertical-align:middle;margin-left:.3rem;padding:0}
+.chiedi:hover{border-color:var(--accento);color:var(--accento)}
+.chiedi.in-riga{width:auto;height:auto;border-radius:999px;padding:.22rem .6rem;font-size:.72rem;
+  font-weight:600;margin-left:.4rem}
+
+#pannello{border:1px solid var(--bordo);border-radius:18px;background:var(--superficie);color:var(--testo);
+  padding:1.15rem 1.2rem 1.3rem;max-width:min(520px,92vw);width:100%;box-shadow:0 24px 60px -20px rgba(0,0,0,.55)}
+#pannello::backdrop{background:rgba(0,0,0,.55);backdrop-filter:blur(3px)}
+.pan-testa{display:flex;align-items:center;justify-content:space-between;gap:.8rem}
+.pan-tipo{font-size:.66rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accento)}
+.pan-chiudi{border:0;background:var(--superficie2);color:var(--testo2);width:28px;height:28px;border-radius:50%;
+  font-size:1.2rem;line-height:1;display:grid;place-items:center}
+.pan-titolo{margin:.35rem 0 .6rem;font-size:1.3rem;font-weight:800;letter-spacing:-.02em}
+.pan-testo{margin:0;font-size:.95rem;line-height:1.62;color:var(--testo2)}
+.pan-voce{margin:.85rem 0 0;font-size:.93rem;line-height:1.58;color:var(--testo2)}
+.pan-voce span{display:block;font-size:.64rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--testo3);margin-bottom:.12rem}
+.pan-scala{display:flex;flex-direction:column;gap:.3rem;margin:.9rem 0 0}
+.pan-scala div{display:flex;gap:.7rem;align-items:baseline;background:var(--superficie2);
+  border-radius:8px;padding:.4rem .6rem}
+.pan-scala dt{font-family:var(--fm);font-size:.78rem;font-weight:600;white-space:nowrap;min-width:6.5em}
+.pan-scala dd{margin:0;font-size:.86rem;color:var(--testo2)}
+.pan-ora{margin:1rem 0 0;padding-top:.7rem;border-top:1px solid var(--bordo);font-size:.84rem;color:var(--testo3)}
+.pan-ora b{font-family:var(--fm);font-size:.95rem;color:var(--testo)}
+.t-nome{display:flex;align-items:center}
 
 /* ——— avviso di versione nuova ——— */
 #aggiornamento{position:fixed;left:0;right:0;z-index:50;display:flex;align-items:center;gap:.7rem;
@@ -318,7 +370,7 @@ code{font-family:var(--fm);font-size:.82rem;background:var(--superficie2);paddin
   #vista-oggi{display:grid;grid-template-columns:1fr 1fr;gap:1rem;align-items:start}
   #saluto{grid-column:1}
   #clima-scheda{grid-column:2;height:100%}
-  #titolone,#sezioni,#piede-oggi,#tessere,#aziende-scheda{grid-column:1/-1}
+  #titolone,#sezioni,#piede-oggi,#tessere,#aziende-scheda,#correzioni{grid-column:1/-1}
   #sezioni{display:grid;grid-template-columns:1fr 1fr;gap:1rem;align-items:start}
   .saluto-riga{font-size:1.9rem}
   .titolone h2{font-size:1.85rem}

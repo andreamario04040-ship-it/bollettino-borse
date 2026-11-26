@@ -173,6 +173,59 @@ Per cambiare le soglie o spegnere gli avvisi, apri `config.json` alla voce `avvi
 
 ---
 
+## Quando l'app sbaglia
+
+Nessun controllo automatico può sapere se un giornale ha scritto il vero. Può però
+accorgersi se l'app contraddice i propri dati, ed è quello che fa `engine/verifica.mjs`
+prima di ogni pubblicazione: controlla che ogni percentuale scritta nelle frasi esista
+davvero fra i dati scaricati, che il clima corrisponda all'indice della paura, che la
+data sia quella di oggi, che le quotazioni siano plausibili e fresche, e che ogni notizia
+citata sia fra quelle lette. **Se qualcosa non torna il bollettino non esce**: meglio
+nessun bollettino che uno falso.
+
+```bash
+npm run verifica      # controlla il bollettino già pubblicato
+```
+
+Quando l'errore sfugge comunque, va detto. Si registra così:
+
+```bash
+node engine/nuova-correzione.mjs "Titolo breve" "Cosa avevo sbagliato" "Com'è adesso"
+```
+
+Al bollettino successivo parte una notifica dedicata, **«Ho fatto un errore»**, e nella
+home compare un banner con le due versioni affiancate. Resta visibile due settimane o
+finché non si tocca *Ho capito*. La notifica parte una volta sola, e solo se l'invio
+riesce davvero.
+
+Una regola imparata sbagliando: **nell'archivio delle aziende non si scrivono fatti che
+invecchiano** — primati, classifiche, se un'azienda è quotata. Quelli si leggono dai dati.
+L'app aveva scritto che Anthropic non era quotata perché la frase era stata messa a mano
+e non è più stata rivista.
+
+## Spiegazioni e glossario
+
+Ogni indice ha una scheda (`guida` dentro `config.json`): cos'è, come si legge, cosa
+vuol dire se sale o se scende, perché conta. Si apre dal punto interrogativo sulle
+tessere e dal dettaglio di ogni riga in Mercati.
+
+`docs/glossario.json` contiene una trentina di termini di economia. L'app sottolinea la
+**prima** comparsa di ciascuno nei testi — solo la prima, altrimenti la pagina diventa
+illeggibile — e toccandola si apre la spiegazione. Per aggiungerne uno basta una voce con
+le forme in cui la parola compare e la spiegazione.
+
+## I loghi delle aziende
+
+```bash
+npm run loghi         # scarica quelli mancanti
+npm run loghi -- --tutti
+```
+
+Si scaricano una volta e si servono da `docs/loghi/`, invece di collegarli a ogni
+apertura: il servizio che li fornisce limita le richieste, l'app è più veloce, e nessuno
+impara quali aziende guardi. Nove aziende non hanno un logo disponibile e mostrano
+l'iniziale: l'app funziona lo stesso.
+
 ## Modifiche frequenti
 
 **Cambiare orari** → `.github/workflows/bollettino.yml`, le righe `cron` (in UTC),

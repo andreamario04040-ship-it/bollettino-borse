@@ -45,7 +45,31 @@
       "perche": "Misura quanta paura c'è sul mercato americano. Sotto 15 è calma, sopra 25 è nervosismo, sopra 35 è panico.",
       "inverso": true,
       "decimali": 2,
-      "cnbc": ".VIX"
+      "cnbc": ".VIX",
+      "guida": {
+        "cosa": "Misura quanta paura c'è sul mercato americano. Non guarda il passato: si calcola dai prezzi delle assicurazioni che gli investitori comprano per proteggersi da un crollo nelle prossime quattro settimane. Più costano, più c'è timore.",
+        "scala": [
+          [
+            "sotto 15",
+            "mercato tranquillo, a volte troppo"
+          ],
+          [
+            "15 – 25",
+            "normale amministrazione"
+          ],
+          [
+            "25 – 35",
+            "nervosismo: gli operatori si stanno coprendo"
+          ],
+          [
+            "sopra 35",
+            "paura forte, movimenti molto ampi"
+          ]
+        ],
+        "sesale": "Quando sale vuol dire che gli investitori si aspettano scossoni, e di solito le borse stanno scendendo.",
+        "sescende": "Quando scende il mercato si sta calmando: è il segnale che la tensione sta passando.",
+        "conta": "È il numero più utile per capire il clima di una giornata in un colpo solo. Se lo guardi per primo, tutto il resto si spiega meglio."
+      }
     },
     {
       "sym": "^TNX",
@@ -56,7 +80,27 @@
       "perche": "Quanto rende prestare soldi allo Stato americano per 10 anni. Se sale, le azioni (soprattutto tecnologiche) soffrono.",
       "inverso": true,
       "decimali": 2,
-      "cnbc": "US10Y"
+      "cnbc": "US10Y",
+      "guida": {
+        "cosa": "È quanto rende prestare soldi allo Stato americano per dieci anni. È il prezzo del denaro a lungo termine nel mondo: quasi tutti gli altri tassi, mutui compresi, si muovono dietro a questo.",
+        "scala": [
+          [
+            "sotto il 3%",
+            "denaro a buon mercato, le borse respirano"
+          ],
+          [
+            "3% – 4,5%",
+            "normale"
+          ],
+          [
+            "sopra il 4,5%",
+            "le azioni fanno più fatica, soprattutto le tecnologiche"
+          ]
+        ],
+        "sesale": "Se sale, comprare azioni conviene meno: i titoli di Stato rendono già bene senza rischio. Soffrono soprattutto le aziende che promettono guadagni lontani nel tempo.",
+        "sescende": "Se scende, il denaro costa meno e le borse di solito festeggiano.",
+        "conta": "Molti cali di borsa che sembrano inspiegabili si spiegano guardando questo numero."
+      }
     },
     {
       "sym": "^GSPC",
@@ -65,7 +109,14 @@
       "gruppo": "Stati Uniti",
       "unita": "punti",
       "perche": "Le 500 maggiori aziende americane. Se sale questo, di solito sale quasi tutto il resto.",
-      "cnbc": ".SPX"
+      "cnbc": ".SPX",
+      "guida": {
+        "cosa": "Raccoglie le 500 maggiori aziende americane quotate. Ogni azienda pesa in proporzione a quanto vale, quindi le più grandi contano molto più delle altre.",
+        "scala": [],
+        "sesale": "Se sale, di solito sale quasi tutto il resto del mondo con lui.",
+        "sescende": "Se scende, difficilmente le altre borse restano in positivo.",
+        "conta": "È il termometro per eccellenza: quando si dice «la borsa americana», di solito si intende questo."
+      }
     },
     {
       "sym": "^IXIC",
@@ -74,7 +125,14 @@
       "gruppo": "Stati Uniti",
       "unita": "punti",
       "perche": "Pieno di Nvidia, Apple, Microsoft. Si muove più degli altri, sia in salita sia in discesa.",
-      "cnbc": ".IXIC"
+      "cnbc": ".IXIC",
+      "guida": {
+        "cosa": "L'indice delle aziende tecnologiche americane: Nvidia, Apple, Microsoft, Amazon e molte altre più piccole.",
+        "scala": [],
+        "sesale": "Sale più degli altri nei momenti di ottimismo, soprattutto sull'intelligenza artificiale.",
+        "sescende": "Scende più degli altri quando la fiducia si rompe: è il più nervoso dei tre indici americani.",
+        "conta": "Confrontarlo con il Dow Jones dice se un calo riguarda tutta l'economia o solo la tecnologia."
+      }
     },
     {
       "sym": "^DJI",
@@ -83,7 +141,14 @@
       "gruppo": "Stati Uniti",
       "unita": "punti",
       "perche": "30 colossi industriali e finanziari. Confrontandolo col Nasdaq capisci se il calo riguarda solo la tecnologia.",
-      "cnbc": ".DJI"
+      "cnbc": ".DJI",
+      "guida": {
+        "cosa": "Trenta grandi aziende americane, soprattutto industria, consumi e banche. Qui ogni azienda pesa per il prezzo della sua azione, non per quanto vale: è un criterio antico e un po' bizzarro.",
+        "scala": [],
+        "sesale": "Sale quando va bene l'economia concreta: fabbriche, consumi, banche.",
+        "sescende": "Scende con i timori sull'economia reale più che su quella tecnologica.",
+        "conta": "Serve soprattutto come paragone: se il Nasdaq crolla e il Dow tiene, il problema è la tecnologia, non l'America."
+      }
     },
     {
       "sym": "^RUT",
@@ -92,7 +157,14 @@
       "gruppo": "Stati Uniti",
       "unita": "punti",
       "perche": "Le aziende piccole soffrono quando i tassi sono alti. Raccontano l'economia reale, non quella delle grandi multinazionali.",
-      "cnbc": ".RUT"
+      "cnbc": ".RUT",
+      "guida": {
+        "cosa": "Duemila aziende americane piccole. Non sono multinazionali: vendono quasi tutto dentro i confini e si finanziano in banca.",
+        "scala": [],
+        "sesale": "Sale quando gli investitori credono che l'economia americana vada davvero bene, non solo le grandi.",
+        "sescende": "Soffre quando i tassi sono alti, perché il debito costa e loro ne hanno tanto.",
+        "conta": "Racconta l'economia reale americana meglio dei grandi indici."
+      }
     },
     {
       "sym": "^STOXX50E",
@@ -101,7 +173,14 @@
       "gruppo": "Europa",
       "unita": "punti",
       "perche": "Le 50 aziende maggiori dell'eurozona. È il riferimento europeo numero uno.",
-      "cnbc": ".STOXX50E"
+      "cnbc": ".STOXX50E",
+      "guida": {
+        "cosa": "Le cinquanta maggiori aziende dei paesi che usano l'euro: lusso francese, industria tedesca, banche italiane e spagnole.",
+        "scala": [],
+        "sesale": "Sale con l'ottimismo sull'economia europea e sui consumi cinesi.",
+        "sescende": "Scende con i timori su industria, energia e dazi.",
+        "conta": "È il riferimento europeo numero uno: se vuoi un solo numero per l'Europa, è questo."
+      }
     },
     {
       "sym": "FTSEMIB.MI",
@@ -110,7 +189,14 @@
       "gruppo": "Europa",
       "unita": "punti",
       "perche": "I 40 titoli italiani principali, con moltissime banche. Questo è il mercato di casa.",
-      "cnbc": ".FTMIB"
+      "cnbc": ".FTMIB",
+      "guida": {
+        "cosa": "I quaranta titoli principali della Borsa di Milano. È un indice molto sbilanciato: banche e assicurazioni ne costituiscono una fetta enorme.",
+        "scala": [],
+        "sesale": "Sale spesso quando salgono i tassi, perché le banche ci guadagnano.",
+        "sescende": "Soffre quando crescono i timori sui conti pubblici italiani.",
+        "conta": "È il mercato di casa, e si muove per ragioni sue che non valgono per gli altri."
+      }
     },
     {
       "sym": "^GDAXI",
@@ -119,7 +205,14 @@
       "gruppo": "Europa",
       "unita": "punti",
       "perche": "Industria e automobili. Se frena la Germania, frena tutta l'Europa.",
-      "cnbc": ".GDAXI"
+      "cnbc": ".GDAXI",
+      "guida": {
+        "cosa": "Le maggiori aziende tedesche: automobili, chimica, macchinari, software.",
+        "scala": [],
+        "sesale": "Sale quando l'industria europea va bene e l'export tira.",
+        "sescende": "Scende con energia cara, dazi e domanda cinese debole.",
+        "conta": "La Germania è la fabbrica d'Europa: se frena lei, frena il continente."
+      }
     },
     {
       "sym": "^FCHI",
@@ -128,7 +221,14 @@
       "gruppo": "Europa",
       "unita": "punti",
       "perche": "LVMH, Hermès, TotalEnergies. Molto sensibile ai consumi in Cina.",
-      "cnbc": ".FCHI"
+      "cnbc": ".FCHI",
+      "guida": {
+        "cosa": "Le quaranta maggiori aziende francesi. Pesano moltissimo il lusso e l'energia.",
+        "scala": [],
+        "sesale": "Sale quando i consumi cinesi ripartono: il lusso vive di quelli.",
+        "sescende": "Scende quando la Cina rallenta o quando la politica francese preoccupa.",
+        "conta": "È il modo più diretto per leggere lo stato del lusso mondiale."
+      }
     },
     {
       "sym": "^FTSE",
@@ -137,7 +237,14 @@
       "gruppo": "Europa",
       "unita": "punti",
       "perche": "Composto soprattutto da energia e materie prime: spesso va in direzione opposta al resto d'Europa.",
-      "cnbc": ".FTSE"
+      "cnbc": ".FTSE",
+      "guida": {
+        "cosa": "Le cento maggiori aziende quotate a Londra. Molte sono petrolifere e minerarie, e guadagnano in dollari pur essendo britanniche.",
+        "scala": [],
+        "sesale": "Sale con petrolio e materie prime, e quando la sterlina si indebolisce.",
+        "sescende": "Scende con il crollo delle materie prime.",
+        "conta": "Va spesso in direzione opposta al resto d'Europa: non è un errore, è la sua composizione."
+      }
     },
     {
       "sym": "^N225",
@@ -146,7 +253,14 @@
       "gruppo": "Asia",
       "unita": "punti",
       "perche": "È il primo grande mercato ad aprire: ti anticipa l'umore della giornata.",
-      "cnbc": ".N225"
+      "cnbc": ".N225",
+      "guida": {
+        "cosa": "L'indice storico della borsa di Tokyo, 225 aziende giapponesi.",
+        "scala": [],
+        "sesale": "Sale quando lo yen si indebolisce, perché gli esportatori giapponesi ci guadagnano.",
+        "sescende": "Scende quando lo yen si rafforza o quando il mondo ha paura.",
+        "conta": "È il primo grande mercato ad aprire: al mattino ti dice come il mondo ha dormito."
+      }
     },
     {
       "sym": "^HSI",
@@ -155,7 +269,14 @@
       "gruppo": "Asia",
       "unita": "punti",
       "perche": "Qui si vedono subito le tensioni geopolitiche e gli effetti dei dazi.",
-      "cnbc": ".HSI"
+      "cnbc": ".HSI",
+      "guida": {
+        "cosa": "L'indice di Hong Kong, dove sono quotate molte delle grandi aziende cinesi accessibili agli stranieri.",
+        "scala": [],
+        "sesale": "Sale quando Pechino annuncia aiuti all'economia o quando le tensioni si allentano.",
+        "sescende": "Scende con dazi, controlli sulle esportazioni e tensioni geopolitiche.",
+        "conta": "È la finestra più leggibile sulla Cina per chi investe da fuori."
+      }
     },
     {
       "sym": "000001.SS",
@@ -164,7 +285,14 @@
       "gruppo": "Asia",
       "unita": "punti",
       "perche": "Un mercato guidato molto dalle decisioni del governo di Pechino.",
-      "cnbc": ".SSEC"
+      "cnbc": ".SSEC",
+      "guida": {
+        "cosa": "La borsa di Shanghai, fatta soprattutto di investitori cinesi e di aziende statali.",
+        "scala": [],
+        "sesale": "Sale quando il governo decide di sostenere i mercati: lì conta più la politica che i bilanci.",
+        "sescende": "Scende con la crisi immobiliare e la domanda interna debole.",
+        "conta": "Va letta sapendo che è un mercato molto guidato dall'alto."
+      }
     },
     {
       "sym": "EURUSD=X",
@@ -174,7 +302,27 @@
       "unita": "$",
       "perche": "Decide se un investimento negli Stati Uniti ti rende di più o di meno una volta riportato in euro.",
       "decimali": 4,
-      "cnbc": "EUR="
+      "cnbc": "EUR=",
+      "guida": {
+        "cosa": "Quanti dollari serve dare per un euro. Se vale 1,10, un euro compra un dollaro e dieci centesimi.",
+        "scala": [
+          [
+            "sotto 1,00",
+            "euro debole: un euro vale meno di un dollaro"
+          ],
+          [
+            "1,00 – 1,15",
+            "zona normale degli ultimi anni"
+          ],
+          [
+            "sopra 1,15",
+            "euro forte"
+          ]
+        ],
+        "sesale": "Euro forte: viaggiare e comprare in America costa meno, ma le aziende europee che esportano guadagnano meno.",
+        "sescende": "Euro debole: l'energia, che si paga in dollari, costa di più a tutti noi.",
+        "conta": "Se investi in America, questo numero decide quanto ti resta davvero una volta tornato in euro."
+      }
     },
     {
       "sym": "GC=F",
@@ -184,7 +332,14 @@
       "unita": "$",
       "perche": "Sale quando la gente ha paura o si aspetta che i prezzi corrano.",
       "decimali": 2,
-      "cnbc": "@GC.1"
+      "cnbc": "@GC.1",
+      "guida": {
+        "cosa": "Il prezzo di un'oncia d'oro in dollari. L'oncia sono poco più di 31 grammi.",
+        "scala": [],
+        "sesale": "Sale quando la gente ha paura, quando si teme l'inflazione o quando le banche centrali comprano.",
+        "sescende": "Scende quando torna la fiducia o quando i titoli di Stato rendono tanto: l'oro non paga interessi, e in quel caso conviene meno.",
+        "conta": "È il bene rifugio per eccellenza: quando sale insieme alla paura, conferma che il timore è vero."
+      }
     },
     {
       "sym": "CL=F",
@@ -194,7 +349,14 @@
       "unita": "$",
       "perche": "Finisce nel pieno dell'auto e nelle bollette: è inflazione con due o tre mesi di ritardo.",
       "decimali": 2,
-      "cnbc": "@CL.1"
+      "cnbc": "@CL.1",
+      "guida": {
+        "cosa": "Il prezzo di un barile di petrolio americano, circa 159 litri. È il riferimento per i prezzi dell'energia.",
+        "scala": [],
+        "sesale": "Sale con guerre, tagli alla produzione o economia in crescita. Dopo due o tre mesi lo ritrovi in bolletta e alla pompa.",
+        "sescende": "Scende quando si teme una recessione: meno attività, meno energia consumata.",
+        "conta": "È inflazione con qualche mese di anticipo: guardarlo oggi è come leggere i prezzi di domani."
+      }
     },
     {
       "sym": "BTC-USD",
@@ -204,7 +366,14 @@
       "unita": "$",
       "perche": "Misura la voglia di rischiare. Quando gli investitori si spaventano, di solito scende per primo.",
       "decimali": 0,
-      "cnbc": "BTC.CM="
+      "cnbc": "BTC.CM=",
+      "guida": {
+        "cosa": "Il prezzo di un bitcoin in dollari. Non ha bilanci né utili dietro: il prezzo è solo quello che qualcuno è disposto a pagare.",
+        "scala": [],
+        "sesale": "Sale quando c'è voglia di rischiare e denaro in abbondanza.",
+        "sescende": "Scende per primo quando gli investitori si spaventano: è la cosa più rischiosa in portafoglio, e la prima che si vende.",
+        "conta": "Funziona da termometro estremo: spesso anticipa di qualche giorno il cambio d'umore delle borse."
+      }
     }
   ],
   "feed": [

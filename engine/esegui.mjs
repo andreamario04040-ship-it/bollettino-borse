@@ -10,6 +10,8 @@ import { serieVuota } from './serie.mjs';
 import { scaricaNotizie } from './notizie.mjs';
 import { costruisciReport } from './report.mjs';
 import { aziendeDelGiorno } from './aziende.mjs';
+import { verifica, stampaVerifica } from './verifica.mjs';
+import { leggiCorrezioni, daNotificare, segnaNotificate, notificaDi } from './correzioni.mjs';
 import { valutaAvviso, statoVuoto } from './avvisi.mjs';
 import { inviaNotifica } from './push.mjs';
 import { giornoRoma, oraItalia, dataItalia, minutiDaMezzanotteRoma } from './lingua.mjs';
@@ -90,6 +92,9 @@ if (modo === 'avviso') {
   ];
   r.utente = config.utente || null;
   r.aziende = await aziendeDelGiorno(notizie, 3);
+  const controllo = stampaVerifica(verifica({ report: r, mercati, notizie, adesso }));
+  if (controllo.blocchi) { console.error('  Non mando l’avviso: i dati non tornano.'); process.exit(1); }
+
   await scriviJson(dentro('docs/data/report.json'), r);
   await scriviJson(dentro(`docs/data/storico/${giornoRoma(adesso)}-avviso-${esito.evento.motivo}.json`), r);
   await inviaNotifica({ ...r.notifica, tipo: 'avviso' });
@@ -119,6 +124,14 @@ const report = costruisciReport(mercati, notizie, tipo, adesso);
 report.utente = config.utente || null;   // serve all'app per il saluto
 report.aziende = await aziendeDelGiorno(notizie, config.aziende?.quante ?? 6);
 
+// Niente esce senza controllo: se un numero scritto non corrisponde ai dati,
+// è meglio nessun bollettino che un bollettino falso.
+const { blocchi } = stampaVerifica(verifica({ report, mercati, notizie, adesso }));
+if (blocchi) {
+  console.error(`  Non pubblico: ${blocchi} problem${blocchi === 1 ? 'a' : 'i'} da bloccare.`);
+  process.exit(1);
+}
+
 await scriviJson(dentro('docs/data/report.json'), report);
 await scriviJson(archivio, report);
 
@@ -128,4 +141,20 @@ if (stato.giorno !== giornoRoma(adesso)) await scriviJson(dentro('docs/data/stat
 
 console.log(`  » ${report.notifica.titolo}\n    ${report.notifica.corpo}`);
 await inviaNotifica({ ...report.notifica, tipo: 'bollettino' });
+
+// Se l'app ha detto qualcosa di sbagliato e la correzione non è ancora stata
+// comunicata, parte una notifica a parte. Una sola volta, qualunque sia il numero.
+const nuoveCorrezioni = daNotificare(await leggiCorrezioni());
+if (nuoveCorrezioni.length) {
+  const esito = await inviaNotifica(notificaDi(nuoveCorrezioni));
+  // Si segna come notificata solo se è davvero partita: altrimenti una prova
+  // in locale, dove le chiavi non ci sono, brucerebbe la correzione in silenzio.
+  if (esito.inviate > 0) {
+    await segnaNotificate(nuoveCorrezioni.map((c) => c.id));
+    console.log(`  correzioni: notificata${nuoveCorrezioni.length > 1 ? 'e ' + nuoveCorrezioni.length : ''}`);
+  } else {
+    console.log(`  correzioni: ${nuoveCorrezioni.length} in attesa, resta${nuoveCorrezioni.length > 1 ? 'no' : ''} da notificare`);
+  }
+}
+
 console.log('  fatto.\n');

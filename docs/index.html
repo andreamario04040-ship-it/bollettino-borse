@@ -14,12 +14,12 @@
 <link rel="icon" href="icons/icona-192.png">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Inter:wght@400;450;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="stile.css?v=10">
+<link rel="stylesheet" href="stile.css?v=12">
 </head>
 <body>
 
 <div id="ruota" aria-hidden="true">
-  <img src="icons/icona-192.png?v=10" alt="" width="72" height="72" decoding="async">
+  <img src="icons/icona-192.png?v=12" alt="" width="72" height="72" decoding="async">
   <p class="ruota-titolo">Gira il telefono</p>
   <p class="ruota-nota">Borsa si legge in verticale: i numeri stanno in colonna e i grafici hanno bisogno di altezza.</p>
 </div>
@@ -27,7 +27,7 @@
 <div class="testa">
 <header class="barra-alta">
   <div class="marchio">
-    <img class="segno" src="icons/icona-192.png?v=10" alt="" width="36" height="36" decoding="async">
+    <img class="segno" src="icons/icona-192.png?v=12" alt="" width="36" height="36" decoding="async">
     <div class="titoli">
       <h1>Borsa</h1>
       <p id="quando">—</p>
@@ -45,6 +45,8 @@
 
   <!-- ———————————— OGGI ———————————— -->
   <section class="vista" id="vista-oggi" role="tabpanel" aria-labelledby="tab-oggi">
+
+    <div id="correzioni"></div>
 
     <div class="scheda saluto" id="saluto" hidden>
       <p class="saluto-riga" id="saluto-riga">—</p>
@@ -176,6 +178,15 @@
   </button>
 </nav>
 
-<script src="app.js?v=10"></script>
+<dialog id="pannello">
+  <div class="pan-testa">
+    <span class="pan-tipo" id="pan-tipo"></span>
+    <button class="pan-chiudi" id="pan-chiudi" aria-label="Chiudi">&times;</button>
+  </div>
+  <h2 class="pan-titolo" id="pan-titolo"></h2>
+  <div id="pan-corpo"></div>
+</dialog>
+
+<script src="app.js?v=12"></script>
 </body>
 </html>

@@ -10,7 +10,9 @@
     "chiavi": "node engine/chiavi.mjs",
     "locale": "node --run bollettino && node engine/servi.mjs",
     "prova": "node engine/prova-avvisi.mjs",
-    "storico": "node engine/storico.mjs"
+    "storico": "node engine/storico.mjs",
+    "verifica": "node engine/controlla.mjs",
+    "loghi": "node engine/loghi.mjs"
   },
   "dependencies": {
     "web-push": "3.6.7"
