@@ -249,3 +249,69 @@ code{font-family:var(--fm);font-size:.82rem;background:var(--superficie2);paddin
   .dati{grid-template-columns:repeat(6,1fr)}
   .clima-dx{width:170px}
 }
+
+/* ———————————————————————————————————————————————
+   Da computer: la navigazione passa a lato, il contenuto si apre su due
+   colonne. Sotto i 900px resta tutto com'è sul telefono.
+   ——————————————————————————————————————————————— */
+@media (min-width:900px){
+  main{
+    margin-left:214px; max-width:1180px;
+    padding-left:2rem; padding-right:2rem;
+    padding-bottom:3rem;
+  }
+
+  /* La barra delle schede diventa una colonna a sinistra, sotto l'intestazione. */
+  .schede{
+    top:var(--testa-h,108px); bottom:0; right:auto; width:214px;
+    flex-direction:column; justify-content:flex-start; gap:.2rem;
+    background:var(--superficie); backdrop-filter:none;
+    border-top:0; border-right:1px solid var(--bordo);
+    padding:1.1rem .7rem;
+  }
+  .schede button{
+    flex:0 0 auto; flex-direction:row; justify-content:flex-start; gap:.75rem;
+    padding:.6rem .75rem; border-radius:10px;
+  }
+  .schede button span{font-size:.93rem;font-weight:500}
+  .schede button[aria-selected="true"]{background:var(--accento-tenue)}
+  .schede button[aria-selected="true"] span{font-weight:600}
+  .schede button:hover{background:var(--superficie2)}
+
+  /* Oggi: saluto e clima affiancati, poi il titolo a tutta larghezza,
+     poi i paragrafi a due colonne. */
+  #vista-oggi{display:grid;grid-template-columns:1fr 1fr;gap:1rem;align-items:start}
+  #saluto{grid-column:1}
+  #clima-scheda{grid-column:2;height:100%}
+  #titolone,#sezioni,#piede-oggi{grid-column:1/-1}
+  #sezioni{display:grid;grid-template-columns:1fr 1fr;gap:1rem;align-items:start}
+  .saluto-riga{font-size:1.9rem}
+  .titolone h2{font-size:1.85rem}
+  .titolone .sommario{font-size:1.06rem;max-width:62ch}
+  .sezione p{font-size:.97rem}
+
+  /* Mercati: i gruppi affiancati, ciascuno intero. */
+  #lista-indici{display:grid;grid-template-columns:1fr 1fr;gap:.4rem 1rem;align-items:start}
+  .blocco-gruppo{min-width:0}
+  .gruppo{margin-top:.9rem}
+  .riga:hover{background:var(--superficie2)}
+  .dati{grid-template-columns:repeat(3,1fr)}
+
+  /* Info: schede affiancate. */
+  #vista-info{display:grid;grid-template-columns:1fr 1fr;gap:1rem;align-items:start}
+  #vista-info .avvertenza{grid-column:1/-1}
+
+  /* L'intestazione tiene conto della colonna a sinistra. */
+  .barra-alta{padding-left:1.5rem;padding-right:1.5rem}
+  .nastro-int{padding-left:1.5rem}
+  .periodo{max-width:420px}
+  .piede-nota{text-align:left}
+}
+
+/* Tre colonne solo quando c'è davvero spazio: sotto, i paragrafi
+   diventerebbero strisce troppo strette da leggere. */
+@media (min-width:1500px){
+  main{margin-left:214px;max-width:1400px}
+  #sezioni{grid-template-columns:repeat(3,1fr)}
+  #lista-indici{grid-template-columns:repeat(3,1fr)}
+}

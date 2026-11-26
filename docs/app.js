@@ -3,7 +3,7 @@
 // Si alza a ogni modifica dell'app, insieme a docs/versione.json.
 // Serve perché un'app aggiunta alla schermata Home resta viva in memoria:
 // riaprendola dal selettore non ricarica, e resterebbe vecchia per giorni.
-const VERSIONE_APP = 7;
+const VERSIONE_APP = 8;
 
 const CHIAVE_PUBBLICA = 'BEX2Ep7AZJPgrIF_cHwKOWk9VSiE8OLd1WLxSJDANLNEbox4xiHYb5pgRslEapXEXZs35jhSmHRhrLcfFhyPwVk';
 const MENO = '−', SOTTILE = ' ';
@@ -155,7 +155,8 @@ function disegnaMercati() {
     g.voci.push(m);
   }
 
-  $('lista-indici').innerHTML = gruppi.map((g) => `<div class="gruppo"><span>${fuga(g.nome)}</span></div>
+  $('lista-indici').innerHTML = gruppi.map((g) => `<section class="blocco-gruppo">
+    <div class="gruppo"><span>${fuga(g.nome)}</span></div>
     <div class="gruppo-schede">${g.voci.map((m) => {
       const v = m[periodo];
       const apertoQui = aperto === m.sym;
@@ -172,7 +173,7 @@ function disegnaMercati() {
         </button>
         ${apertoQui ? dettaglio(m) : ''}
       </div>`;
-    }).join('')}</div>`).join('');
+    }).join('')}</div></section>`).join('');
 }
 
 function dettaglio(m) {
