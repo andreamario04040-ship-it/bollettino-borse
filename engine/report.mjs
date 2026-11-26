@@ -1,6 +1,6 @@
 // Trasforma numeri e titoli di giornale in cinque frasi che si capiscono.
 
-import { num, pct, verbo, elenco, taglia, oraItalia, dataItalia, MENO } from './lingua.mjs';
+import { num, pct, verbo, elenco, taglia, oraItalia, dataItalia, minutiDaMezzanotteRoma, MENO } from './lingua.mjs';
 import { temiDelGiorno } from './temi.mjs';
 
 const AREE = {
@@ -60,16 +60,32 @@ function frasePiazze(ctx, syms, soglia = 0.1) {
   }).filter(Boolean));
 }
 
+// Gli orari veri delle piazze, in ora italiana: servono a non raccontare
+// come "chiuso" un mercato che sta ancora scambiando. Un bollettino lanciato
+// a mano fuori orario altrimenti direbbe il falso.
+const CHIUSURA_MILANO = 17 * 60 + 35;
+const APERTURA_NEWYORK = 15 * 60 + 30;
+const CHIUSURA_NEWYORK = 22 * 60 + 5;
+
 function sezCosaSuccesso(ctx) {
   const { medie, tipo } = ctx;
+  const ora = minutiDaMezzanotteRoma(ctx.adesso);
   const eu = medie.europa, us = medie.usa, as = medie.asia;
   const p = [];
 
   if (tipo === 'sera') {
     const mib = ctx.g('FTSEMIB.MI');
-    if (mib?.giorno != null) p.push(`La Borsa di Milano ${verbo(mib.giorno)} ${pct(mib.giorno).replace('+', '').replace(MENO, '')} e ha chiuso a ${num(mib.prezzo)} punti.`);
+    if (mib?.giorno != null) {
+      const dove = ora >= CHIUSURA_MILANO ? `ha chiuso a ${num(mib.prezzo)} punti` : `a quest'ora segna ${num(mib.prezzo)} punti`;
+      p.push(`La Borsa di Milano ${verbo(mib.giorno)} ${pct(mib.giorno).replace('+', '').replace(MENO, '')} e ${dove}.`);
+    }
     p.push(`Nel resto d'Europa: ${frasePiazze(ctx, ['^GDAXI', '^FCHI', '^FTSE'])}.`);
-    if (us != null) p.push(`A New York, dove si continua a scambiare, l'andamento è ${us > 0.15 ? 'positivo' : us < -0.15 ? 'negativo' : 'piatto'}: ${frasePiazze(ctx, ['^GSPC', '^IXIC'])}.`);
+    if (us != null) {
+      const stato = ora < APERTURA_NEWYORK ? 'che apre alle 15:30'
+        : ora <= CHIUSURA_NEWYORK ? 'dove si continua a scambiare'
+        : 'che ha chiuso';
+      p.push(`A New York, ${stato}, l'andamento è ${us > 0.15 ? 'positivo' : us < -0.15 ? 'negativo' : 'piatto'}: ${frasePiazze(ctx, ['^GSPC', '^IXIC'])}.`);
+    }
   } else if (tipo === 'mattina') {
     if (as != null) p.push(`Stanotte l'Asia ha chiuso ${as > 0.15 ? 'in rialzo' : as < -0.15 ? 'in calo' : 'poco mossa'}: ${frasePiazze(ctx, ['^N225', '^HSI', '000001.SS'])}.`);
     if (us != null) p.push(`Ieri sera Wall Street ${verbo(us)} in media ${pct(Math.abs(us)).replace('+', '')}: ${frasePiazze(ctx, ['^GSPC', '^IXIC', '^DJI'])}.`);

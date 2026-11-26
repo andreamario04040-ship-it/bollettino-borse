@@ -3,7 +3,7 @@
 // Si alza a ogni modifica dell'app, insieme a docs/versione.json.
 // Serve perché un'app aggiunta alla schermata Home resta viva in memoria:
 // riaprendola dal selettore non ricarica, e resterebbe vecchia per giorni.
-const VERSIONE_APP = 8;
+const VERSIONE_APP = 9;
 
 const CHIAVE_PUBBLICA = 'BEX2Ep7AZJPgrIF_cHwKOWk9VSiE8OLd1WLxSJDANLNEbox4xiHYb5pgRslEapXEXZs35jhSmHRhrLcfFhyPwVk';
 const MENO = '−', SOTTILE = ' ';
@@ -331,14 +331,20 @@ $('chiudi-riapri').addEventListener('click', () => {
   $('aggiornamento').innerHTML = '<span>Chiudi del tutto l’app (scorri via dal selettore) e riaprila dall’icona.</span>';
 });
 
-// L'intestazione è alta quanto è alta: la barra dei periodi deve fermarsi appena sotto.
+// Quanto è alta l'intestazione: da questo dipendono la barra dei periodi e,
+// su computer, la colonna di sinistra. Misurarla una volta sola non basta:
+// all'avvio il nastro degli indici è ancora vuoto e l'intestazione è più bassa
+// di quanto sarà fra un istante. Chi si fida di quella misura parte troppo in
+// alto e finisce sopra il nastro.
+const testa = document.querySelector('.testa');
 function misuraTesta() {
-  const t = document.querySelector('.testa');
-  if (t) document.documentElement.style.setProperty('--testa-h', t.offsetHeight + 'px');
+  if (testa) document.documentElement.style.setProperty('--testa-h', testa.offsetHeight + 'px');
 }
 misuraTesta();
 addEventListener('resize', misuraTesta);
 if (document.fonts?.ready) document.fonts.ready.then(misuraTesta);
+// Così la misura segue l'intestazione ogni volta che cambia, qualunque sia il motivo.
+try { if (testa) new ResizeObserver(misuraTesta).observe(testa); } catch { addEventListener('load', misuraTesta); }
 
 // Il campo del nome: si scrive e il saluto cambia subito.
 const campoNome = $('nome-utente');
