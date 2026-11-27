@@ -38,7 +38,12 @@ function numeriDi(testo) {
     .filter((x) => x.replace('.', '').length >= 2));
 }
 
-export function verifica({ report, mercati, notizie = [], adesso = new Date() }) {
+// `tardivo` è il controllo fatto a bollettino già pubblicato, anche giorni dopo.
+// Lì tre confronti non si possono più fare, e fingere di farli è peggio che non
+// farli: i titoli del giorno non esistono più (il flusso RSS è andato avanti) e
+// i prezzi non sono quelli di allora. Quei controlli si dichiarano saltati
+// invece di sparare blocchi su cifre che erano giuste.
+export function verifica({ report, mercati, notizie = [], adesso = new Date(), tardivo = false }) {
   const problemi = [];
   const segnala = (gravita, dove, cosa) => problemi.push({ gravita, dove, cosa });
   const g = (sym) => mercati.find((m) => m.sym === sym);
@@ -56,7 +61,9 @@ export function verifica({ report, mercati, notizie = [], adesso = new Date() })
 
   // ——— 2. Il clima deve venire dall'indice della paura, non da altro.
   const vix = g('^VIX');
-  if (report.clima?.vix != null && vix?.prezzo != null && Math.abs(report.clima.vix - vix.prezzo) > 0.01) {
+  // A controllo tardivo il confronto non regge: il VIX di stasera non è quello
+  // di stamattina, e il bollettino non ha sbagliato niente.
+  if (!tardivo && report.clima?.vix != null && vix?.prezzo != null && Math.abs(report.clima.vix - vix.prezzo) > 0.01) {
     segnala('blocco', 'clima', `il clima usa un indice della paura a ${report.clima.vix}, ma il dato è ${vix.prezzo}`);
   }
 
@@ -93,8 +100,12 @@ export function verifica({ report, mercati, notizie = [], adesso = new Date() })
 
   // Solo i numeri col segno: quelli senza sono soglie di lettura ("sopra il 4,5%"),
   // non dati, e non vanno cercati nei valori.
-  for (const trovato of new Set(testo.match(/[+−]\d+(?:,\d+)?%/g) || [])) {
-    if (!ammessi.has(trovato)) segnala('blocco', 'testo', `la frase cita ${trovato}, che non corrisponde a nessun dato scaricato`);
+  if (tardivo) {
+    segnala('nota', 'testo', 'le percentuali nel testo non sono controllate: andrebbero confrontate con i prezzi di quel momento, e questi sono quelli di adesso');
+  } else {
+    for (const trovato of new Set(testo.match(/[+−]\d+(?:,\d+)?%/g) || [])) {
+      if (!ammessi.has(trovato)) segnala('blocco', 'testo', `la frase cita ${trovato}, che non corrisponde a nessun dato scaricato`);
+    }
   }
 
   // ——— 5. Le aziende.
@@ -176,18 +187,24 @@ export function verifica({ report, mercati, notizie = [], adesso = new Date() })
     else for (const x of fuori) segnala('avviso', dove, `${chi}: la cifra ${x} di ${come} non sta né nei titoli né nei dati`);
   };
 
-  for (const a of report.aziende || []) if (a.perche) controllaScelta('scelta', a.nome, 'la riga «perché oggi»', a.perche);
-  for (const a of report.radar || []) if (a.notizia) controllaScelta('radar', a.nome, 'la riga nelle aziende seguite', a.notizia);
+  if (tardivo) {
+    segnala('nota', 'scelta', 'le righe «perché oggi» non sono controllate: nascono dai titoli di quel giorno, e il flusso delle notizie è andato avanti');
+  } else {
+    for (const a of report.aziende || []) if (a.perche) controllaScelta('scelta', a.nome, 'la riga «perché oggi»', a.perche);
+    for (const a of report.radar || []) if (a.notizia) controllaScelta('radar', a.nome, 'la riga nelle aziende seguite', a.notizia);
+  }
 
   for (const d of report.daGuardare || []) {
     const m = mercati.find((x) => x.sym === d.sym);
     if (!m) { segnala('blocco', 'scelta', `«${d.nome}» è segnalato fra i dati da guardare, ma non è fra gli strumenti scaricati`); continue; }
     if (m.prezzo == null) { segnala('avviso', 'scelta', `«${d.nome}» è segnalato da guardare ma oggi non ha un valore`); continue; }
-    if (d.perche) controllaScelta('scelta', d.nome, 'la riga «perché oggi»', d.perche);
+    if (d.perche && !tardivo) controllaScelta('scelta', d.nome, 'la riga «perché oggi»', d.perche);
   }
 
   // ——— 6. Le notizie citate devono essere fra quelle lette oggi.
-  if (notizie.length) {
+  if (tardivo) {
+    segnala('nota', 'notizie', 'non controllo se le notizie citate erano fra quelle lette: quelle di allora non si possono più rileggere');
+  } else if (notizie.length) {
     const titoliVeri = new Set(notizie.map((n) => n.titolo));
     const citate = [
       ...(report.sezioni || []).flatMap((s) => s.riferimenti || []),
