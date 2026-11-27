@@ -98,6 +98,9 @@ export async function scaricaMercati(strumenti, serie = {}, giornoOggi = new Dat
       for (const [simboloCnbc, d] of q) {
         const sym = perCnbc.get(simboloCnbc);
         if (!sym) continue;
+        // Niente di nuovo da CNBC: meglio lasciarlo mancante, così resta il
+        // valore precedente segnato come fermo invece di una finta giornata piatta.
+        if (d.fermo) { console.log(`  · ${sym}: CNBC ripete la chiusura di ieri`); continue; }
         aggiungiPunto(serie, sym, giornoOggi, d.prezzo);
         const st = daSerie(serie, sym, d.prezzo, giornoOggi);
         presi.set(sym, {

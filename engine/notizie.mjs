@@ -83,7 +83,10 @@ export async function scaricaNotizie(feed) {
 
 // I comunicati ufficiali di BCE e Federal Reserve usciti nelle ultime ore:
 // sono l'unico tipo di notizia che da solo giustifica un avviso fuori orario.
-export function comunicatiRecenti(notizie, ore = 3) {
-  const limite = Date.now() - ore * 3600 * 1000;
+export function comunicatiRecenti(notizie, ore = 3, adesso = new Date()) {
+  // L'ora arriva da fuori, non dall'orologio: chi chiama ragiona su un momento
+  // preciso, e un controllo che guarda l'ora vera non si può né provare né
+  // rieseguire su dati di ieri.
+  const limite = adesso.getTime() - ore * 3600 * 1000;
   return notizie.filter((n) => n.ufficiale && n.data && new Date(n.data).getTime() > limite);
 }

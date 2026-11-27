@@ -3,13 +3,13 @@
 // Si alza a ogni modifica dell'app, insieme a docs/versione.json.
 // Serve perché un'app aggiunta alla schermata Home resta viva in memoria:
 // riaprendola dal selettore non ricarica, e resterebbe vecchia per giorni.
-const VERSIONE_APP = 19;
+const VERSIONE_APP = 20;
 
 const CHIAVE_PUBBLICA = 'BEX2Ep7AZJPgrIF_cHwKOWk9VSiE8OLd1WLxSJDANLNEbox4xiHYb5pgRslEapXEXZs35jhSmHRhrLcfFhyPwVk';
 const MENO = '−', SOTTILE = ' ';
 const $ = (id) => document.getElementById(id);
 
-let MERCATI = [], REPORT = null, CORREZIONI = [], GLOSSARIO = [], periodo = 'giorno', aperto = null;
+let MERCATI = [], REPORT = null, CORREZIONI = [], GLOSSARIO = [], periodo = 'giorno', aperto = null, zonaAperta = null;
 
 /* ——————————————— numeri all'italiana ——————————————— */
 const num = (n, dec) => {
@@ -591,6 +591,162 @@ function disegnaAziende() {
   }
 }
 
+/* ——————————————— la mappa del mondo ———————————————
+   I tracciati stanno in mappa.js, generato da engine/mappa.mjs e fermo: qui si
+   decidono solo i colori, lo zoom e che cosa compare di lato.
+
+   La mappa si costruisce una volta sola. Sono settanta chilobyte di contorni:
+   rifarli a ogni tocco sarebbe uno spreco, e le uniche cose che cambiano — il
+   colore delle zone, lo zoom, le scritte — si aggiornano con due attributi. */
+
+const ZONE_NOMI = {
+  nordamerica: 'America del Nord', latam: 'America Latina',
+  europa: 'Europa', asia: 'Asia', oceania: 'Oceania',
+};
+
+// Quanto deve muoversi un indice perché la zona cambi colore. Le soglie
+// cambiano col periodo: un punto percentuale in un giorno è una giornata mossa,
+// in un anno è quasi fermo.
+const SOGLIE = {
+  giorno: [0.25, 1, 2], settimana: [0.6, 2, 4], mese: [1, 3, 6], anno: [3, 10, 20],
+};
+
+const indiciDiZona = (z) => MERCATI.filter((m) => m.zona === z && !m.errore && m.prezzo != null);
+
+// Media semplice, non pesata sul valore delle borse: serve a dire «qui oggi si
+// sale», non a misurare quanta ricchezza si è mossa. Il pannello di lato dice
+// sempre su quali indici è fatta, così il numero non è mai un atto di fede.
+function mediaZona(z) {
+  const v = indiciDiZona(z).map((m) => m[periodo]).filter((x) => x != null && isFinite(x));
+  if (!v.length) return null;
+  return v.reduce((s, x) => s + x, 0) / v.length;
+}
+
+function forzaDi(v) {
+  if (v == null || !isFinite(v)) return 'vuota';
+  const [a, b, c] = SOGLIE[periodo] || SOGLIE.giorno;
+  const x = Math.abs(v);
+  if (x < a) return '0';
+  const grado = x < b ? 1 : x < c ? 2 : 3;
+  return (v > 0 ? 'su' : 'giu') + grado;
+}
+
+function costruisciMappa() {
+  const terre = $('mappa-terre');
+  if (!terre || typeof MAPPA === 'undefined') return;
+  terre.innerHTML = `<path class="mappa-fuori" d="${MAPPA.fuori}"/>`
+    + Object.entries(MAPPA.zone).map(([z, v]) =>
+      `<path class="mappa-zona" data-zona="${z}" d="${v.d}" role="button" tabindex="0"></path>`).join('');
+}
+
+// Lo zoom non tocca il viewBox — che non si può animare — ma sposta e ingrandisce
+// il gruppo delle terre, e quello sì che il browser sa animarlo da solo.
+function inquadratura(z) {
+  const { larghezza: L, altezza: A } = MAPPA;
+  if (!z) return { k: 1, x: 0, y: 0 };
+  const [x0, y0, x1, y1] = MAPPA.zone[z].bbox;
+  const k = Math.min(L / (x1 - x0), A / (y1 - y0)) * 0.86;
+  return { k, x: L / 2 - k * (x0 + x1) / 2, y: A / 2 - k * (y0 + y1) / 2 };
+}
+
+function aggiornaMappa() {
+  const terre = $('mappa-terre');
+  if (!terre || typeof MAPPA === 'undefined') return;
+  if (!terre.children.length) costruisciMappa();
+
+  const { k, x, y } = inquadratura(zonaAperta);
+  terre.setAttribute('transform', `translate(${x.toFixed(2)} ${y.toFixed(2)}) scale(${k.toFixed(4)})`);
+
+  const scritte = [];
+  for (const z of Object.keys(MAPPA.zone)) {
+    const media = mediaZona(z);
+    const via = terre.querySelector(`[data-zona="${z}"]`);
+    via.setAttribute('data-forza', forzaDi(media));
+    via.classList.toggle('attiva', zonaAperta === z);
+    via.classList.toggle('spenta', !!zonaAperta && zonaAperta !== z);
+    via.setAttribute('aria-label', `${ZONE_NOMI[z]}: ${media == null ? 'nessun dato' : pct(media, 2)}`);
+    via.setAttribute('aria-pressed', String(zonaAperta === z));
+
+    // Da zoomati la percentuale non serve più: sta scritta grande qui di fianco,
+    // e in mezzo alla zona ingrandita darebbe solo fastidio.
+    if (zonaAperta) continue;
+    const [bx, by] = MAPPA.zone[z].centro;
+    const cx = (k * bx + x).toFixed(1), cy = (k * by + y).toFixed(1);
+    scritte.push(`<text class="mappa-scritta ${classe(media)}" x="${cx}" y="${cy}">${media == null ? '—' : pct(media, 1)}</text>`);
+  }
+  // Le scritte stanno fuori dal gruppo che si ingrandisce: altrimenti crescerebbero
+  // con la terra sotto, e da zoomate sarebbero enormi. La misura è in unità del
+  // disegno, non in pixel: si calcola da quanto è larga la mappa sullo schermo,
+  // così resta uguale sul telefono e sul Mac invece di rimpicciolirsi con lui.
+  const pergola = $('mappa-scritte');
+  const perPixel = 1000 / ($('mappa').clientWidth || 1000);
+  pergola.style.fontSize = `${(12.5 * perPixel).toFixed(1)}px`;
+  pergola.style.strokeWidth = `${(3.5 * perPixel).toFixed(1)}px`;
+  pergola.innerHTML = scritte.join('');
+
+  const etichette = { giorno: 'Oggi', settimana: 'Ultimi 7 giorni', mese: 'Ultimo mese', anno: 'Ultimo anno' };
+  $('mappa-periodo').textContent = etichette[periodo] || 'Oggi';
+  disegnaLatoMappa();
+}
+
+function disegnaLatoMappa() {
+  const lato = $('mappa-lato');
+  if (!lato) return;
+
+  if (!zonaAperta) {
+    const righe = Object.keys(MAPPA.zone).map((z) => {
+      const media = mediaZona(z), quanti = indiciDiZona(z).length;
+      return `<button class="zona-riga" data-zona="${z}">
+        <span class="zona-nome">${fuga(ZONE_NOMI[z])}</span>
+        <span class="zona-quanti">${quanti === 1 ? 'un indice' : `${quanti} indici`}</span>
+        <span class="varia ${classe(media)}">${media == null ? '—' : pct(media, periodo === 'giorno' ? 2 : 1)}</span>
+      </button>`;
+    }).join('');
+    lato.innerHTML = `<p class="mappa-invito">Tocca una zona della mappa, o una riga qui sotto, per vedere da vicino i suoi indici.</p>
+      <div class="zona-righe">${righe}</div>`;
+    return;
+  }
+
+  const media = mediaZona(zonaAperta);
+  const voci = indiciDiZona(zonaAperta);
+  const mancanti = MERCATI.filter((m) => m.zona === zonaAperta && (m.errore || m.prezzo == null));
+  const righe = voci.map((m) => {
+    const v = m[periodo];
+    return `<button class="zona-indice" data-indice="${fuga(m.sym)}">
+      <span class="zi-nome">${fuga(m.nome)}<span class="zi-breve">${fuga(m.breve || '')}</span></span>
+      <span class="zi-numeri">
+        <span class="zi-prezzo">${num(m.prezzo, m.decimali)}${m.obsoleto ? '<span class="fermo" title="valore fermo all’ultimo aggiornamento riuscito"> ·</span>' : ''}</span>
+        <span class="varia ${classe(v, m.inverso)}">${pct(v, periodo === 'giorno' ? 2 : 1)}</span>
+      </span>
+    </button>`;
+  }).join('');
+
+  const quali = voci.length === 1 ? 'dell’unico indice' : `dei ${voci.length} indici`;
+  const nota = !voci.length ? 'Oggi non è arrivato nessun valore da questa zona.'
+    : media == null ? `Questi indici sono fra i più nuovi che seguo: lo storico non arriva ancora a coprire ${periodo === 'anno' ? 'un anno' : periodo === 'mese' ? 'un mese' : 'questo periodo'}.`
+      : `Media semplice ${quali} che seguo qui.`;
+
+  lato.innerHTML = `<button class="tasto-pillola mappa-indietro" id="mappa-indietro">Tutto il mondo</button>
+    <p class="zona-titolo">${fuga(ZONE_NOMI[zonaAperta])} <span class="varia ${classe(media)}">${media == null ? '—' : pct(media, periodo === 'giorno' ? 2 : 1)}</span></p>
+    <p class="zona-nota">${nota}</p>
+    <div class="zona-indici">${righe}</div>
+    ${mancanti.length ? `<p class="zona-nota">Senza valore oggi: ${mancanti.map((m) => fuga(m.nome)).join(', ')}.</p>` : ''}`;
+}
+
+function apriZona(z) {
+  zonaAperta = zonaAperta === z ? null : z;
+  aggiornaMappa();
+}
+
+// Dal pannello della mappa alla riga dell'indice, in fondo alla pagina: si apre
+// e si va a vederla, invece di lasciare l'utente a cercarla.
+function mostraIndice(sym) {
+  aperto = sym;
+  disegnaMercati();
+  const riga = document.querySelector(`.riga[data-sym="${CSS.escape(sym)}"]`);
+  if (riga) riga.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
 function disegnaMercati() {
   const gruppi = [];
   for (const m of MERCATI) {
@@ -599,6 +755,8 @@ function disegnaMercati() {
     if (!g) gruppi.push(g = { nome: m.gruppo, voci: [] });
     g.voci.push(m);
   }
+
+  aggiornaMappa();
 
   $('lista-indici').innerHTML = gruppi.map((g) => `<section class="blocco-gruppo">
     <div class="gruppo"><span>${fuga(g.nome)}</span></div>
@@ -754,6 +912,9 @@ function cambiaVista(nome) {
     caricaTitoli().then(disegnaPreferiti);
     if (gettoneGist()) sincronizza('controllo').catch(() => {});
   }
+  // Una pagina nascosta è larga zero: la mappa disegnata prima di aprirla
+  // avrebbe le scritte calcolate su una larghezza che non esiste.
+  if (nome === 'mercati') aggiornaMappa();
   document.querySelectorAll('.schede button').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.vista === nome)));
   window.scrollTo({ top: 0, behavior: 'instant' });
 }
@@ -830,6 +991,18 @@ document.addEventListener('click', (e) => {
   const scheda = e.target.closest('.schede button');
   if (scheda) return cambiaVista(scheda.dataset.vista);
 
+  const zona = e.target.closest('[data-zona]');
+  if (zona) return apriZona(zona.dataset.zona);
+
+  // Toccare il mare, una terra grigia o il tasto: tre modi per tornare indietro.
+  if (e.target.closest('#mappa-indietro') || (zonaAperta && e.target.closest('#mappa'))) {
+    zonaAperta = null;
+    return aggiornaMappa();
+  }
+
+  const indice = e.target.closest('[data-indice]');
+  if (indice) return mostraIndice(indice.dataset.indice);
+
   const riga = e.target.closest('.riga');
   if (riga) { aperto = aperto === riga.dataset.sym ? null : riga.dataset.sym; return disegnaMercati(); }
 
@@ -841,6 +1014,14 @@ document.addEventListener('click', (e) => {
   }
   const tema = e.target.closest('.periodo.tema button');
   if (tema) return applicaTema(tema.dataset.tema);
+});
+
+// Cambiando la larghezza della finestra cambia anche quanto misura un pixel
+// dentro la mappa: le scritte vanno rifatte, o restano della misura di prima.
+let orologioMappa;
+window.addEventListener('resize', () => {
+  clearTimeout(orologioMappa);
+  orologioMappa = setTimeout(aggiornaMappa, 150);
 });
 
 $('pref-cerca').addEventListener('input', (e) => { filtro = e.target.value; disegnaRisultati(); });
@@ -856,6 +1037,8 @@ $('aziende').addEventListener('scroll', () => {
 // Con la tastiera una card si apre con Invio, come un tasto vero.
 document.addEventListener('keydown', (e) => {
   if (e.key !== 'Enter' && e.key !== ' ') return;
+  const zona = e.target.closest?.('.mappa-zona');
+  if (zona) { e.preventDefault(); return apriZona(zona.dataset.zona); }
   const card = e.target.closest?.('[data-apri]');
   if (card) { e.preventDefault(); apriAzienda(card.dataset.apri); }
 });
@@ -927,7 +1110,7 @@ preparaNotifiche().catch((e) => console.warn('notifiche:', e));
 
 const GIST_NOME = 'Borsa — le aziende che segui';
 const GIST_FILE = 'preferiti.json';
-let sincroniaInCorso = null;
+let sincroniaInCorso = null, invioInSospeso = false, ultimaSincronia = 0;
 
 const gettoneGist = () => { try { return localStorage.getItem('gettoneGist') || ''; } catch { return ''; } };
 
@@ -945,8 +1128,8 @@ function segnaCambiamento() {
   if (gettoneGist()) programmaInvio();
 }
 
-async function chiamaGist(percorso, opzioni = {}) {
-  const t = gettoneGist();
+async function chiamaGist(percorso, opzioni = {}, gettone) {
+  const t = gettone || gettoneGist();
   if (!t) throw new Error('nessun gettone');
   const r = await fetch('https://api.github.com' + percorso, {
     ...opzioni,
@@ -958,6 +1141,7 @@ async function chiamaGist(percorso, opzioni = {}) {
     },
   });
   if (r.status === 401) throw new Error('gettone rifiutato');
+  if (r.status === 403 || r.status === 404) throw new Error('al gettone manca il permesso «gist»');
   if (!r.ok) throw new Error(`GitHub ha risposto ${r.status}`);
   return r.json();
 }
@@ -1004,7 +1188,13 @@ function programmaInvio() {
 
 async function sincronizza(modo = 'controllo') {
   if (!gettoneGist()) return disegnaSincronia();
-  if (sincroniaInCorso) return sincroniaInCorso;
+  // Una modifica fatta mentre è già in corso una sincronia non va buttata via:
+  // si segna, e parte appena l'altra ha finito. Senza questo, chi tocca due
+  // stelle di seguito su una rete lenta ne vede arrivare una sola.
+  if (sincroniaInCorso) {
+    if (modo === 'invio') invioInSospeso = true;
+    return sincroniaInCorso;
+  }
 
   sincroniaInCorso = (async () => {
     disegnaSincronia('in corso');
@@ -1032,16 +1222,27 @@ async function sincronizza(modo = 'controllo') {
           await inviaAlGist();
         }
       }
+      ultimaSincronia = Date.now();
       try { localStorage.setItem('sincQuando', new Date().toISOString()); } catch { /* niente */ }
       disegnaSincronia();
     } catch (e) {
       disegnaSincronia('errore', e.message);
     } finally {
       sincroniaInCorso = null;
+      if (invioInSospeso) { invioInSospeso = false; sincronizza('invio').catch(() => {}); }
     }
   })();
   return sincroniaInCorso;
 }
+
+// Due dispositivi aperti insieme non si parlano: quello rimasto in secondo piano
+// non sa niente di quello che hai toccato sull'altro. Al ritorno sull'app si
+// ricontrolla, che è il momento in cui conta davvero vedere la lista giusta.
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState !== 'visible' || !gettoneGist()) return;
+  if (Date.now() - ultimaSincronia < 20000) return;   // non a ogni sbirciata
+  sincronizza('controllo').catch(() => {});
+});
 
 function disegnaSincronia(fase, dettaglio) {
   const stato = $('sinc-stato'), tasto = $('sinc-tasto');
@@ -1075,6 +1276,7 @@ function apriSincronia() {
         <li>Incollalo qui sotto. Sull'altro dispositivo rifai lo stesso: troverà da solo la lista già salvata.</li>
       </ol>
       <input class="sinc-campo" id="sinc-gettone" type="password" placeholder="Incolla qui il gettone" autocomplete="off" spellcheck="false" aria-label="Gettone GitHub">
+      <p class="sinc-esito" id="sinc-esito" role="status"></p>
       <div class="sinc-tasti">
         <button class="tasto-pillola" id="sinc-salva">${attiva ? 'Sostituisci' : 'Attiva'}</button>
         ${attiva ? '<button class="az-tasto" id="sinc-spegni">Disattiva su questo dispositivo</button>' : ''}
@@ -1083,9 +1285,23 @@ function apriSincronia() {
   });
 
   $('sinc-salva').addEventListener('click', async () => {
-    const campo = $('sinc-gettone');
-    const t = campo.value.trim();
-    if (!t) return;
+    const campo = $('sinc-gettone'), esito = $('sinc-esito'), tasto = $('sinc-salva');
+    // Incollando da un telefono si portano dietro spazi e a capo: del gettone
+    // restano solo i caratteri che un gettone può avere.
+    const t = campo.value.replace(/[^A-Za-z0-9_-]/g, '');
+    if (!t) { esito.textContent = 'Il campo è vuoto.'; return; }
+
+    // Si prova prima di tenerlo. Un gettone sbagliato che resta salvato è
+    // peggio di nessun gettone: l'app crederebbe di sincronizzare e invece no.
+    esito.textContent = 'Controllo il gettone…';
+    tasto.disabled = true;
+    try {
+      await chiamaGist('/gists?per_page=1', {}, t);
+    } catch (e) {
+      esito.textContent = `Non va bene: ${e.message}. Il gettone non è stato salvato.`;
+      tasto.disabled = false;
+      return;
+    }
     try { localStorage.setItem('gettoneGist', t); localStorage.removeItem('idGist'); } catch { /* niente */ }
     campo.value = '';
     $('pannello').close();

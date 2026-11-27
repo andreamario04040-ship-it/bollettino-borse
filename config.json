@@ -112,7 +112,7 @@
       "sym": "^GSPC",
       "nome": "S&P 500",
       "breve": "Il termometro del mondo",
-      "gruppo": "Stati Uniti",
+      "gruppo": "America del Nord",
       "unita": "punti",
       "perche": "Le 500 maggiori aziende americane. Se sale questo, di solito sale quasi tutto il resto.",
       "cnbc": ".SPX",
@@ -122,13 +122,14 @@
         "sesale": "Se sale, di solito sale quasi tutto il resto del mondo con lui.",
         "sescende": "Se scende, difficilmente le altre borse restano in positivo.",
         "conta": "È il termometro per eccellenza: quando si dice «la borsa americana», di solito si intende questo."
-      }
+      },
+      "zona": "nordamerica"
     },
     {
       "sym": "^IXIC",
       "nome": "Nasdaq",
       "breve": "Tecnologia e intelligenza artificiale",
-      "gruppo": "Stati Uniti",
+      "gruppo": "America del Nord",
       "unita": "punti",
       "perche": "Pieno di Nvidia, Apple, Microsoft. Si muove più degli altri, sia in salita sia in discesa.",
       "cnbc": ".IXIC",
@@ -138,13 +139,14 @@
         "sesale": "Sale più degli altri nei momenti di ottimismo, soprattutto sull'intelligenza artificiale.",
         "sescende": "Scende più degli altri quando la fiducia si rompe: è il più nervoso dei tre indici americani.",
         "conta": "Confrontarlo con il Dow Jones dice se un calo riguarda tutta l'economia o solo la tecnologia."
-      }
+      },
+      "zona": "nordamerica"
     },
     {
       "sym": "^DJI",
       "nome": "Dow Jones",
       "breve": "L'America della vecchia economia",
-      "gruppo": "Stati Uniti",
+      "gruppo": "America del Nord",
       "unita": "punti",
       "perche": "30 colossi industriali e finanziari. Confrontandolo col Nasdaq capisci se il calo riguarda solo la tecnologia.",
       "cnbc": ".DJI",
@@ -154,13 +156,14 @@
         "sesale": "Sale quando va bene l'economia concreta: fabbriche, consumi, banche.",
         "sescende": "Scende con i timori sull'economia reale più che su quella tecnologica.",
         "conta": "Serve soprattutto come paragone: se il Nasdaq crolla e il Dow tiene, il problema è la tecnologia, non l'America."
-      }
+      },
+      "zona": "nordamerica"
     },
     {
       "sym": "^RUT",
       "nome": "Russell 2000",
       "breve": "Le piccole aziende americane",
-      "gruppo": "Stati Uniti",
+      "gruppo": "America del Nord",
       "unita": "punti",
       "perche": "Le aziende piccole soffrono quando i tassi sono alti. Raccontano l'economia reale, non quella delle grandi multinazionali.",
       "cnbc": ".RUT",
@@ -170,6 +173,58 @@
         "sesale": "Sale quando gli investitori credono che l'economia americana vada davvero bene, non solo le grandi.",
         "sescende": "Soffre quando i tassi sono alti, perché il debito costa e loro ne hanno tanto.",
         "conta": "Racconta l'economia reale americana meglio dei grandi indici."
+      },
+      "zona": "nordamerica"
+    },
+    {
+      "sym": "^GSPTSE",
+      "nome": "S&P/TSX",
+      "breve": "La borsa del Canada",
+      "gruppo": "America del Nord",
+      "zona": "nordamerica",
+      "unita": "punti",
+      "perche": "Le maggiori aziende canadesi: banche, petrolio, miniere. Si muove con le materie prime.",
+      "cnbc": ".GSPTSE",
+      "guida": {
+        "cosa": "Raccoglie le maggiori aziende quotate a Toronto. Pesano soprattutto le banche, le compagnie petrolifere e le società minerarie.",
+        "scala": [],
+        "sesale": "Sale quando petrolio, oro e rame tirano, e quando l’economia americana va bene: gli Stati Uniti sono il cliente principale del Canada.",
+        "sescende": "Scende con le materie prime deboli, o quando Washington minaccia dazi sulle merci canadesi.",
+        "conta": "È il modo più semplice per vedere come va il Nord America fuori dagli Stati Uniti."
+      }
+    },
+    {
+      "sym": "^BVSP",
+      "nome": "Bovespa",
+      "breve": "La borsa del Brasile",
+      "gruppo": "America Latina",
+      "zona": "latam",
+      "unita": "punti",
+      "perche": "Il listino di San Paolo, il maggiore dell’America Latina: materie prime, banche e consumi.",
+      "cnbc": ".BVSP",
+      "guida": {
+        "cosa": "Le maggiori aziende quotate a San Paolo: il colosso petrolifero Petrobras, la mineraria Vale, le grandi banche.",
+        "scala": [],
+        "sesale": "Sale quando le materie prime salgono e quando i tassi d’interesse brasiliani scendono.",
+        "sescende": "Scende quando il dollaro si rafforza: il Brasile ha molto debito in dollari, e ripagarlo costa di più.",
+        "conta": "È il termometro dell’America Latina: qui si vede prima che altrove quando i soldi scappano dai paesi emergenti."
+      }
+    },
+    {
+      "sym": "^MXX",
+      "nome": "IPC Messico",
+      "breve": "La borsa del Messico",
+      "gruppo": "America Latina",
+      "zona": "latam",
+      "unita": "punti",
+      "perche": "Il listino di Città del Messico. Dipende dalle fabbriche che esportano negli Stati Uniti.",
+      "cnbc": ".MXX",
+      "guida": {
+        "cosa": "Le maggiori aziende messicane: telefonia, birra, cemento e banche.",
+        "scala": [],
+        "sesale": "Sale quando l’industria americana compra: quasi tutte le esportazioni messicane finiscono negli Stati Uniti.",
+        "sescende": "Scende quando si torna a parlare di dazi o di rivedere l’accordo commerciale con Stati Uniti e Canada.",
+        "conta": "È la borsa che reagisce per prima alle decisioni commerciali di Washington."
       }
     },
     {
@@ -186,7 +241,8 @@
         "sesale": "Sale con l'ottimismo sull'economia europea e sui consumi cinesi.",
         "sescende": "Scende con i timori su industria, energia e dazi.",
         "conta": "È il riferimento europeo numero uno: se vuoi un solo numero per l'Europa, è questo."
-      }
+      },
+      "zona": "europa"
     },
     {
       "sym": "FTSEMIB.MI",
@@ -202,7 +258,8 @@
         "sesale": "Sale spesso quando salgono i tassi, perché le banche ci guadagnano.",
         "sescende": "Soffre quando crescono i timori sui conti pubblici italiani.",
         "conta": "È il mercato di casa, e si muove per ragioni sue che non valgono per gli altri."
-      }
+      },
+      "zona": "europa"
     },
     {
       "sym": "^GDAXI",
@@ -218,7 +275,8 @@
         "sesale": "Sale quando l'industria europea va bene e l'export tira.",
         "sescende": "Scende con energia cara, dazi e domanda cinese debole.",
         "conta": "La Germania è la fabbrica d'Europa: se frena lei, frena il continente."
-      }
+      },
+      "zona": "europa"
     },
     {
       "sym": "^FCHI",
@@ -234,7 +292,8 @@
         "sesale": "Sale quando i consumi cinesi ripartono: il lusso vive di quelli.",
         "sescende": "Scende quando la Cina rallenta o quando la politica francese preoccupa.",
         "conta": "È il modo più diretto per leggere lo stato del lusso mondiale."
-      }
+      },
+      "zona": "europa"
     },
     {
       "sym": "^FTSE",
@@ -250,7 +309,8 @@
         "sesale": "Sale con petrolio e materie prime, e quando la sterlina si indebolisce.",
         "sescende": "Scende con il crollo delle materie prime.",
         "conta": "Va spesso in direzione opposta al resto d'Europa: non è un errore, è la sua composizione."
-      }
+      },
+      "zona": "europa"
     },
     {
       "sym": "^N225",
@@ -266,7 +326,8 @@
         "sesale": "Sale quando lo yen si indebolisce, perché gli esportatori giapponesi ci guadagnano.",
         "sescende": "Scende quando lo yen si rafforza o quando il mondo ha paura.",
         "conta": "È il primo grande mercato ad aprire: al mattino ti dice come il mondo ha dormito."
-      }
+      },
+      "zona": "asia"
     },
     {
       "sym": "^HSI",
@@ -282,7 +343,8 @@
         "sesale": "Sale quando Pechino annuncia aiuti all'economia o quando le tensioni si allentano.",
         "sescende": "Scende con dazi, controlli sulle esportazioni e tensioni geopolitiche.",
         "conta": "È la finestra più leggibile sulla Cina per chi investe da fuori."
-      }
+      },
+      "zona": "asia"
     },
     {
       "sym": "000001.SS",
@@ -298,6 +360,58 @@
         "sesale": "Sale quando il governo decide di sostenere i mercati: lì conta più la politica che i bilanci.",
         "sescende": "Scende con la crisi immobiliare e la domanda interna debole.",
         "conta": "Va letta sapendo che è un mercato molto guidato dall'alto."
+      },
+      "zona": "asia"
+    },
+    {
+      "sym": "^NSEI",
+      "nome": "Nifty 50",
+      "breve": "La borsa dell’India",
+      "gruppo": "Asia",
+      "zona": "asia",
+      "unita": "punti",
+      "perche": "Le 50 maggiori aziende indiane. L’India è il grande paese che cresce più in fretta.",
+      "cnbc": ".NSEI",
+      "guida": {
+        "cosa": "Le cinquanta aziende maggiori della borsa di Mumbai: informatica, banche, il gruppo Reliance.",
+        "scala": [],
+        "sesale": "Sale con i consumi interni del paese più popoloso del mondo, e quando i capitali stranieri entrano.",
+        "sescende": "Scende quando il petrolio rincara: l’India lo compra quasi tutto fuori.",
+        "conta": "Conta sempre di più: molte aziende occidentali spostano qui quello che prima facevano in Cina."
+      }
+    },
+    {
+      "sym": "^KS11",
+      "nome": "Kospi",
+      "breve": "La borsa della Corea del Sud",
+      "gruppo": "Asia",
+      "zona": "asia",
+      "unita": "punti",
+      "perche": "Il listino di Seul: Samsung, Hyundai, i chip di memoria. Si muove con la tecnologia mondiale.",
+      "cnbc": ".KS11",
+      "guida": {
+        "cosa": "Le aziende quotate a Seul. Pesa soprattutto Samsung, insieme a Hyundai e alle società dei chip.",
+        "scala": [],
+        "sesale": "Sale quando la domanda mondiale di chip e di elettronica cresce.",
+        "sescende": "Scende quando il commercio mondiale rallenta, o quando sale la tensione con la Corea del Nord.",
+        "conta": "È un indicatore in anticipo: la Corea vende componenti a tutti, quindi si accorge prima degli altri se il mondo sta rallentando."
+      }
+    },
+    {
+      "sym": "^AXJO",
+      "nome": "S&P/ASX 200",
+      "breve": "La borsa dell’Australia",
+      "gruppo": "Oceania",
+      "zona": "oceania",
+      "unita": "punti",
+      "perche": "Le 200 maggiori aziende australiane: miniere e banche. Dipende da quanto compra la Cina.",
+      "cnbc": ".AXJO",
+      "guida": {
+        "cosa": "Le duecento maggiori aziende quotate a Sydney: i colossi minerari del ferro e le quattro grandi banche.",
+        "scala": [],
+        "sesale": "Sale quando la Cina costruisce: il ferro australiano finisce nelle acciaierie cinesi.",
+        "sescende": "Scende quando l’edilizia cinese rallenta.",
+        "conta": "È il modo più diretto per vedere se la domanda cinese di materie prime sta tenendo."
       }
     },
     {

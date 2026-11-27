@@ -14,7 +14,7 @@
 <link rel="icon" href="icons/icona-192.png">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Inter:wght@400;450;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="stile.css?v=19">
+<link rel="stylesheet" href="stile.css?v=20">
 </head>
 <body>
 
@@ -115,6 +115,32 @@
 
   <!-- ———————————— MERCATI ———————————— -->
   <section class="vista" id="vista-mercati" role="tabpanel" aria-labelledby="tab-mercati" hidden>
+
+    <p class="capitolo" data-tinta="1"><i></i><span>Il mondo di oggi</span></p>
+
+    <section class="scheda mappa-scheda">
+      <div class="riga-titolo">
+        <h2 class="scheda-titolo">Dove sale e dove scende</h2>
+        <span class="pillola" id="mappa-periodo">Oggi</span>
+      </div>
+      <div class="mappa-corpo">
+        <div class="mappa-telaio">
+          <svg id="mappa" viewBox="0 0 1000 394.4" role="group" aria-label="Mappa del mondo: tocca una zona per vedere i suoi indici">
+            <g id="mappa-terre"></g>
+            <g id="mappa-scritte" aria-hidden="true"></g>
+          </svg>
+          <p class="mappa-legenda" aria-hidden="true">
+            <span class="leg giu3"></span><span class="leg giu1"></span><span class="leg zero"></span><span class="leg su1"></span><span class="leg su3"></span>
+            <span class="leg-testo">dal rosso al verde</span>
+          </p>
+        </div>
+        <div class="mappa-lato" id="mappa-lato"></div>
+      </div>
+      <p class="piede-nota">Le terre grigie sono quelle di cui non seguo nessun indice.</p>
+    </section>
+
+    <p class="capitolo" data-tinta="5"><i></i><span>Tutti gli indici, uno per uno</span></p>
+
     <div class="periodo-barra">
       <div class="periodo" role="group" aria-label="Periodo da confrontare">
         <button data-periodo="giorno" class="attivo">Oggi</button>
@@ -252,6 +278,7 @@
   <div id="pan-corpo"></div>
 </dialog>
 
-<script src="app.js?v=19"></script>
+<script src="mappa.js?v=20"></script>
+<script src="app.js?v=20"></script>
 </body>
 </html>

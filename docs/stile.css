@@ -637,3 +637,88 @@ code{font-family:var(--fm);font-size:.82rem;background:var(--superficie2);paddin
   #capitolo-aziende{order:12} #aziende-scheda{order:13}
   #piede-oggi{order:14}
 }
+
+/* ——————————————— la mappa del mondo ———————————————
+   Il colore di una zona nasce da due variabili che già cambiano col tema: il
+   verde del «su» e il rosso del «giù», mescolati con il fondo della scheda.
+   Così la mappa segue chiaro e scuro senza una seconda tavolozza da tenere
+   allineata a mano. */
+
+.mappa-scheda{padding:16px}
+.mappa-corpo{display:flex;gap:16px;align-items:flex-start;margin-top:10px}
+.mappa-telaio{position:relative;flex:1 1 62%;min-width:0}
+#mappa{width:100%;height:auto;display:block;border-radius:var(--raggio-s);background:var(--superficie2);
+  touch-action:manipulation}
+#mappa-terre{transition:transform .5s cubic-bezier(.2,.75,.25,1)}
+
+.mappa-fuori{fill:var(--bordo);stroke:var(--superficie2);stroke-width:.4;vector-effect:non-scaling-stroke}
+.mappa-zona{
+  fill:var(--superficie);stroke:var(--superficie2);stroke-width:.4;vector-effect:non-scaling-stroke;
+  cursor:pointer;transition:fill .35s ease,opacity .35s ease;outline:none;
+}
+.mappa-zona[data-forza="vuota"]{fill:var(--bordo)}
+.mappa-zona[data-forza="0"]{fill:color-mix(in oklab,var(--testo3) 22%,var(--superficie))}
+.mappa-zona[data-forza="su1"]{fill:color-mix(in oklab,var(--su) 26%,var(--superficie))}
+.mappa-zona[data-forza="su2"]{fill:color-mix(in oklab,var(--su) 55%,var(--superficie))}
+.mappa-zona[data-forza="su3"]{fill:color-mix(in oklab,var(--su) 85%,var(--superficie))}
+.mappa-zona[data-forza="giu1"]{fill:color-mix(in oklab,var(--giu) 26%,var(--superficie))}
+.mappa-zona[data-forza="giu2"]{fill:color-mix(in oklab,var(--giu) 55%,var(--superficie))}
+.mappa-zona[data-forza="giu3"]{fill:color-mix(in oklab,var(--giu) 85%,var(--superficie))}
+.mappa-zona:hover{stroke:var(--testo);stroke-width:1.2}
+.mappa-zona:focus-visible{stroke:var(--accento);stroke-width:2}
+.mappa-zona.spenta{opacity:.3}
+.mappa-zona.attiva{stroke:var(--testo);stroke-width:1}
+
+#mappa-scritte{font:700 20px/1 var(--fd);stroke:var(--superficie2);stroke-width:5px}
+.mappa-scritta{
+  font:inherit;fill:var(--testo);text-anchor:middle;dominant-baseline:middle;
+  paint-order:stroke fill;stroke:inherit;stroke-width:inherit;stroke-linejoin:round;
+  pointer-events:none;
+}
+.mappa-scritta.su{fill:var(--su)}
+.mappa-scritta.giu{fill:var(--giu)}
+
+.mappa-legenda{display:flex;align-items:center;gap:3px;margin:8px 0 0;padding:0}
+.leg{width:16px;height:7px;border-radius:2px}
+.leg.giu3{background:color-mix(in oklab,var(--giu) 85%,var(--superficie))}
+.leg.giu1{background:color-mix(in oklab,var(--giu) 26%,var(--superficie))}
+.leg.zero{background:color-mix(in oklab,var(--testo3) 22%,var(--superficie))}
+.leg.su1{background:color-mix(in oklab,var(--su) 26%,var(--superficie))}
+.leg.su3{background:color-mix(in oklab,var(--su) 85%,var(--superficie))}
+.leg-testo{margin-left:6px;font:500 11px/1 var(--fb);color:var(--testo3)}
+
+.mappa-lato{flex:1 1 38%;min-width:260px;display:flex;flex-direction:column;gap:8px}
+.mappa-invito{margin:0;font:400 13px/1.45 var(--fb);color:var(--testo2)}
+.zona-righe{display:flex;flex-direction:column;gap:4px}
+.zona-riga{
+  display:grid;grid-template-columns:1fr auto;align-items:center;gap:2px 10px;width:100%;
+  padding:9px 11px;border:1px solid var(--bordo);border-radius:var(--raggio-s);
+  background:var(--superficie2);color:var(--testo);text-align:left;cursor:pointer;font:inherit;
+}
+.zona-riga:hover{border-color:var(--testo3)}
+.zona-nome{font:600 14px/1.2 var(--fd)}
+.zona-quanti{grid-column:1;font:400 11.5px/1.2 var(--fb);color:var(--testo3)}
+.zona-riga .varia{grid-column:2;grid-row:1/3;font:700 15px/1 var(--fm)}
+
+.mappa-indietro{align-self:flex-start}
+.zona-titolo{margin:0;font:700 17px/1.2 var(--fd);display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.zona-titolo .varia{font:700 15px/1 var(--fm)}
+.zona-nota{margin:0;font:400 12px/1.4 var(--fb);color:var(--testo3)}
+.zona-indici{display:flex;flex-direction:column;gap:4px}
+.zona-indice{
+  display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;
+  padding:8px 11px;border:1px solid var(--bordo);border-radius:var(--raggio-s);
+  background:var(--superficie2);color:var(--testo);text-align:left;cursor:pointer;font:inherit;
+}
+.zona-indice:hover{border-color:var(--testo3)}
+.zi-nome{display:flex;flex-direction:column;gap:1px;min-width:0;font:600 13.5px/1.2 var(--fd)}
+.zi-breve{font:400 11px/1.2 var(--fb);color:var(--testo3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.zi-numeri{display:flex;flex-direction:column;align-items:flex-end;gap:1px;flex:none}
+.zi-prezzo{font:500 12.5px/1 var(--fm);color:var(--testo2)}
+.zi-numeri .varia{font:700 13.5px/1 var(--fm)}
+
+@media (max-width:760px){
+  .mappa-corpo{flex-direction:column;gap:12px}
+  .mappa-telaio,.mappa-lato{flex:1 1 auto;width:100%;min-width:0}
+}
+.sinc-esito{margin:6px 0 0;font:500 12.5px/1.45 var(--fb);color:var(--attenzione);min-height:1em}

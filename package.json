@@ -15,7 +15,8 @@
     "verifica": "node engine/controlla.mjs",
     "fonti": "node engine/fonti.mjs",
     "simboli": "node engine/simboli.mjs",
-    "loghi": "node engine/loghi.mjs"
+    "loghi": "node engine/loghi.mjs",
+    "mappa": "node engine/mappa.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.14.0",

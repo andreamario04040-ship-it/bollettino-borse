@@ -8,7 +8,7 @@ const minuti = (hhmm) => { const [h, m] = hhmm.split(':').map(Number); return h 
 
 export const statoVuoto = () => ({ giorno: null, avvisiOggi: 0, ultimoAvviso: null, motiviUsati: [], intensita: {} });
 
-function eventiPossibili(mercati, notizie, s) {
+function eventiPossibili(mercati, notizie, s, adesso) {
   const m = new Map(mercati.map((x) => [x.sym, x]));
   const g = (k) => m.get(k);
   const ev = [];
@@ -56,7 +56,7 @@ function eventiPossibili(mercati, notizie, s) {
   }
 
   // 4. Un comunicato ufficiale di BCE o Federal Reserve: l'unica notizia che da sola basta.
-  for (const c of comunicatiRecenti(notizie, 2)) {
+  for (const c of comunicatiRecenti(notizie, 2, adesso)) {
     ev.push({
       motivo: 'banca-centrale', forza: 99, sym: null, intensita: 1,
       titolo: `Comunicato ${c.fonte}`,
@@ -93,7 +93,7 @@ export function valutaAvviso({ mercati, notizie, stato, config, adesso = new Dat
     if (passati < a.minuti_tra_un_avviso_e_l_altro) return scarta(`ultimo avviso ${Math.round(passati)} minuti fa`);
   }
 
-  const tutti = eventiPossibili(mercati, notizie, a.soglie);
+  const tutti = eventiPossibili(mercati, notizie, a.soglie, adesso);
   const candidati = tutti
     .filter((e) => !s.motiviUsati.includes(e.motivo))
     // Il movimento deve essere NUOVO: se era già così all'ultimo controllo, si tace.
