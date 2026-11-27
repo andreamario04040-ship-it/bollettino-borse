@@ -14,7 +14,7 @@
 <link rel="icon" href="icons/icona-192.png">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Inter:wght@400;450;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="stile.css?v=20">
+<link rel="stylesheet" href="stile.css?v=21">
 </head>
 <body>
 
@@ -36,6 +36,14 @@
 
   <!-- ———————————— OGGI ———————————— -->
   <section class="vista" id="vista-oggi" role="tabpanel" aria-labelledby="tab-oggi">
+
+    <!-- La prima domanda di chi apre l'app: quello che vedo è di oggi? -->
+    <section class="scheda agente" id="agente" data-stato="attesa" aria-live="polite">
+      <p class="agente-riga"><span class="agente-spia" aria-hidden="true"></span><span id="agente-titolo">Controllo se l'agente è passato…</span></p>
+      <p class="agente-novita" id="agente-novita" hidden></p>
+      <ul class="agente-giornata" id="agente-giornata" hidden></ul>
+      <p class="agente-nota" id="agente-nota" hidden></p>
+    </section>
 
     <div id="correzioni"></div>
 
@@ -278,7 +286,7 @@
   <div id="pan-corpo"></div>
 </dialog>
 
-<script src="mappa.js?v=20"></script>
-<script src="app.js?v=20"></script>
+<script src="mappa.js?v=21"></script>
+<script src="app.js?v=21"></script>
 </body>
 </html>

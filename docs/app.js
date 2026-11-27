@@ -3,7 +3,7 @@
 // Si alza a ogni modifica dell'app, insieme a docs/versione.json.
 // Serve perché un'app aggiunta alla schermata Home resta viva in memoria:
 // riaprendola dal selettore non ricarica, e resterebbe vecchia per giorni.
-const VERSIONE_APP = 20;
+const VERSIONE_APP = 21;
 
 const CHIAVE_PUBBLICA = 'BEX2Ep7AZJPgrIF_cHwKOWk9VSiE8OLd1WLxSJDANLNEbox4xiHYb5pgRslEapXEXZs35jhSmHRhrLcfFhyPwVk';
 const MENO = '−', SOTTILE = ' ';
@@ -166,6 +166,116 @@ function disegnaCorrezioni() {
     <p class="corr-voce"><span>Cosa avevo sbagliato</span>${fuga(c.sbagliato)}</p>
     <p class="corr-voce"><span>Com'è adesso</span>${fuga(c.corretto)}</p>
   </section>`).join('');
+}
+
+/* ——————————————— la spia dell'agente ———————————————
+   Chi apre l'app si fa sempre la stessa domanda: quello che leggo è di oggi?
+   Senza una risposta in cima bisogna rileggere tutto il bollettino per
+   accorgersi che è lo stesso di ieri. Qui si risponde per prima cosa — e si
+   risponde anche, soprattutto, quando la risposta è no. */
+
+const FINESTRE_AGENTE = { mattina: [8 * 60, 12 * 60 + 30], sera: [17 * 60 + 30, 21 * 60 + 30] };
+const NOME_USCITA = { mattina: 'Mattina', sera: 'Pomeriggio' };
+
+const giornoDi = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+const orologio = (min) => `${String(Math.floor(min / 60)).padStart(2, '0')}:${String(min % 60).padStart(2, '0')}`;
+
+function quantoFa(ms) {
+  const min = Math.round(ms / 60000);
+  if (min < 2) return 'adesso';
+  if (min < 60) return `${min} minuti fa`;
+  const ore = Math.round(min / 60);
+  if (ore < 24) return ore === 1 ? "un'ora fa" : `${ore} ore fa`;
+  const g = Math.round(ore / 24);
+  return g === 1 ? 'ieri' : `${g} giorni fa`;
+}
+
+// L'età in ore finché le ore si contano ancora: «ha ventidue ore» dice quanto
+// è vecchio un bollettino meglio di «è di ieri», che suona quasi aggiornato.
+function eta(ms) {
+  const ore = Math.round(ms / 3600000);
+  if (ore < 48) return ore === 1 ? "un'ora" : `${ore} ore`;
+  return `${Math.round(ore / 24)} giorni`;
+}
+
+// I due appuntamenti della giornata: quale è andato, quale deve ancora arrivare,
+// quale è stato saltato. Un bollettino vecchio non dice da sé quale dei due manca.
+function uscitediOggi(oggi, minuti) {
+  const fatte = new Map();
+  const g = REPORT?.giornata;
+  if (g?.giorno === oggi) for (const u of g.uscite || []) fatte.set(u.tipo, u);
+  else if (REPORT?.generatoIl && giornoDi(new Date(REPORT.generatoIl)) === oggi) {
+    fatte.set(REPORT.tipo, { tipo: REPORT.tipo, ora: REPORT.ora });
+  }
+  return ['mattina', 'sera'].map((t) => {
+    const u = fatte.get(t), [da, a] = FINESTRE_AGENTE[t];
+    if (u) return { t, esito: 'fatto', nota: u.ora ? `alle ${u.ora}` : 'fatto' };
+    if (minuti < da) return { t, esito: 'attesa', nota: `dalle ${orologio(da)}` };
+    if (minuti <= a) return { t, esito: 'attesa', nota: 'in arrivo' };
+    return { t, esito: 'saltato', nota: 'non è partito' };
+  });
+}
+
+function disegnaAgente() {
+  const el = $('agente');
+  const adesso = new Date();
+  const oggi = giornoDi(adesso);
+  const minuti = adesso.getHours() * 60 + adesso.getMinutes();
+
+  const titolo = (t) => { $('agente-titolo').textContent = t; };
+  const riga = (id, t) => { const e = $(id); e.textContent = t || ''; e.hidden = !t; };
+
+  if (!REPORT?.generatoIl) {
+    el.dataset.stato = 'manca';
+    titolo('Non c’è ancora nessun bollettino.');
+    riga('agente-novita', '');
+    riga('agente-nota', 'Il primo arriva appena l’agente riesce a girare.');
+    $('agente-giornata').hidden = true;
+    return;
+  }
+
+  const fatto = new Date(REPORT.generatoIl);
+  const quando = giornoDi(fatto);
+  const ieri = giornoDi(new Date(adesso.getTime() - 86400000));
+  const avviso = REPORT.tipo === 'avviso';
+  const momento = REPORT.tipo === 'sera' ? 'pomeriggio' : 'mattina';
+  const ora = REPORT.ora ? ` alle ${REPORT.ora}` : '';
+  const delle = REPORT.ora ? `, delle ${REPORT.ora}` : '';
+  // «il bollettino di ieri pomeriggio», «l'avviso di ieri»: la frase va costruita
+  // intera, perché l'avviso non regge gli stessi articoli del bollettino.
+  const diIeri = avviso ? "l’avviso di ieri" : `il bollettino di ieri ${momento}`;
+  const nov = REPORT.novita;
+
+  if (quando === oggi) {
+    // Ha lavorato oggi. Resta da dire se ha trovato qualcosa: è la differenza
+    // fra «è aggiornato» e «è aggiornato e vale la pena rileggerlo».
+    el.dataset.stato = nov ? (nov.quanto === 'molto' ? 'viva' : 'ferma') : 'viva';
+    titolo(REPORT.tipo === 'avviso'
+      ? `Oggi${ora} l’agente ti ha mandato un avviso — ${quantoFa(adesso - fatto)}.`
+      : `L’agente ha lavorato oggi${ora} — ${quantoFa(adesso - fatto)}.`);
+    riga('agente-novita', nov?.riga || '');
+    riga('agente-nota', nov ? '' : 'Questo bollettino è stato scritto prima che l’app sapesse confrontare le giornate: del nuovo non so dire.');
+  } else if (quando === ieri && minuti < FINESTRE_AGENTE.mattina[0]) {
+    el.dataset.stato = 'attesa';
+    titolo('Il turno dell’agente comincia alle 8 di mattina.');
+    riga('agente-novita', `Per ora vedi ${diIeri}${delle}: è l’ultimo che ha scritto.`);
+    riga('agente-nota', '');
+  } else if (quando === ieri) {
+    el.dataset.stato = 'salta';
+    titolo('Oggi l’agente non è ancora passato.');
+    riga('agente-novita', `Quello che leggi è ${diIeri}${delle}: ha ${eta(adesso - fatto)}. Di oggi non c’è niente, tranne i prezzi degli indici.`);
+    riga('agente-nota', 'L’agente gira sul Mac: se era spento, o col coperchio chiuso, non è potuto partire.');
+  } else {
+    el.dataset.stato = 'vecchio';
+    titolo(`L’ultimo bollettino è di ${quantoFa(adesso - fatto)}.`);
+    riga('agente-novita', `È ${avviso ? 'un avviso' : `il bollettino del ${momento}`} di ${REPORT.data || quando}${delle}. Da allora l’agente non ha più scritto.`);
+    riga('agente-nota', 'L’agente gira sul Mac: se era spento, o col coperchio chiuso, non è potuto partire.');
+  }
+
+  const voci = uscitediOggi(oggi, minuti);
+  $('agente-giornata').innerHTML = voci.map((v) => `<li data-esito="${v.esito}">
+    <b>${NOME_USCITA[v.t]}</b> ${fuga(v.nota)}</li>`).join('');
+  $('agente-giornata').hidden = false;
 }
 
 /* ——————————————— saluto ——————————————— */
@@ -824,7 +934,7 @@ async function carica() {
     .map((t) => ({ ...t, forme: [...t.forme].sort((a, b) => b.length - a.length) }))
     .sort((a, b) => Math.max(...b.forme.map((f) => f.length)) - Math.max(...a.forme.map((f) => f.length)));
   // Se una parte si rompe, le altre devono restare in piedi.
-  for (const [nome, f] of [['correzioni', disegnaCorrezioni], ['saluto', disegnaSaluto], ['nastro', disegnaNastro], ['oggi', disegnaOggi], ['da guardare', disegnaGuardare], ['tessere', disegnaTessere], ['aziende', disegnaAziende], ['preferiti', disegnaPreferiti], ['mercati', disegnaMercati], ['info', disegnaInfo]]) {
+  for (const [nome, f] of [['agente', disegnaAgente], ['correzioni', disegnaCorrezioni], ['saluto', disegnaSaluto], ['nastro', disegnaNastro], ['oggi', disegnaOggi], ['da guardare', disegnaGuardare], ['tessere', disegnaTessere], ['aziende', disegnaAziende], ['preferiti', disegnaPreferiti], ['mercati', disegnaMercati], ['info', disegnaInfo]]) {
     try { f(); } catch (e) { console.error('disegno ' + nome + ':', e); }
   }
 }
@@ -1093,6 +1203,9 @@ try { screen.orientation?.lock?.('portrait').catch(() => {}); } catch { /* non s
 
 carica();
 controllaAggiornamenti();
+// La spia dell'agente racconta il tempo che passa: alle 7:59 dice «fra poco»,
+// alle 13 dice «non è passato». Se l'app resta aperta, si aggiorna da sola.
+setInterval(() => { try { disegnaAgente(); } catch { /* niente */ } }, 60000);
 preparaNotifiche().catch((e) => console.warn('notifiche:', e));
 
 /* ——————————————— sincronia fra i dispositivi ———————————————

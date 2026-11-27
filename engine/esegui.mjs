@@ -24,7 +24,8 @@ import { verifica, stampaVerifica } from './verifica.mjs';
 import { leggiCorrezioni, daNotificare, segnaNotificate, notificaDi } from './correzioni.mjs';
 import { valutaAvviso, statoVuoto } from './avvisi.mjs';
 import { inviaNotifica } from './push.mjs';
-import { giornoRoma, oraItalia, dataItalia, minutiDaMezzanotteRoma } from './lingua.mjs';
+import { giornoRoma, oraItalia, dataItalia, minutiDaMezzanotteRoma, taglia } from './lingua.mjs';
+import { bollettinoPrecedente, confronta, giornataDiOggi } from './novita.mjs';
 
 const radice = fileURLToPath(new URL('..', import.meta.url));
 const dentro = (...p) => path.join(radice, ...p);
@@ -210,6 +211,22 @@ const conTesto = await arricchisci(notizie.filter((n) => serviranno.has(n.link))
 const conEstratto = riassumiConEstratto(aziendeTrovate, conTesto);
 report.aziende = await riassumiAziende(conEstratto, conTesto, process.env, config.agente?.modello, config.agente?.modello_cli);
 report.materialeAgente = conTesto;   // serve alla verifica, non viene pubblicato
+
+// Il bollettino ha sempre la stessa forma: cinque sezioni, gli stessi titoli.
+// Due giornate diverse si somigliano al punto di sembrare la stessa, quindi qui
+// si confronta con il bollettino precedente e lo si dice a voce alta — anche, e
+// soprattutto, quando non c'è niente di nuovo.
+const cartellaStorico = dentro('docs/data/storico');
+const precedente = await bollettinoPrecedente(cartellaStorico, giornoRoma(adesso), tipo);
+report.novita = confronta({ report, precedente, mercati, adesso });
+report.giornata = await giornataDiOggi(cartellaStorico, report, adesso);
+console.log(`  novità: ${report.novita.riga}`);
+
+// Se non è cambiato niente, lo deve dire anche la notifica: è la prima cosa che
+// si legge, e aprire l'app per scoprire che è tutto come ieri è tempo buttato.
+if (report.novita.quanto === 'niente') {
+  report.notifica.corpo = taglia(`${report.notifica.corpo} Niente di nuovo rispetto a ${report.novita.confrontatoCon?.come || 'ieri'}.`, 190);
+}
 
 // Niente esce senza controllo: se un numero scritto non corrisponde ai dati,
 // è meglio nessun bollettino che un bollettino falso.

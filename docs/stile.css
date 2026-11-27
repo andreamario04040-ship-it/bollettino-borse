@@ -148,6 +148,36 @@ main{max-width:640px;margin:0 auto;
   color:var(--testo3);margin-bottom:.15rem}
 
 /* ——— saluto ——— */
+/* ——— la spia dell'agente ———
+   Sta in cima a tutto e risponde a una domanda sola: questo è di oggi?
+   Il colore è il primo a parlare, la riga lo spiega, i due appuntamenti
+   della giornata dicono quale è andato e quale no. */
+.agente{padding:.85rem 1rem;border-left-width:4px;display:grid;gap:.45rem}
+.agente[data-stato="viva"]{border-color:var(--su)}
+.agente[data-stato="ferma"]{border-color:var(--t5)}
+.agente[data-stato="attesa"]{border-color:var(--bordo);border-left-color:var(--t5)}
+.agente[data-stato="salta"],.agente[data-stato="manca"]{border-color:var(--attenzione)}
+.agente[data-stato="vecchio"]{border-color:var(--giu)}
+.agente-riga{margin:0;display:flex;align-items:baseline;gap:.55rem;
+  font-size:.99rem;font-weight:600;line-height:1.4}
+.agente-spia{flex:0 0 auto;width:.62rem;height:.62rem;border-radius:50%;
+  background:var(--testo3);transform:translateY(-.08rem)}
+.agente[data-stato="viva"] .agente-spia{background:var(--su);box-shadow:var(--bagliore)}
+.agente[data-stato="ferma"] .agente-spia{background:var(--t5)}
+.agente[data-stato="salta"] .agente-spia,.agente[data-stato="manca"] .agente-spia{background:var(--attenzione)}
+.agente[data-stato="vecchio"] .agente-spia{background:var(--giu)}
+.agente-novita{margin:0 0 0 1.17rem;font-size:.9rem;color:var(--testo2);line-height:1.5}
+.agente-nota{margin:0 0 0 1.17rem;font-size:.82rem;color:var(--testo3);line-height:1.45}
+.agente-giornata{margin:.2rem 0 0 1.17rem;padding:0;list-style:none;
+  display:flex;flex-wrap:wrap;gap:.4rem .5rem}
+.agente-giornata li{display:inline-flex;align-items:center;gap:.3rem;
+  font-size:.76rem;font-weight:500;padding:.18rem .5rem;border-radius:999px;
+  background:var(--superficie2);border:1px solid var(--bordo);color:var(--testo2)}
+.agente-giornata li b{font-weight:600;color:var(--testo)}
+.agente-giornata li[data-esito="fatto"]{background:var(--su-tenue);border-color:transparent;color:var(--su)}
+.agente-giornata li[data-esito="fatto"] b{color:var(--su)}
+.agente-giornata li[data-esito="saltato"]{background:var(--t3b);border-color:transparent;color:var(--t3)}
+.agente-giornata li[data-esito="saltato"] b{color:var(--t3)}
 .saluto{padding:1.15rem 1.1rem 1.2rem}
 .saluto-riga{margin:0;font-family:var(--fd);font-size:1.65rem;font-weight:800;letter-spacing:-.03em;
   line-height:1.1;color:var(--testo)}
