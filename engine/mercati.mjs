@@ -93,6 +93,7 @@ export async function scaricaMercati(strumenti, serie = {}, giornoOggi = new Dat
     fonte = 'CNBC';
     console.log('  · passo a CNBC e allo storico salvato');
     const perCnbc = new Map(strumenti.map((s) => [s.cnbc, s.sym]));
+    const fermi = new Map();
     try {
       const q = await quotazioniCnbc(strumenti.map((s) => s.cnbc).filter(Boolean));
       for (const [simboloCnbc, d] of q) {
@@ -100,7 +101,7 @@ export async function scaricaMercati(strumenti, serie = {}, giornoOggi = new Dat
         if (!sym) continue;
         // Niente di nuovo da CNBC: meglio lasciarlo mancante, così resta il
         // valore precedente segnato come fermo invece di una finta giornata piatta.
-        if (d.fermo) { console.log(`  · ${sym}: CNBC ripete la chiusura di ieri`); continue; }
+        if (d.fermo) { fermi.set(sym, d); console.log(`  · ${sym}: CNBC ripete la chiusura di ieri`); continue; }
         aggiungiPunto(serie, sym, giornoOggi, d.prezzo);
         const st = daSerie(serie, sym, d.prezzo, giornoOggi);
         presi.set(sym, {
@@ -116,10 +117,26 @@ export async function scaricaMercati(strumenti, serie = {}, giornoOggi = new Dat
     } catch (e) {
       console.error(`  ! anche CNBC non risponde: ${e.message}`);
     }
+
+    // Uno strumento appena aggiunto non ha un valore precedente su cui ripiegare:
+    // finché la sua borsa non apre non avrebbe proprio niente da mostrare. Allora
+    // si prende la chiusura che CNBC ripete, senza variazione e segnata come
+    // ferma — un prezzo vecchio dichiarato tale vale più di una casella vuota.
+    for (const [sym, d] of fermi) {
+      if (presi.has(sym) || serie[sym]?.length) continue;
+      console.log(`  · ${sym}: parte dalla chiusura, in attesa della prima seduta`);
+      presi.set(sym, {
+        sym, prezzo: d.prezzo, giorno: null,
+        settimana: null, mese: null, trimestre: null, anno: null,
+        max52: null, min52: null, spark: [], storicoScarso: true, obsoleto: true,
+        aggiornato: new Date().toISOString(),
+      });
+    }
   }
 
-  // Lo storico si allunga comunque di un punto al giorno.
-  for (const [sym, d] of presi) if (d.prezzo != null) aggiungiPunto(serie, sym, giornoOggi, d.prezzo);
+  // Lo storico si allunga comunque di un punto al giorno — ma non con un prezzo
+  // dichiarato fermo, che sarebbe una seduta mai avvenuta.
+  for (const [sym, d] of presi) if (d.prezzo != null && !d.obsoleto) aggiungiPunto(serie, sym, giornoOggi, d.prezzo);
 
   const out = strumenti.map((s) => {
     const d = presi.get(s.sym);
